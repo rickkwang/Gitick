@@ -86,10 +86,12 @@ const NavItem: React.FC<{
           </span>
           
           {/* Text Container */}
+          {/* CRITICAL FIX: Always visible on Mobile (default classes), only conditionally hidden on Desktop (md: prefix) */}
           <div className={`
-            flex items-center flex-1 min-w-0 overflow-hidden whitespace-nowrap
+            flex items-center flex-1 min-w-0 overflow-hidden whitespace-nowrap pl-1
             transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)] transform-gpu
-            ${isCollapsed ? 'opacity-0 translate-x-2' : 'opacity-100 translate-x-0'}
+            opacity-100 translate-x-0
+            ${isCollapsed ? 'md:opacity-0 md:translate-x-2' : 'md:opacity-100 md:translate-x-0'}
           `}>
             <span className="truncate pr-2">{label}</span>
             
@@ -116,9 +118,9 @@ const NavItem: React.FC<{
           </div>
         </button>
 
-        {/* Collapsed Indicator Dot */}
+        {/* Collapsed Indicator Dot - Desktop Only */}
         {!isFocusItem && taskCount > 0 && isCollapsed && (
-             <span className="absolute top-3 left-8 w-2 h-2 rounded-full bg-black dark:bg-white ring-2 ring-white dark:ring-zinc-950 pointer-events-none animate-in fade-in zoom-in duration-200" />
+             <span className="hidden md:block absolute top-3 left-8 w-2 h-2 rounded-full bg-black dark:bg-white ring-2 ring-white dark:ring-zinc-950 pointer-events-none animate-in fade-in zoom-in duration-200" />
         )}
         
         {/* Delete Button */}
@@ -160,7 +162,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const [newProjectName, setNewProjectName] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Force sidebar to be expanded on mobile (isOpen=true), regardless of desktop collapsed state
+  // Logic: renderCollapsed applies MAINLY to Desktop. 
+  // On Mobile, we force visual expansion via CSS regardless of this bool to prevent flickering.
   const renderCollapsed = isCollapsed && !isOpen;
 
   useEffect(() => {
@@ -195,17 +198,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
     }
   };
 
-  // Optimized for "ChatGPT-like" feel on mobile:
-  // 1. Slower duration (600ms) for deliberate movement.
-  // 2. Custom Bezier (Expo Out) for high-framerate feel (starts fast, stops very gently).
-  // 3. Wider mobile width (280px) for better presence.
+  // Optimized for "Silky" feel (ChatGPT/Obsidian style)
+  // Using a custom spring-like bezier for more natural movement
   const sidebarClasses = `
     fixed inset-y-0 left-0 z-[60] bg-white dark:bg-zinc-950 flex flex-col border-r border-transparent dark:border-zinc-800
     
     /* MOBILE CONFIGURATION */
     w-[280px]
     transform-gpu will-change-transform
-    transition-transform duration-[600ms] ease-[cubic-bezier(0.16,1,0.3,1)]
+    /* Smoother, slightly faster transition for mobile drawer feel (500ms) */
+    transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]
     ${isOpen ? 'translate-x-0 shadow-[20px_0_50px_-10px_rgba(0,0,0,0.15)]' : '-translate-x-full'}
     
     /* DESKTOP CONFIGURATION (Overrides) */
@@ -220,7 +222,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <div 
         className={`
           fixed inset-0 bg-gray-900/30 dark:bg-black/60 z-50 md:hidden backdrop-blur-[2px]
-          transition-opacity duration-[600ms] ease-[cubic-bezier(0.16,1,0.3,1)]
+          transition-opacity duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]
           ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}
         `}
         onClick={onCloseMobile}
@@ -230,12 +232,33 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <aside className={sidebarClasses}>
         <div className="flex flex-col h-full overflow-hidden w-full pt-safe md:pt-0">
           
-          {/* Header */}
-          <div className="h-16 md:h-20 relative flex items-center shrink-0 select-none w-full transition-all duration-300">
+          {/* Header - Completely Refactored for Zero-Flicker */}
+          <div className="h-16 md:h-20 relative flex items-center shrink-0 select-none w-full">
              
-             {/* Expanded: Logo + Toggle */}
+             {/* 1. MOBILE HEADER: Static, Always Visible on Mobile (md:hidden) */}
+             {/* This separates mobile logic from desktop state, preventing logo flicker during open */}
+             <div className="md:hidden absolute inset-0 px-5 flex items-center justify-between">
+                <div className="flex items-center gap-3 text-black dark:text-white">
+                    <span className="shrink-0 flex items-center justify-center">
+                        <Icons.GitickLogo />
+                    </span>
+                    <span className="text-lg font-bold tracking-tight whitespace-nowrap">
+                        Gitick
+                    </span>
+                </div>
+                {/* Mobile Close Button */}
+                <button 
+                  onClick={onCloseMobile} 
+                  className="flex items-center justify-center p-2 -mr-2 rounded-lg text-gray-400 hover:text-black dark:hover:text-white transition-colors active:scale-95 transform"
+                  title="Close Sidebar"
+               >
+                  <Icons.SidebarLeft />
+               </button>
+             </div>
+
+             {/* 2. DESKTOP HEADER - EXPANDED (hidden on mobile) */}
              <div className={`
-                absolute inset-0 px-5 flex items-center justify-between
+                hidden md:flex absolute inset-0 px-5 items-center justify-between
                 transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)]
                 ${renderCollapsed ? 'opacity-0 -translate-x-4 pointer-events-none' : 'opacity-100 translate-x-0 delay-100'}
              `}>
@@ -248,28 +271,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
                  </span>
                </div>
                
-               {/* Desktop Collapse Button */}
                <button 
                   onClick={toggleCollapse} 
-                  className="hidden md:flex items-center justify-center p-2 rounded-lg text-gray-400 hover:text-black dark:hover:text-white hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
+                  className="flex items-center justify-center p-2 rounded-lg text-gray-400 hover:text-black dark:hover:text-white hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
                   title="Collapse Sidebar"
-               >
-                  <Icons.SidebarLeft />
-               </button>
-
-               {/* Mobile Close Button (Minimize) - Minimalist */}
-               <button 
-                  onClick={onCloseMobile} 
-                  className="md:hidden flex items-center justify-center p-2 -mr-2 rounded-lg text-gray-400 hover:text-black dark:hover:text-white transition-colors"
-                  title="Close Sidebar"
                >
                   <Icons.SidebarLeft />
                </button>
              </div>
 
-             {/* Collapsed: Centered Button (Logo -> Hover -> Toggle) */}
+             {/* 3. DESKTOP HEADER - COLLAPSED (hidden on mobile) */}
              <div className={`
-                absolute inset-0 flex items-center justify-center
+                hidden md:flex absolute inset-0 items-center justify-center
                 transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)]
                 ${renderCollapsed ? 'opacity-100 scale-100 delay-100' : 'opacity-0 scale-90 pointer-events-none'}
              `}>
@@ -294,7 +307,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <div className="flex-1 overflow-y-auto no-scrollbar py-2 space-y-6 px-3">
             {/* Section: Overview */}
             <div>
-              <div className={`overflow-hidden transition-all duration-200 ${renderCollapsed ? 'opacity-0 h-0 mb-0' : 'opacity-100 h-6 mb-2'} px-3`}>
+              {/* CRITICAL: md: prefix ensures collapse logic only affects desktop. Mobile is always visible (h-6) */}
+              <div className={`
+                 overflow-hidden transition-all duration-200 px-3
+                 opacity-100 h-6 mb-2
+                 ${renderCollapsed ? 'md:opacity-0 md:h-0 md:mb-0' : 'md:opacity-100 md:h-6 md:mb-2'}
+              `}>
                 <h3 className="text-[10px] font-bold text-gray-400 dark:text-zinc-600 uppercase tracking-widest whitespace-nowrap pl-1">Overview</h3>
               </div>
               <nav className="space-y-1">
@@ -327,7 +345,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <div className={`
                  flex items-center justify-between px-3 group overflow-hidden whitespace-nowrap
                  transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)]
-                 ${renderCollapsed ? 'opacity-0 h-0 mb-0' : 'opacity-100 h-6 mb-2'}
+                 opacity-100 h-6 mb-2
+                 ${renderCollapsed ? 'md:opacity-0 md:h-0 md:mb-0' : 'md:opacity-100 md:h-6 md:mb-2'}
               `}>
                   <h3 className="text-[10px] font-bold text-gray-400 dark:text-zinc-600 uppercase tracking-widest pl-1">Projects</h3>
                   <button 
@@ -380,7 +399,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
             {/* Section: History */}
             <div>
-               <div className={`overflow-hidden transition-all duration-200 ${renderCollapsed ? 'opacity-0 h-0 mb-0' : 'opacity-100 h-6 mb-2'} px-3`}>
+               <div className={`
+                  overflow-hidden transition-all duration-200 px-3
+                  opacity-100 h-6 mb-2
+                  ${renderCollapsed ? 'md:opacity-0 md:h-0 md:mb-0' : 'md:opacity-100 md:h-6 md:mb-2'}
+               `}>
                  <h3 className="text-[10px] font-bold text-gray-400 dark:text-zinc-600 uppercase tracking-widest whitespace-nowrap pl-1">History</h3>
                </div>
                <nav className="space-y-1">
@@ -417,9 +440,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
                   {/* Text Container */}
                   <div className={`
-                      flex items-center justify-between flex-1 min-w-0 overflow-hidden pr-3
+                      flex items-center justify-between flex-1 min-w-0 overflow-hidden pr-3 pl-1
                       transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)]
-                      ${renderCollapsed ? 'opacity-0 w-0 translate-x-4' : 'opacity-100 w-auto translate-x-0'}
+                      opacity-100 w-auto translate-x-0
+                      ${renderCollapsed ? 'md:opacity-0 md:w-0 md:translate-x-4' : 'md:opacity-100 md:w-auto md:translate-x-0'}
                   `}>
                       <div className="flex flex-col items-start leading-tight">
                           <span className="text-sm font-bold text-gray-900 dark:text-white truncate max-w-[120px]">{userProfile.name}</span>

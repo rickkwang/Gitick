@@ -73,20 +73,20 @@ export const TaskItem: React.FC<TaskItemProps> = ({
     <div 
       onClick={() => onSelect(task)}
       className={`
-        group relative flex items-start gap-3 md:gap-4 p-4 md:p-5 rounded-[24px] cursor-pointer transition-all duration-200 border transform active:scale-[0.99]
+        group relative flex items-start gap-4 p-4 px-5 md:py-5 md:px-6 rounded-[24px] cursor-pointer transition-all duration-200 border transform active:scale-[0.99]
         ${selected 
           ? 'bg-white dark:bg-zinc-900 border-gray-300 dark:border-zinc-600 shadow-[0_4px_20px_rgba(0,0,0,0.06)] dark:shadow-none z-10 scale-[1.01]' 
           : 'bg-white dark:bg-dark-surface border-transparent hover:bg-gray-50/50 dark:hover:bg-zinc-900 hover:border-gray-200 dark:hover:border-zinc-800'}
         ${task.completed ? 'opacity-60 grayscale' : 'opacity-100'}
       `}
     >
-      {/* Priority Indicator Dot (Left Edge) - Changed from bar to soft dot or gradient line */}
+      {/* Priority Indicator Dot (Left Edge) - OPTICAL ADJUSTMENT: Moved inward to left-2 */}
       {!task.completed && (
-          <div className={`absolute left-0 top-6 bottom-6 w-1 rounded-r-full ${priorityColor[task.priority]} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
+          <div className={`absolute left-2 top-1/2 -translate-y-1/2 h-8 w-1 rounded-full ${priorityColor[task.priority]} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
       )}
 
       {/* Custom Checkbox */}
-      <div className="shrink-0 mt-0.5">
+      <div className="shrink-0 mt-0.5 ml-0.5">
           <button 
             onClick={(e) => {
               e.stopPropagation();

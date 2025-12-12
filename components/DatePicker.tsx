@@ -66,10 +66,6 @@ export const DatePicker: React.FC<DatePickerProps> = ({ selectedDate, onSelect, 
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const firstDayOfMonth = new Date(year, month, 1).getDay(); // 0 = Sun, 1 = Mon...
   
-  // Adjust for Monday start? Let's use Sunday start standard for now, typical in simple pickers.
-  // Actually, many sleek apps use Mon start. Let's do Sunday start to match native for simplicity unless requested.
-  // Let's stick to standard Sunday start (0) for alignment with `firstDayOfMonth`.
-  
   const blanks = Array(firstDayOfMonth).fill(null);
   const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
 
@@ -77,7 +73,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({ selectedDate, onSelect, 
 
   return (
     <div 
-        className="absolute top-full right-0 mt-2 z-50 w-72 bg-white dark:bg-zinc-900 rounded-[24px] shadow-2xl ring-1 ring-black/5 dark:ring-white/10 p-4 animate-in fade-in zoom-in-95 duration-200 select-none"
+        className="absolute top-full right-0 mt-2 z-50 w-72 bg-white dark:bg-zinc-900 rounded-[24px] shadow-2xl ring-1 ring-black/5 dark:ring-white/10 p-6 animate-in fade-in zoom-in-95 duration-200 select-none"
         onClick={(e) => e.stopPropagation()}
     >
         {/* Header */}

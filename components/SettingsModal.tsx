@@ -113,7 +113,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
         {/* Content Area */}
         <div className="flex-1 flex flex-col min-h-0 bg-white dark:bg-zinc-900 pb-safe">
-           <div className="hidden md:flex items-center justify-between p-6 border-b border-gray-100 dark:border-zinc-800 shrink-0">
+           <div className="hidden md:flex items-center justify-between px-8 py-6 border-b border-gray-100 dark:border-zinc-800 shrink-0">
               <h3 className="font-bold text-lg text-black dark:text-white">
                 {tabs.find(t => t.id === activeTab)?.label}
               </h3>
@@ -122,7 +122,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               </button>
            </div>
 
-           <div className="flex-1 overflow-y-auto p-6 space-y-8">
+           <div className="flex-1 overflow-y-auto p-6 md:p-8 space-y-8">
              
              {/* --- PROFILE TAB --- */}
              {activeTab === 'profile' && (
