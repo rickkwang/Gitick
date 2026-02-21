@@ -178,25 +178,29 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       : 'Browser';
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-0 md:p-4">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-2 md:p-6">
       <div className="absolute inset-0 bg-black/20 dark:bg-black/60 backdrop-blur-sm" onClick={onClose} />
       
-      <div className="relative w-full max-w-2xl bg-white dark:bg-zinc-900 md:rounded-3xl shadow-2xl animate-in fade-in zoom-in-95 duration-200 border-none md:border border-gray-100 dark:border-zinc-800 overflow-hidden flex flex-col md:flex-row h-full md:h-[500px] max-h-[100dvh] md:max-h-[85vh]">
+      <div className="relative w-full max-w-4xl bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl border border-gray-100 dark:border-zinc-800 overflow-hidden flex flex-col md:flex-row h-[96dvh] md:h-[min(780px,88vh)] animate-in fade-in zoom-in-95 duration-200">
         
         {/* Sidebar Nav - Horizontal on Mobile */}
-        <div className="w-full md:w-64 bg-gray-50/50 dark:bg-black border-b md:border-b-0 md:border-r border-gray-100 dark:border-zinc-800 p-4 md:p-6 flex flex-col shrink-0 pt-safe md:pt-6">
-          <div className="flex items-center justify-between mb-4 md:mb-6">
+        <div className="w-full md:w-72 bg-gray-50/70 dark:bg-black border-b md:border-b-0 md:border-r border-gray-100 dark:border-zinc-800 px-4 py-4 md:px-6 md:py-7 flex flex-col shrink-0 pt-safe md:pt-7">
+          <div className="flex items-center justify-between mb-4 md:mb-7">
              <h2 className="text-lg font-bold text-black dark:text-white">Settings</h2>
              <button onClick={onClose} className="md:hidden text-gray-500 p-1">
                <Icons.X />
              </button>
           </div>
-          <nav className="flex md:flex-col gap-2 overflow-x-auto no-scrollbar md:overflow-visible">
+          <nav className="grid grid-cols-2 md:grid-cols-1 gap-2 md:gap-2.5">
             {tabs.map(tab => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`whitespace-nowrap flex items-center gap-2 md:gap-3 px-3 py-2 md:py-2.5 rounded-xl text-sm font-medium transition-all ${activeTab === tab.id ? 'bg-white dark:bg-zinc-800 text-black dark:text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white hover:bg-gray-100 dark:hover:bg-zinc-800/50'}`}
+                className={`whitespace-nowrap flex items-center justify-center md:justify-start gap-2 md:gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                  activeTab === tab.id
+                    ? 'bg-white dark:bg-zinc-800 text-black dark:text-white shadow-sm border border-gray-200 dark:border-zinc-700'
+                    : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white hover:bg-gray-100 dark:hover:bg-zinc-800/50 border border-transparent'
+                }`}
               >
                 {tab.icon}
                 {tab.label}
@@ -204,17 +208,17 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             ))}
           </nav>
           
-          <div className="mt-auto hidden md:block">
-             <div className="text-[10px] text-gray-400 font-mono">
-                Version {desktopAppVersion || 'Web'}
+          <div className="mt-4 md:mt-auto hidden md:block">
+             <div className="rounded-xl border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/60 px-3 py-2 text-[10px] text-gray-500 dark:text-zinc-400 font-mono">
+                App Version: {desktopAppVersion || 'Web'}
              </div>
           </div>
         </div>
 
         {/* Content Area */}
         <div className="flex-1 flex flex-col min-h-0 bg-white dark:bg-zinc-900 pb-safe">
-           <div className="hidden md:flex items-center justify-between px-8 py-6 border-b border-gray-100 dark:border-zinc-800 shrink-0">
-              <h3 className="font-bold text-lg text-black dark:text-white">
+           <div className="hidden md:flex items-center justify-between px-10 py-7 border-b border-gray-100 dark:border-zinc-800 shrink-0">
+              <h3 className="font-semibold text-xl text-black dark:text-white">
                 {tabs.find(t => t.id === activeTab)?.label}
               </h3>
               <button onClick={onClose} className="text-gray-400 hover:text-black dark:hover:text-white transition-colors">
@@ -222,12 +226,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               </button>
            </div>
 
-           <div className="flex-1 overflow-y-auto p-6 md:p-8 space-y-8">
+           <div className="flex-1 overflow-y-auto px-5 py-5 md:px-10 md:py-8 space-y-10">
              
              {/* --- PROFILE TAB --- */}
              {activeTab === 'profile' && (
-               <div className="space-y-6">
-                 <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
+               <div className="space-y-7">
+                 <div className="rounded-2xl border border-gray-200 dark:border-zinc-800 bg-gray-50/60 dark:bg-zinc-800/20 p-5 md:p-6">
+                   <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
                    <div className={`w-20 h-20 rounded-full flex items-center justify-center text-3xl font-bold text-white shadow-lg ${localProfile.avatarColor} shrink-0`}>
                       {localProfile.name.charAt(0).toUpperCase()}
                    </div>
@@ -249,8 +254,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                      </div>
                    </div>
                  </div>
+                 </div>
 
-                 <div className="space-y-4">
+                 <div className="rounded-2xl border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 md:p-6 space-y-4">
                     <div className="space-y-1">
                        <label className="text-xs font-bold text-gray-500 dark:text-zinc-500 uppercase tracking-wider">Full Name</label>
                        <input 
@@ -261,7 +267,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                          className="w-full bg-gray-50 dark:bg-zinc-800/50 border border-gray-200 dark:border-zinc-700 rounded-xl px-4 py-3 text-sm text-black dark:text-white outline-none focus:border-black dark:focus:border-white transition-colors"
                        />
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                       <div className="space-y-1">
                         <label className="text-xs font-bold text-gray-500 dark:text-zinc-500 uppercase tracking-wider">Title / Role</label>
                         <input 
@@ -289,9 +295,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
              {/* --- GENERAL / APPEARANCE TAB --- */}
              {activeTab === 'general' && (
-               <div className="space-y-6">
-                 <div className="space-y-4">
-                    <h4 className="text-sm font-medium text-gray-900 dark:text-white border-b border-gray-100 dark:border-zinc-800 pb-2">Theme</h4>
+               <div className="space-y-7">
+                 <div className="rounded-2xl border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 md:p-6 space-y-5">
+                    <h4 className="text-sm font-medium text-gray-900 dark:text-white border-b border-gray-100 dark:border-zinc-800 pb-3">Theme</h4>
                     <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-zinc-800/30 rounded-2xl border border-gray-100 dark:border-zinc-800/50">
                       <div className="flex items-center gap-3">
                         <span className="p-2 bg-white dark:bg-zinc-800 rounded-lg text-black dark:text-white shadow-sm">
@@ -315,8 +321,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
              {/* --- DATA TAB --- */}
              {activeTab === 'data' && (
-               <div className="space-y-6">
-                 <div className="p-4 bg-blue-50 dark:bg-blue-900/10 rounded-xl border border-blue-100 dark:border-blue-900/30">
+               <div className="space-y-7">
+                 <div className="p-4 md:p-5 bg-blue-50 dark:bg-blue-900/10 rounded-2xl border border-blue-100 dark:border-blue-900/30">
                     <div className="flex gap-3">
                        <Icons.Briefcase />
                        <div className="space-y-1">
@@ -326,7 +332,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     </div>
                  </div>
 
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <button 
                       onClick={handleExport}
                       className="flex flex-col items-center justify-center gap-2 p-6 rounded-2xl border border-gray-200 dark:border-zinc-700 hover:border-black dark:hover:border-white hover:bg-gray-50 dark:hover:bg-zinc-800 transition-all text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white"
@@ -346,7 +352,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                    <p className="text-xs text-red-500 font-bold">{importError}</p>
                  )}
 
-                 <div className="pt-8 border-t border-gray-100 dark:border-zinc-800">
+                 <div className="pt-6 border-t border-gray-100 dark:border-zinc-800">
                     <h4 className="text-sm font-bold text-red-500 mb-2">Danger Zone</h4>
                     <button 
                       onClick={() => {
@@ -366,7 +372,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
              {/* --- ABOUT TAB --- */}
              {activeTab === 'about' && (
-               <div className="space-y-6">
+               <div className="space-y-7">
                  <div className="flex flex-col items-center text-center space-y-3 pb-6 border-b border-gray-100 dark:border-zinc-800">
                     <div className="p-4 bg-black dark:bg-white rounded-2xl text-white dark:text-black mb-2">
                        <Icons.GitickLogo />
@@ -377,10 +383,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     </p>
                  </div>
 
-                <div className="space-y-4">
+                <div className="space-y-5">
                    <h4 className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-zinc-600">Install & Updates</h4>
 
-                    <div className="rounded-xl border border-gray-200 dark:border-zinc-700 p-4 bg-white dark:bg-zinc-800/40 space-y-3">
+                    <div className="rounded-2xl border border-gray-200 dark:border-zinc-700 p-5 bg-white dark:bg-zinc-800/40 space-y-4">
                       <div className="flex items-center justify-between">
                         <p className="text-xs uppercase tracking-wider text-gray-400 dark:text-zinc-500">Current Runtime</p>
                         <span className="text-xs font-mono text-black dark:text-white">{runtimeLabel}</span>
@@ -409,7 +415,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                         </p>
                       )}
                       {canCheckDesktopUpdate && (
-                        <div className="pt-2 border-t border-gray-100 dark:border-zinc-700 space-y-2">
+                        <div className="pt-3 border-t border-gray-100 dark:border-zinc-700 space-y-3">
                           <div className="flex items-center justify-between">
                             <p className="text-xs uppercase tracking-wider text-gray-400 dark:text-zinc-500">Desktop Version</p>
                             <span className="text-xs font-mono text-black dark:text-white">{desktopAppVersion || 'Unknown'}</span>
@@ -432,7 +438,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       )}
                     </div>
                     
-                    <div className="bg-gray-50 dark:bg-zinc-800/30 rounded-xl p-4 space-y-4 border border-gray-100 dark:border-zinc-800/50">
+                    <div className="bg-gray-50 dark:bg-zinc-800/30 rounded-2xl p-5 space-y-4 border border-gray-100 dark:border-zinc-800/50">
                         <div className="flex gap-3 items-start">
                             <span className="flex items-center justify-center w-6 h-6 rounded-full bg-black dark:bg-white text-white dark:text-black text-xs font-bold shrink-0">1</span>
                             <div>
@@ -450,7 +456,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     </div>
                  </div>
 
-                 <div className="p-4 rounded-xl bg-green-50 dark:bg-green-900/10 border border-green-100 dark:border-green-900/30">
+                 <div className="p-5 rounded-2xl bg-green-50 dark:bg-green-900/10 border border-green-100 dark:border-green-900/30">
                     <p className="text-xs text-green-700 dark:text-green-400 font-medium">
                        🔒 <span className="font-bold">Local First:</span> Your data is stored locally on your current device (browser or app). We don't see your tasks. Export backup before switching devices.
                     </p>
