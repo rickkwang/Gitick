@@ -139,6 +139,7 @@ const App: React.FC = () => {
   const [showSettings, setShowSettings] = useState(false);
   const nativeApp = isNativePlatform();
   const runtimePlatform = getRuntimePlatform();
+  const isDesktopRuntime = typeof window !== 'undefined' && Boolean(window.gitickDesktop?.updater);
   const [deferredInstallPrompt, setDeferredInstallPrompt] = useState<DeferredInstallPromptEvent | null>(null);
   const [isStandaloneInstalled, setIsStandaloneInstalled] = useState(() => {
     if (typeof window === 'undefined') return nativeApp;
@@ -379,6 +380,42 @@ const App: React.FC = () => {
       setDeferredInstallPrompt(null);
     }
   };
+
+  useEffect(() => {
+    if (!isDesktopRuntime || !window.gitickDesktop?.updater) return;
+
+    const updater = window.gitickDesktop.updater;
+    const removeListener = updater.onStatus((payload) => {
+      if (payload.type === 'available') {
+        const ok = window.confirm(`New version ${payload.version ?? ''} is available. Download now?`.trim());
+        if (ok) {
+          void updater.downloadUpdate();
+        }
+      }
+
+      if (payload.type === 'download-progress' && payload.percent % 25 === 0) {
+        showToast(`Downloading update... ${payload.percent}%`);
+      }
+
+      if (payload.type === 'downloaded') {
+        const restartNow = window.confirm(`Version ${payload.version ?? ''} is ready. Restart now to install?`.trim());
+        if (restartNow) {
+          void updater.quitAndInstall();
+        } else {
+          showToast('Update downloaded. It will install when you restart the app.');
+        }
+      }
+
+      if (payload.type === 'error') {
+        showToast(`Update failed: ${payload.message}`);
+      }
+    });
+
+    void updater.checkForUpdates();
+    return () => {
+      removeListener();
+    };
+  }, [isDesktopRuntime]);
 
   const addProject = (name: string) => {
       if (!projects.some(p => p.toLowerCase() === name.toLowerCase())) {

@@ -1,11 +1,55 @@
-const { app, BrowserWindow, shell, nativeTheme } = require('electron');
+const { app, BrowserWindow, ipcMain, shell, nativeTheme } = require('electron');
+const { autoUpdater } = require('electron-updater');
 const path = require('path');
 
 const isDev = !app.isPackaged;
 const isMac = process.platform === 'darwin';
+let mainWindow = null;
+
+const sendUpdaterStatus = (payload) => {
+  if (!mainWindow || mainWindow.isDestroyed()) return;
+  mainWindow.webContents.send('updater:status', payload);
+};
+
+const setupAutoUpdater = () => {
+  if (isDev) return;
+
+  autoUpdater.autoDownload = false;
+  autoUpdater.autoInstallOnAppQuit = true;
+
+  autoUpdater.on('checking-for-update', () => {
+    sendUpdaterStatus({ type: 'checking' });
+  });
+
+  autoUpdater.on('update-available', (info) => {
+    sendUpdaterStatus({ type: 'available', version: info.version });
+  });
+
+  autoUpdater.on('update-not-available', () => {
+    sendUpdaterStatus({ type: 'not-available' });
+  });
+
+  autoUpdater.on('download-progress', (progress) => {
+    sendUpdaterStatus({
+      type: 'download-progress',
+      percent: Math.round(progress.percent || 0),
+    });
+  });
+
+  autoUpdater.on('update-downloaded', (info) => {
+    sendUpdaterStatus({ type: 'downloaded', version: info.version });
+  });
+
+  autoUpdater.on('error', (error) => {
+    sendUpdaterStatus({
+      type: 'error',
+      message: error?.message || 'Unknown update error',
+    });
+  });
+};
 
 function createMainWindow() {
-  const window = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 1320,
     height: 860,
     minWidth: 980,
@@ -23,19 +67,49 @@ function createMainWindow() {
     },
   });
 
-  window.webContents.setWindowOpenHandler(({ url }) => {
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
     shell.openExternal(url);
     return { action: 'deny' };
   });
 
+  mainWindow.on('closed', () => {
+    mainWindow = null;
+  });
+
   if (isDev && process.env.VITE_DEV_SERVER_URL) {
-    window.loadURL(process.env.VITE_DEV_SERVER_URL);
+    mainWindow.loadURL(process.env.VITE_DEV_SERVER_URL);
   } else {
-    window.loadFile(path.join(__dirname, '..', 'dist', 'index.html'));
+    mainWindow.loadFile(path.join(__dirname, '..', 'dist', 'index.html'));
   }
 }
 
+ipcMain.handle('updater:get-version', () => app.getVersion());
+
+ipcMain.handle('updater:check', async () => {
+  if (isDev) {
+    return { ok: false, reason: 'dev-mode' };
+  }
+  await autoUpdater.checkForUpdates();
+  return { ok: true };
+});
+
+ipcMain.handle('updater:download', async () => {
+  if (isDev) {
+    return { ok: false, reason: 'dev-mode' };
+  }
+  await autoUpdater.downloadUpdate();
+  return { ok: true };
+});
+
+ipcMain.handle('updater:quit-install', () => {
+  if (!isDev) {
+    setImmediate(() => autoUpdater.quitAndInstall());
+  }
+  return { ok: true };
+});
+
 app.whenReady().then(() => {
+  setupAutoUpdater();
   createMainWindow();
 
   app.on('activate', () => {

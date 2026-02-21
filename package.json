@@ -4,6 +4,10 @@
   "version": "0.2.1",
   "description": "Gitick desktop and mobile task manager",
   "author": "Myrick Wang",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rickkwang/Gitick.git"
+  },
   "main": "electron/main.cjs",
   "type": "module",
   "scripts": {
@@ -30,6 +34,7 @@
     "@capacitor/keyboard": "^8.0.0",
     "@capacitor/splash-screen": "^8.0.1",
     "@capacitor/status-bar": "^8.0.1",
+    "electron-updater": "^6.6.2",
     "react": "^19.2.1",
     "react-dom": "^19.2.1"
   },
@@ -72,6 +77,11 @@
     "dmg": {
       "artifactName": "${productName}-${version}-${arch}.${ext}",
       "title": "${productName} ${version}"
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "rickkwang",
+      "repo": "Gitick"
     }
   }
 }
