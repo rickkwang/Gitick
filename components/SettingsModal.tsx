@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Icons } from '../constants';
-import { UserProfile, Task } from '../types';
+import { UserProfile, Task, Priority } from '../types';
 
 interface SettingsModalProps {
   onClose: () => void;
@@ -14,6 +14,75 @@ interface SettingsModalProps {
 }
 
 type SettingsTab = 'profile' | 'general' | 'data' | 'about';
+
+const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+const isPriority = (value: unknown): value is Priority =>
+  value === Priority.HIGH || value === Priority.MEDIUM || value === Priority.LOW;
+
+const normalizeTask = (raw: unknown): Task | null => {
+  if (!raw || typeof raw !== 'object') return null;
+  const item = raw as Record<string, unknown>;
+
+  const title = typeof item.title === 'string' ? item.title.trim() : '';
+  if (!title) return null;
+
+  const completed = Boolean(item.completed);
+  const createdAt = typeof item.createdAt === 'number' && Number.isFinite(item.createdAt)
+    ? item.createdAt
+    : Date.now();
+
+  const completedAt = completed && typeof item.completedAt === 'number' && Number.isFinite(item.completedAt)
+    ? item.completedAt
+    : undefined;
+
+  const dueDate = typeof item.dueDate === 'string' && ISO_DATE_RE.test(item.dueDate)
+    ? item.dueDate
+    : undefined;
+
+  const tags = Array.isArray(item.tags)
+    ? item.tags.filter((tag): tag is string => typeof tag === 'string').map(tag => tag.trim()).filter(Boolean)
+    : [];
+
+  const subtasks = Array.isArray(item.subtasks)
+    ? item.subtasks
+        .map((sub): Task['subtasks'][number] | null => {
+          if (!sub || typeof sub !== 'object') return null;
+          const rawSub = sub as Record<string, unknown>;
+          const subTitle = typeof rawSub.title === 'string' ? rawSub.title.trim() : '';
+          if (!subTitle) return null;
+          return {
+            id: typeof rawSub.id === 'string' && rawSub.id.trim() ? rawSub.id : crypto.randomUUID(),
+            title: subTitle,
+            completed: Boolean(rawSub.completed),
+          };
+        })
+        .filter((sub): sub is Task['subtasks'][number] => sub !== null)
+    : [];
+
+  return {
+    id: typeof item.id === 'string' && item.id.trim() ? item.id : crypto.randomUUID(),
+    title,
+    description: typeof item.description === 'string' ? item.description : '',
+    completed,
+    completedAt,
+    priority: isPriority(item.priority) ? item.priority : Priority.MEDIUM,
+    dueDate,
+    tags,
+    list: typeof item.list === 'string' && item.list.trim() ? item.list.trim() : 'Inbox',
+    subtasks,
+    createdAt,
+  };
+};
+
+const sanitizeImportedTasks = (value: unknown): Task[] => {
+  if (!Array.isArray(value)) {
+    throw new Error('Invalid format: Expected an array of tasks');
+  }
+  return value
+    .map(normalizeTask)
+    .filter((task): task is Task => task !== null);
+};
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
   onClose,
@@ -56,15 +125,20 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     reader.onload = (event) => {
       try {
         const json = JSON.parse(event.target?.result as string);
-        if (Array.isArray(json)) {
-          onImportData(json);
-          setImportError('');
-          onClose(); // Close modal on success
-        } else {
-          setImportError('Invalid format: Expected an array of tasks');
+        const sanitizedTasks = sanitizeImportedTasks(json);
+        if (sanitizedTasks.length === 0) {
+          setImportError('No valid tasks found in this file');
+          return;
         }
+        onImportData(sanitizedTasks);
+        setImportError('');
+        onClose(); // Close modal on success
       } catch (err) {
-        setImportError('Invalid JSON file');
+        if (err instanceof Error) {
+          setImportError(err.message);
+        } else {
+          setImportError('Invalid JSON file');
+        }
       }
     };
     reader.readAsText(file);

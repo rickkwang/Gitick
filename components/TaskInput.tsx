@@ -101,7 +101,7 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
 
     // 3. Project Parsing (@Project)
     const projectRegex = /@(\w+)/i;
-    const projectMatch = input.match(projectRegex);
+    const projectMatch = text.match(projectRegex);
     let projectFound = null;
     if (projectMatch) {
        const pName = projectMatch[1];

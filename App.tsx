@@ -91,11 +91,11 @@ const App: React.FC = () => {
   };
 
   // Helper for Local Date String (Fixes Timezone Bugs)
-  const getLocalTodayStr = () => {
-    const d = new Date();
+  const getLocalDateStr = (d: Date) => {
     const offset = d.getTimezoneOffset() * 60000;
     return new Date(d.getTime() - offset).toISOString().split('T')[0];
   };
+  const getLocalTodayStr = () => getLocalDateStr(new Date());
 
   // Initialize tasks with Onboarding data if localStorage is empty
   const [tasks, setTasks] = useState<Task[]>(() => {
@@ -163,7 +163,7 @@ const App: React.FC = () => {
      const end = now + (focusTimeLeft * 1000);
      setFocusEndTime(end);
      setIsFocusActive(true);
-     if (Notification.permission === 'default') {
+     if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'default') {
        Notification.requestPermission();
      }
   };
@@ -193,7 +193,7 @@ const App: React.FC = () => {
            showToast(msg);
            playSuccessSound();
            
-           if (Notification.permission === 'granted') {
+           if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
              new Notification("Gitick Timer", { body: msg, icon: '/favicon.ico' });
            }
         } else {
@@ -428,7 +428,7 @@ const App: React.FC = () => {
     const todayStr = getLocalTodayStr();
     const d = new Date();
     d.setDate(d.getDate() + 1);
-    const tmrStr = d.toISOString().split('T')[0];
+    const tmrStr = getLocalDateStr(d);
 
     const groups: { [key: string]: Task[] } = {
         'Overdue': [],
