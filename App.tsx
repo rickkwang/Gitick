@@ -8,6 +8,7 @@ import { Heatmap } from './components/Heatmap';
 import { GitGraph } from './components/GitGraph';
 import { StatusBar } from './components/StatusBar';
 import { SettingsModal } from './components/SettingsModal';
+import { ConfirmDialog } from './components/ConfirmDialog';
 import { Task, FilterType, UserProfile, Priority } from './types';
 import { Icons, PROJECTS as DEFAULT_PROJECTS } from './constants';
 import {
@@ -17,6 +18,17 @@ import {
   registerAndroidBackButton,
   syncStatusBarWithTheme,
 } from './services/nativeApp';
+import { addDaysLocalIsoDate, todayLocalIsoDate } from './utils/date';
+import { sanitizeTaskList } from './utils/taskSanitizer';
+import {
+  LEGACY_STORAGE_KEYS,
+  STORAGE_KEYS,
+  readStoredJson,
+  readStoredValue,
+  removeStoredKeys,
+  writeStoredJson,
+  writeStoredValue,
+} from './utils/storage';
 
 // --- ONBOARDING DATA ---
 const ONBOARDING_TASKS: Task[] = [
@@ -93,29 +105,35 @@ type StandaloneNavigator = Navigator & {
   standalone?: boolean;
 };
 
+interface ServiceWorkerUpdateEventDetail {
+  applyUpdate: () => void;
+}
+
+interface ConfirmDialogRequest {
+  title: string;
+  description: string;
+  confirmLabel?: string;
+  cancelLabel?: string;
+  confirmTone?: 'default' | 'danger';
+  onConfirm: () => void | Promise<void>;
+  onCancel?: () => void | Promise<void>;
+}
+
+const DEFAULT_USER_PROFILE: UserProfile = {
+  name: 'User',
+  email: 'user@gitick.app',
+  jobTitle: 'Productivity Master',
+  avatarColor: 'bg-zinc-900',
+};
+
 const App: React.FC = () => {
-  // Helper for lazy state initialization from localStorage
-  const loadState = <T,>(key: string, fallback: T | null): T => {
-    if (typeof window === 'undefined') return fallback as T;
-    try {
-      const saved = localStorage.getItem(key);
-      return saved ? JSON.parse(saved) : fallback;
-    } catch (e) {
-      console.error(`Error loading ${key}`, e);
-      return fallback as T;
-    }
-  };
-
-  // Helper for Local Date String (Fixes Timezone Bugs)
-  const getLocalDateStr = (d: Date) => {
-    const offset = d.getTimezoneOffset() * 60000;
-    return new Date(d.getTime() - offset).toISOString().split('T')[0];
-  };
-  const getLocalTodayStr = () => getLocalDateStr(new Date());
-
   // Initialize tasks with Onboarding data if localStorage is empty
   const [tasks, setTasks] = useState<Task[]>(() => {
-     const saved = loadState<Task[]>('zendo-tasks', null);
+     const saved = readStoredJson<Task[] | null>(
+      [STORAGE_KEYS.tasks, LEGACY_STORAGE_KEYS.tasks],
+      null,
+      (value) => sanitizeTaskList(value),
+    );
      return saved !== null ? saved : ONBOARDING_TASKS;
   });
 
@@ -124,14 +142,20 @@ const App: React.FC = () => {
   
   // Sidebar states
   const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Mobile toggle
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => loadState('zendo-sidebar-collapsed', true)); // Desktop collapse
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() =>
+    readStoredJson<boolean>(
+      [STORAGE_KEYS.sidebarCollapsed, LEGACY_STORAGE_KEYS.sidebarCollapsed],
+      true,
+      (value) => Boolean(value),
+    ),
+  ); // Desktop collapse
 
   // Right Sidebar Toggle State - Default to closed
   const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
   
   const [isDarkMode, setIsDarkMode] = useState(() => {
      if (typeof window === 'undefined') return false;
-     const saved = localStorage.getItem('zendo-theme');
+     const saved = readStoredValue(STORAGE_KEYS.theme) ?? readStoredValue(LEGACY_STORAGE_KEYS.theme);
      if (saved) return saved === 'dark';
      return window.matchMedia('(prefers-color-scheme: dark)').matches;
   });
@@ -143,6 +167,7 @@ const App: React.FC = () => {
   const isDesktopMac = desktopPlatform === 'darwin';
   const isDesktopRuntime = typeof window !== 'undefined' && Boolean(window.gitickDesktop?.updater);
   const [deferredInstallPrompt, setDeferredInstallPrompt] = useState<DeferredInstallPromptEvent | null>(null);
+  const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogRequest | null>(null);
   const [isStandaloneInstalled, setIsStandaloneInstalled] = useState(() => {
     if (typeof window === 'undefined') return nativeApp;
     const standaloneNavigator = window.navigator as StandaloneNavigator;
@@ -154,15 +179,40 @@ const App: React.FC = () => {
   });
   
   // Projects State
-  const [projects, setProjects] = useState<string[]>(() => loadState('zendo-projects', DEFAULT_PROJECTS));
+  const [projects, setProjects] = useState<string[]>(() =>
+    readStoredJson<string[]>(
+      [STORAGE_KEYS.projects, LEGACY_STORAGE_KEYS.projects],
+      DEFAULT_PROJECTS,
+      (value) =>
+        Array.isArray(value)
+          ? value.filter((project): project is string => typeof project === 'string' && project.trim().length > 0)
+          : DEFAULT_PROJECTS,
+    ),
+  );
   
   // User Profile State
-  const [userProfile, setUserProfile] = useState<UserProfile>(() => loadState('zendo-profile', {
-    name: 'User',
-    email: 'user@gitick.app',
-    jobTitle: 'Productivity Master',
-    avatarColor: 'bg-zinc-900'
-  }));
+  const [userProfile, setUserProfile] = useState<UserProfile>(() =>
+    readStoredJson<UserProfile>(
+      [STORAGE_KEYS.profile, LEGACY_STORAGE_KEYS.profile],
+      DEFAULT_USER_PROFILE,
+      (value) => {
+        if (!value || typeof value !== 'object') return DEFAULT_USER_PROFILE;
+        const profile = value as Record<string, unknown>;
+        return {
+          name: typeof profile.name === 'string' && profile.name.trim() ? profile.name.trim() : DEFAULT_USER_PROFILE.name,
+          email: typeof profile.email === 'string' && profile.email.trim() ? profile.email.trim() : DEFAULT_USER_PROFILE.email,
+          jobTitle:
+            typeof profile.jobTitle === 'string' && profile.jobTitle.trim()
+              ? profile.jobTitle.trim()
+              : DEFAULT_USER_PROFILE.jobTitle,
+          avatarColor:
+            typeof profile.avatarColor === 'string' && profile.avatarColor.trim()
+              ? profile.avatarColor.trim()
+              : DEFAULT_USER_PROFILE.avatarColor,
+        };
+      },
+    ),
+  );
   
   // Search / Command Palette State
   const [showSearch, setShowSearch] = useState(false);
@@ -186,7 +236,6 @@ const App: React.FC = () => {
   const [focusTimeLeft, setFocusTimeLeft] = useState(25 * 60);
   const [isFocusActive, setIsFocusActive] = useState(false);
   const [focusModeType, setFocusModeType] = useState<'focus' | 'break'>('focus');
-  const [initialFocusDuration, setInitialFocusDuration] = useState(25 * 60);
 
   // Helper: Format Time
   const formatTime = (seconds: number) => {
@@ -252,13 +301,10 @@ const App: React.FC = () => {
   const handleSetTimeLeft = (val: number | ((prev: number) => number)) => {
       if (typeof val === 'function') {
           setFocusTimeLeft(prev => {
-              const newVal = val(prev);
-              setInitialFocusDuration(newVal);
-              return newVal;
+              return val(prev);
           });
       } else {
           setFocusTimeLeft(val);
-          setInitialFocusDuration(val);
       }
   };
 
@@ -311,23 +357,23 @@ const App: React.FC = () => {
 
   // Persistence Effects
   useEffect(() => {
-    localStorage.setItem('zendo-tasks', JSON.stringify(tasks));
+    writeStoredJson(STORAGE_KEYS.tasks, tasks);
   }, [tasks]);
   
   useEffect(() => {
-      localStorage.setItem('zendo-projects', JSON.stringify(projects));
+      writeStoredJson(STORAGE_KEYS.projects, projects);
   }, [projects]);
 
   useEffect(() => {
-    localStorage.setItem('zendo-profile', JSON.stringify(userProfile));
+    writeStoredJson(STORAGE_KEYS.profile, userProfile);
   }, [userProfile]);
   
   useEffect(() => {
-    localStorage.setItem('zendo-sidebar-collapsed', JSON.stringify(isSidebarCollapsed));
+    writeStoredJson(STORAGE_KEYS.sidebarCollapsed, isSidebarCollapsed);
   }, [isSidebarCollapsed]);
 
   useEffect(() => {
-    localStorage.setItem('zendo-theme', isDarkMode ? 'dark' : 'light');
+    writeStoredValue(STORAGE_KEYS.theme, isDarkMode ? 'dark' : 'light');
     if (isDarkMode) {
       document.documentElement.classList.add('dark');
     } else {
@@ -355,6 +401,89 @@ const App: React.FC = () => {
       setUndoAction(undefined);
     }, 4000);
   };
+
+  useEffect(
+    () => () => {
+      if (toastTimeoutRef.current) {
+        clearTimeout(toastTimeoutRef.current);
+      }
+    },
+    [],
+  );
+
+  const clearAllLocalData = () => {
+    removeStoredKeys([
+      STORAGE_KEYS.tasks,
+      STORAGE_KEYS.projects,
+      STORAGE_KEYS.profile,
+      STORAGE_KEYS.sidebarCollapsed,
+      STORAGE_KEYS.theme,
+      LEGACY_STORAGE_KEYS.tasks,
+      LEGACY_STORAGE_KEYS.projects,
+      LEGACY_STORAGE_KEYS.profile,
+      LEGACY_STORAGE_KEYS.sidebarCollapsed,
+      LEGACY_STORAGE_KEYS.theme,
+    ]);
+    setTasks([]);
+    setProjects(DEFAULT_PROJECTS);
+    setUserProfile(DEFAULT_USER_PROFILE);
+    setSelectedTask(null);
+    setIsRightSidebarOpen(false);
+    setFilter('next7days');
+    setSearchQuery('');
+    setShowSearch(false);
+    setIsSidebarCollapsed(true);
+    setDesktopUpdateStatus('');
+    setIsCheckingDesktopUpdate(false);
+    const fallbackDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    setIsDarkMode(fallbackDark);
+    showToast('All local data has been reset.');
+  };
+
+  const runConfirmAction = useCallback(
+    async (kind: 'confirm' | 'cancel') => {
+      const dialog = confirmDialog;
+      if (!dialog) return;
+
+      setConfirmDialog(null);
+      if (kind === 'confirm') {
+        try {
+          await dialog.onConfirm();
+        } catch (error) {
+          console.warn('Confirm action failed:', error);
+        }
+        return;
+      }
+      if (dialog.onCancel) {
+        try {
+          await dialog.onCancel();
+        } catch (error) {
+          console.warn('Cancel action failed:', error);
+        }
+      }
+    },
+    [confirmDialog],
+  );
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const handleSWUpdateReady = (event: Event) => {
+      const detail = (event as CustomEvent<ServiceWorkerUpdateEventDetail>).detail;
+      if (!detail?.applyUpdate) return;
+      setConfirmDialog({
+        title: 'New version is ready',
+        description: 'A new Gitick version has been downloaded. Reload now to apply the update?',
+        confirmLabel: 'Reload Now',
+        cancelLabel: 'Later',
+        onConfirm: () => detail.applyUpdate(),
+        onCancel: () => showToast('Update ready. You can reload later.'),
+      });
+    };
+
+    window.addEventListener('gitick:sw-update-ready', handleSWUpdateReady);
+    return () => window.removeEventListener('gitick:sw-update-ready', handleSWUpdateReady);
+  }, []);
 
   const getFriendlyUpdateError = (raw: string, reason?: string) => {
     const message = raw.replace(/\s+/g, ' ').trim().toLowerCase();
@@ -485,29 +614,35 @@ const App: React.FC = () => {
 
       if (payload.type === 'available') {
         setDesktopUpdateStatus(`Update ${payload.version ?? ''} is available.`.trim());
-        const ok = window.confirm(`New version ${payload.version ?? ''} is available. Download now?`.trim());
-        if (ok) {
-          desktopUpdateUserFlowRef.current = true;
-          setDesktopUpdateStatus('Downloading update...');
-          void updater.downloadUpdate()
-            .then((result) => {
+        setConfirmDialog({
+          title: `Download update ${payload.version ?? ''}?`.trim(),
+          description: 'A new desktop version is available. Download now and install after restart.',
+          confirmLabel: 'Download',
+          cancelLabel: 'Later',
+          onConfirm: async () => {
+            desktopUpdateUserFlowRef.current = true;
+            setDesktopUpdateStatus('Downloading update...');
+            try {
+              const result = await updater.downloadUpdate();
               if (!result.ok) {
                 const friendly = getFriendlyUpdateError(result.reason ?? 'download failed', result.reason);
                 setDesktopUpdateStatus(friendly);
                 showToast(friendly);
                 finishDesktopUpdateFlow();
               }
-            })
-            .catch((error) => {
+            } catch (error) {
               console.warn('Download update call failed:', error);
               const friendly = getFriendlyUpdateError('download failed');
               setDesktopUpdateStatus(friendly);
               showToast(friendly);
               finishDesktopUpdateFlow();
-            });
-        } else {
-          setIsCheckingDesktopUpdate(false);
-        }
+            }
+          },
+          onCancel: async () => {
+            setDesktopUpdateStatus('Update available. Download whenever you are ready.');
+            finishDesktopUpdateFlow();
+          },
+        });
       }
 
       if (payload.type === 'download-progress' && payload.percent % 25 === 0) {
@@ -517,40 +652,55 @@ const App: React.FC = () => {
 
       if (payload.type === 'downloaded') {
         setDesktopUpdateStatus(`Update ${payload.version ?? ''} downloaded. Restart to install.`.trim());
-        const restartNow = window.confirm(`Version ${payload.version ?? ''} is ready. Restart now to install?`.trim());
-        if (restartNow) {
-          desktopUpdateUserFlowRef.current = true;
-          void updater.quitAndInstall()
-            .then(async (result) => {
+        setConfirmDialog({
+          title: 'Install downloaded update now?',
+          description: `Version ${payload.version ?? ''} has been downloaded and needs an app restart to finish installation.`.trim(),
+          confirmLabel: 'Restart & Install',
+          cancelLabel: 'Install Later',
+          onConfirm: async () => {
+            desktopUpdateUserFlowRef.current = true;
+            try {
+              const result = await updater.quitAndInstall();
               if (result.ok) {
                 return;
               }
 
               if (result.reason === 'not-in-applications') {
-                const moveNow = window.confirm('Gitick.app must be in /Applications for in-app update. Move it now?');
-                if (moveNow) {
-                  await tryMoveDesktopAppToApplications();
-                  return;
-                }
+                setConfirmDialog({
+                  title: 'Move app to /Applications?',
+                  description:
+                    'Gitick.app must be in /Applications for in-app updates on macOS. Move it now and relaunch?',
+                  confirmLabel: 'Move App',
+                  cancelLabel: 'Not Now',
+                  onConfirm: async () => {
+                    await tryMoveDesktopAppToApplications();
+                  },
+                  onCancel: async () => {
+                    const friendly = getFriendlyUpdateError('install failed', 'not-in-applications');
+                    setDesktopUpdateStatus(friendly);
+                    showToast(friendly);
+                  },
+                });
+                return;
               }
 
               const friendly = getFriendlyUpdateError(result.reason ?? 'install failed', result.reason);
               setDesktopUpdateStatus(friendly);
               showToast(friendly);
-            })
-            .catch((error) => {
+            } catch (error) {
               console.warn('Install update call failed:', error);
               const friendly = getFriendlyUpdateError('install failed');
               setDesktopUpdateStatus(friendly);
               showToast(friendly);
-            })
-            .finally(() => {
+            } finally {
               finishDesktopUpdateFlow();
-            });
-        } else {
-          showToast('Update downloaded. It will install when you restart the app.');
-          finishDesktopUpdateFlow();
-        }
+            }
+          },
+          onCancel: async () => {
+            showToast('Update downloaded. It will install when you restart the app.');
+            finishDesktopUpdateFlow();
+          },
+        });
       }
 
       if (payload.type === 'not-available') {
@@ -719,7 +869,8 @@ const App: React.FC = () => {
 
   // --- Filter & Sorting Logic ---
   const filteredTasks = useMemo(() => {
-    const todayStr = getLocalTodayStr();
+    const todayStr = todayLocalIsoDate();
+    const next7daysStr = addDaysLocalIsoDate(7);
     
     // Base Filtering
     let filtered = tasks;
@@ -727,7 +878,7 @@ const App: React.FC = () => {
     if (filter === 'completed') {
        filtered = filtered.filter(t => t.completed);
     } else if (filter === 'next7days') {
-       filtered = filtered.filter(t => !t.completed);
+       filtered = filtered.filter(t => !t.completed && Boolean(t.dueDate) && t.dueDate <= next7daysStr);
     } else if (filter === 'today') {
       filtered = filtered.filter(t => !t.completed && t.dueDate === todayStr);
     } else if (filter === 'inbox') {
@@ -765,30 +916,25 @@ const App: React.FC = () => {
   const taskGroups = useMemo(() => {
     if (filter !== 'next7days') return null;
 
-    const todayStr = getLocalTodayStr();
-    const d = new Date();
-    d.setDate(d.getDate() + 1);
-    const tmrStr = getLocalDateStr(d);
+    const todayStr = todayLocalIsoDate();
+    const tmrStr = addDaysLocalIsoDate(1);
 
     const groups: { [key: string]: Task[] } = {
         'Overdue': [],
         'Today': [],
         'Tomorrow': [],
-        'Later': [],
-        'No Date': []
+        'Next 7 Days': [],
     };
 
     filteredTasks.forEach(t => {
-        if (!t.dueDate) {
-            groups['No Date'].push(t);
-        } else if (t.dueDate < todayStr) {
+        if (t.dueDate && t.dueDate < todayStr) {
             groups['Overdue'].push(t);
-        } else if (t.dueDate === todayStr) {
+        } else if (t.dueDate && t.dueDate === todayStr) {
             groups['Today'].push(t);
-        } else if (t.dueDate === tmrStr) {
+        } else if (t.dueDate && t.dueDate === tmrStr) {
             groups['Tomorrow'].push(t);
         } else {
-            groups['Later'].push(t);
+            groups['Next 7 Days'].push(t);
         }
     });
 
@@ -800,9 +946,10 @@ const App: React.FC = () => {
     const counts: Record<string, number> = {};
     const active = tasks.filter((t) => !t.completed);
     counts['inbox'] = active.filter((t) => t.list === 'Inbox' || !t.list).length;
-    const todayStr = getLocalTodayStr();
+    const todayStr = todayLocalIsoDate();
+    const next7daysStr = addDaysLocalIsoDate(7);
     counts['today'] = active.filter((t) => t.dueDate === todayStr).length;
-    counts['next7days'] = active.length;
+    counts['next7days'] = active.filter((t) => t.dueDate && t.dueDate <= next7daysStr).length;
     projects.forEach((projectName) => {
       counts[projectName] = active.filter((t) => t.list === projectName).length;
     });
@@ -966,7 +1113,11 @@ const App: React.FC = () => {
       <header className="md:hidden bg-white/95 dark:bg-zinc-950/95 border-b border-gray-100 dark:border-zinc-800 shrink-0 z-50 pt-safe backdrop-blur-sm transition-colors duration-300">
          <div className="h-14 flex items-center px-4 justify-between">
             <div className="flex items-center gap-3">
-               <button onClick={() => setIsSidebarOpen(true)} className="text-black dark:text-white p-1">
+               <button
+                 onClick={() => setIsSidebarOpen(true)}
+                 aria-label="Open sidebar"
+                 className="text-black dark:text-white p-1"
+               >
                  <Icons.Menu />
                </button>
                <span className="font-bold text-black dark:text-white tracking-tight">Gitick</span>
@@ -1001,7 +1152,7 @@ const App: React.FC = () => {
         />
 
         {/* COL 2: Main Content */}
-        <main className="flex-1 flex flex-col min-w-0 h-full bg-gradient-to-b from-gray-50 via-gray-50 to-gray-100/30 dark:from-zinc-900 dark:via-zinc-900 dark:to-zinc-950 relative z-0 transition-colors duration-300">
+        <main className="flex-1 flex flex-col min-w-0 h-full bg-gradient-to-b from-gray-50 via-gray-50/95 to-white dark:from-zinc-900 dark:via-zinc-900 dark:to-zinc-950 relative z-0 transition-colors duration-300">
            
            <div key={filter} className="h-full flex flex-col">
              
@@ -1034,6 +1185,7 @@ const App: React.FC = () => {
                         {/* Search Trigger (Refined) */}
                         <button 
                           onClick={() => { setShowSearch(true); setTimeout(() => searchInputRef.current?.focus(), 50); }}
+                          aria-label="Open quick search"
                           className="group flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-100/50 dark:bg-zinc-800/50 hover:bg-white dark:hover:bg-zinc-800 border border-transparent hover:border-gray-200 dark:hover:border-zinc-700 transition-all duration-200"
                           title="Quick Search (Cmd+K)"
                         >
@@ -1046,12 +1198,12 @@ const App: React.FC = () => {
 
                   {/* Scrollable List Area */}
                   <div className="flex-1 overflow-y-auto main-scroll scroll-smooth">
-                      <div className="max-w-5xl mx-auto w-full px-4 md:px-8 py-6 md:py-8">
+                      <div className="max-w-[1100px] mx-auto w-full px-5 md:px-10 py-7 md:py-10">
                           
                           {/* Heatmap Section */}
                           {filter === 'next7days' && (
-                             <div className="mb-10">
-                                <div className="p-6 bg-white/96 dark:bg-zinc-900/70 rounded-[24px] shadow-sm border border-gray-200/80 dark:border-zinc-800/80">
+                             <div className="mb-12">
+                                <div className="p-7 bg-white/96 dark:bg-zinc-900/70 rounded-[24px] shadow-sm border border-gray-200/80 dark:border-zinc-800/80">
                                    <div className="flex items-center justify-between mb-5">
                                       <div className="flex items-center gap-2">
                                          <Icons.Flame />
@@ -1080,14 +1232,13 @@ const App: React.FC = () => {
                                         {renderTaskList(taskGroups['Overdue'], 'Overdue')}
                                         {renderTaskList(taskGroups['Today'], 'Today')}
                                         {renderTaskList(taskGroups['Tomorrow'], 'Tomorrow')}
-                                        {renderTaskList(taskGroups['Later'], 'Later')}
-                                        {renderTaskList(taskGroups['No Date'], 'No Date')}
+                                        {renderTaskList(taskGroups['Next 7 Days'], 'Next 7 Days')}
                                     </>
                                   )
                               ) : (
                                   /* Flat List for other views */
                                   filteredTasks.length > 0 ? (
-                                    <div className="space-y-3">
+                                    <div className="space-y-4">
                                       {filteredTasks.map(task => (
                                           <TaskItem 
                                             key={task.id}
@@ -1111,7 +1262,7 @@ const App: React.FC = () => {
                   {showTaskInput && (
                      <div className="absolute bottom-0 left-0 right-0 z-20 pointer-events-none">
                         {/* Gradient Mask to catch scrolling text - Taller and solid at bottom */}
-                        <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-gray-50/95 via-gray-50/80 to-transparent dark:from-zinc-900 dark:via-zinc-900/80" />
+                        <div className="absolute bottom-0 left-0 right-0 h-56 bg-gradient-to-t from-gray-50/95 via-gray-50/80 to-transparent dark:from-zinc-900 dark:via-zinc-900/80" />
 
                         {/* Input Container - Padded from bottom including Safe Area */}
                         <div className="relative z-10 w-full flex justify-center px-4 pt-10 pb-safe">
@@ -1214,7 +1365,11 @@ const App: React.FC = () => {
                      className="flex-1 bg-transparent text-2xl outline-none text-black dark:text-white placeholder:text-gray-300 dark:placeholder:text-zinc-600 font-medium tracking-tight h-10"
                      autoFocus
                   />
-                  <button onClick={() => setShowSearch(false)} className="p-2 bg-gray-100 dark:bg-zinc-800 rounded-lg text-xs font-bold text-gray-500 dark:text-zinc-400 hover:text-black dark:hover:text-white transition-colors">
+                  <button
+                    onClick={() => setShowSearch(false)}
+                    aria-label="Close search"
+                    className="p-2 bg-gray-100 dark:bg-zinc-800 rounded-lg text-xs font-bold text-gray-500 dark:text-zinc-400 hover:text-black dark:hover:text-white transition-colors"
+                  >
                      ESC
                   </button>
                </div>
@@ -1287,7 +1442,7 @@ const App: React.FC = () => {
           onUpdateProfile={setUserProfile}
           tasks={tasks}
           onImportData={handleImportData}
-          onClearData={() => setTasks([])}
+          onClearData={clearAllLocalData}
           isNativeApp={nativeApp}
           runtimePlatform={runtimePlatform}
           isStandaloneInstalled={isStandaloneInstalled}
@@ -1300,6 +1455,21 @@ const App: React.FC = () => {
           onCheckDesktopUpdate={requestDesktopUpdateCheck}
         />
       )}
+
+      <ConfirmDialog
+        open={Boolean(confirmDialog)}
+        title={confirmDialog?.title ?? ''}
+        description={confirmDialog?.description ?? ''}
+        confirmLabel={confirmDialog?.confirmLabel}
+        cancelLabel={confirmDialog?.cancelLabel}
+        confirmTone={confirmDialog?.confirmTone}
+        onCancel={() => {
+          void runConfirmAction('cancel');
+        }}
+        onConfirm={() => {
+          void runConfirmAction('confirm');
+        }}
+      />
 
     </div>
   );

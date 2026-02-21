@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Icons } from '../constants';
-import { UserProfile, Task, Priority } from '../types';
+import { UserProfile, Task } from '../types';
+import { sanitizeTaskList } from '../utils/taskSanitizer';
+import { ConfirmDialog } from './ConfirmDialog';
 
 interface SettingsModalProps {
   onClose: () => void;
@@ -25,75 +27,6 @@ interface SettingsModalProps {
 
 type SettingsTab = 'profile' | 'general' | 'data' | 'about';
 
-const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
-
-const isPriority = (value: unknown): value is Priority =>
-  value === Priority.HIGH || value === Priority.MEDIUM || value === Priority.LOW;
-
-const normalizeTask = (raw: unknown): Task | null => {
-  if (!raw || typeof raw !== 'object') return null;
-  const item = raw as Record<string, unknown>;
-
-  const title = typeof item.title === 'string' ? item.title.trim() : '';
-  if (!title) return null;
-
-  const completed = Boolean(item.completed);
-  const createdAt = typeof item.createdAt === 'number' && Number.isFinite(item.createdAt)
-    ? item.createdAt
-    : Date.now();
-
-  const completedAt = completed && typeof item.completedAt === 'number' && Number.isFinite(item.completedAt)
-    ? item.completedAt
-    : undefined;
-
-  const dueDate = typeof item.dueDate === 'string' && ISO_DATE_RE.test(item.dueDate)
-    ? item.dueDate
-    : undefined;
-
-  const tags = Array.isArray(item.tags)
-    ? item.tags.filter((tag): tag is string => typeof tag === 'string').map(tag => tag.trim()).filter(Boolean)
-    : [];
-
-  const subtasks = Array.isArray(item.subtasks)
-    ? item.subtasks
-        .map((sub): Task['subtasks'][number] | null => {
-          if (!sub || typeof sub !== 'object') return null;
-          const rawSub = sub as Record<string, unknown>;
-          const subTitle = typeof rawSub.title === 'string' ? rawSub.title.trim() : '';
-          if (!subTitle) return null;
-          return {
-            id: typeof rawSub.id === 'string' && rawSub.id.trim() ? rawSub.id : crypto.randomUUID(),
-            title: subTitle,
-            completed: Boolean(rawSub.completed),
-          };
-        })
-        .filter((sub): sub is Task['subtasks'][number] => sub !== null)
-    : [];
-
-  return {
-    id: typeof item.id === 'string' && item.id.trim() ? item.id : crypto.randomUUID(),
-    title,
-    description: typeof item.description === 'string' ? item.description : '',
-    completed,
-    completedAt,
-    priority: isPriority(item.priority) ? item.priority : Priority.MEDIUM,
-    dueDate,
-    tags,
-    list: typeof item.list === 'string' && item.list.trim() ? item.list.trim() : 'Inbox',
-    subtasks,
-    createdAt,
-  };
-};
-
-const sanitizeImportedTasks = (value: unknown): Task[] => {
-  if (!Array.isArray(value)) {
-    throw new Error('Invalid format: Expected an array of tasks');
-  }
-  return value
-    .map(normalizeTask)
-    .filter((task): task is Task => task !== null);
-};
-
 export const SettingsModal: React.FC<SettingsModalProps> = ({
   onClose,
   isDarkMode,
@@ -116,6 +49,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<SettingsTab>('profile');
   const [importError, setImportError] = useState('');
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
 
   // Local state for profile form to avoid constant re-renders on every keystroke
   const [localProfile, setLocalProfile] = useState(userProfile);
@@ -131,10 +65,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `zendo-backup-${new Date().toISOString().split('T')[0]}.json`;
+    link.download = `gitick-backup-${new Date().toISOString().split('T')[0]}.json`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -145,7 +80,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     reader.onload = (event) => {
       try {
         const json = JSON.parse(event.target?.result as string);
-        const sanitizedTasks = sanitizeImportedTasks(json);
+        const sanitizedTasks = sanitizeTaskList(json);
         if (sanitizedTasks.length === 0) {
           setImportError('No valid tasks found in this file');
           return;
@@ -187,7 +122,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         <div className="w-full md:w-72 bg-gray-50/70 dark:bg-black border-b md:border-b-0 md:border-r border-gray-100 dark:border-zinc-800 px-4 py-4 md:px-6 md:py-7 flex flex-col shrink-0 pt-safe md:pt-7">
           <div className="flex items-center justify-between mb-4 md:mb-7">
              <h2 className="text-lg font-bold text-black dark:text-white">Settings</h2>
-             <button onClick={onClose} className="md:hidden text-gray-500 p-1">
+             <button onClick={onClose} aria-label="Close settings" className="md:hidden text-gray-500 p-1">
                <Icons.X />
              </button>
           </div>
@@ -221,7 +156,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <h3 className="font-semibold text-xl text-black dark:text-white">
                 {tabs.find(t => t.id === activeTab)?.label}
               </h3>
-              <button onClick={onClose} className="text-gray-400 hover:text-black dark:hover:text-white transition-colors">
+              <button onClick={onClose} aria-label="Close settings" className="text-gray-400 hover:text-black dark:hover:text-white transition-colors">
                 <Icons.X />
               </button>
            </div>
@@ -248,6 +183,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                               setLocalProfile(newProfile);
                               onUpdateProfile(newProfile);
                             }}
+                            aria-label={`Set avatar color ${color.replace('bg-', '')}`}
                             className={`w-6 h-6 rounded-full ${color} ${localProfile.avatarColor === color ? 'ring-2 ring-offset-2 ring-gray-400 dark:ring-zinc-600' : ''}`}
                           />
                         ))}
@@ -355,15 +291,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                  <div className="pt-6 border-t border-gray-100 dark:border-zinc-800">
                     <h4 className="text-sm font-bold text-red-500 mb-2">Danger Zone</h4>
                     <button 
-                      onClick={() => {
-                        if (confirm('Are you sure you want to delete all tasks? This cannot be undone.')) {
-                          onClearData();
-                          onClose();
-                        }
-                      }}
+                      onClick={() => setShowClearConfirm(true)}
                       className="w-full flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/30 rounded-xl text-red-600 hover:bg-red-100 dark:hover:bg-red-900/20 transition-colors"
                     >
-                       <span className="text-sm font-medium">Clear All Data</span>
+                       <span className="text-sm font-medium">Reset All Local Data</span>
                        <Icons.Trash />
                     </button>
                  </div>
@@ -467,6 +398,20 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
            </div>
         </div>
       </div>
+      <ConfirmDialog
+        open={showClearConfirm}
+        title="Reset all local data?"
+        description="This will clear tasks, projects, profile and preferences on this device. This cannot be undone."
+        confirmLabel="Reset Data"
+        cancelLabel="Keep Data"
+        confirmTone="danger"
+        onCancel={() => setShowClearConfirm(false)}
+        onConfirm={() => {
+          setShowClearConfirm(false);
+          onClearData();
+          onClose();
+        }}
+      />
     </div>
   );
 };

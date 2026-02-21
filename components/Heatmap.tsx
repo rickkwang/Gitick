@@ -1,5 +1,6 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { Task } from '../types';
+import { toLocalIsoDate } from '../utils/date';
 
 interface HeatmapProps {
   tasks: Task[];
@@ -24,14 +25,6 @@ export const Heatmap: React.FC<HeatmapProps> = ({ tasks }) => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Helper to get local date string YYYY-MM-DD
-  const getLocalDateStr = (date: Date) => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  };
-
   // --- Data Processing & Stats ---
   const { completionMap, totalContributions, maxStreak, currentStreak } = useMemo(() => {
     const map: Record<string, number> = {};
@@ -41,7 +34,7 @@ export const Heatmap: React.FC<HeatmapProps> = ({ tasks }) => {
     tasks.forEach(t => {
       if (t.completed && t.completedAt) {
         const date = new Date(t.completedAt);
-        const dateKey = getLocalDateStr(date);
+        const dateKey = toLocalIsoDate(date);
         if (!map[dateKey]) map[dateKey] = 0;
         map[dateKey]++;
         total++;
@@ -77,17 +70,17 @@ export const Heatmap: React.FC<HeatmapProps> = ({ tasks }) => {
             if (tempCurrent > max) max = tempCurrent;
         }
 
-        const todayStr = getLocalDateStr(new Date());
+        const todayStr = toLocalIsoDate(new Date());
         const yesterday = new Date();
         yesterday.setDate(yesterday.getDate() - 1);
-        const yesterdayStr = getLocalDateStr(yesterday);
+        const yesterdayStr = toLocalIsoDate(yesterday);
 
         if (map[todayStr]) {
             current = 1;
             let checkDate = new Date();
             while (true) {
                 checkDate.setDate(checkDate.getDate() - 1);
-                const checkStr = getLocalDateStr(checkDate);
+                const checkStr = toLocalIsoDate(checkDate);
                 if (map[checkStr]) {
                     current++;
                 } else {
@@ -99,7 +92,7 @@ export const Heatmap: React.FC<HeatmapProps> = ({ tasks }) => {
             let checkDate = new Date();
             checkDate.setDate(checkDate.getDate() - 1); 
             while (true) {
-                if (map[getLocalDateStr(checkDate)]) {
+                if (map[toLocalIsoDate(checkDate)]) {
                     current++;
                 } else {
                     break;
@@ -265,7 +258,7 @@ export const Heatmap: React.FC<HeatmapProps> = ({ tasks }) => {
                     {weeks.map((week, wIdx) => (
                     <div key={wIdx} className={`flex flex-col ${GAP} shrink-0`}>
                         {week.map((date, dIdx) => {
-                            const dateStr = getLocalDateStr(date);
+                            const dateStr = toLocalIsoDate(date);
                             const count = completionMap[dateStr] || 0;
                             const isFuture = date > new Date();
                             

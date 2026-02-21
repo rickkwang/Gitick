@@ -19,10 +19,15 @@ if (typeof window !== 'undefined') {
   const updateSW = registerSW({
     immediate: true,
     onNeedRefresh() {
-      const shouldReload = window.confirm('A new Gitick version is ready. Reload now?');
-      if (shouldReload) {
-        void updateSW(true);
-      }
+      window.dispatchEvent(
+        new CustomEvent('gitick:sw-update-ready', {
+          detail: {
+            applyUpdate: () => {
+              void updateSW(true);
+            },
+          },
+        }),
+      );
     },
     onOfflineReady() {
       console.info('Gitick is ready to work offline.');

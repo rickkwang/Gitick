@@ -114,16 +114,20 @@ To run this project locally on your machine:
    ```bash
    npm run desktop:release
    ```
-   这个命令会自动上传并校验以下 5 个文件到 GitHub Release，确保 App 内更新可用：
+   这个命令会自动上传并校验以下 9 个文件到 GitHub Release，确保 App 内更新可用：
    - `Gitick-<version>-arm64.dmg`
    - `Gitick-<version>-arm64.dmg.blockmap`
    - `Gitick-<version>-arm64.zip`
    - `Gitick-<version>-arm64.zip.blockmap`
+   - `Gitick-<version>-x64.dmg`
+   - `Gitick-<version>-x64.dmg.blockmap`
+   - `Gitick-<version>-x64.zip`
+   - `Gitick-<version>-x64.zip.blockmap`
    - `latest-mac.yml`
 
 4. **找到安装包**
    - 输出目录：`release/`
-   - 文件示例：`Gitick-0.2.0-universal.dmg`
+   - 文件示例：`Gitick-0.2.16-arm64.dmg` 或 `Gitick-0.2.16-x64.dmg`
 
 5. **安装**
    - 双击 `.dmg`

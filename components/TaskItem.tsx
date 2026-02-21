@@ -1,6 +1,7 @@
 import React from 'react';
 import { Task, Priority } from '../types';
 import { Icons } from '../constants';
+import { formatIsoDateForDisplay, todayLocalIsoDate } from '../utils/date';
 
 interface TaskItemProps {
   task: Task;
@@ -15,33 +16,6 @@ export const TaskItem: React.FC<TaskItemProps> = ({
   selected,
   onSelect
 }) => {
-  
-  // Local date helper to fix timezone off-by-one errors
-  const getLocalTodayStr = () => {
-    const d = new Date();
-    const offset = d.getTimezoneOffset() * 60000;
-    return new Date(d.getTime() - offset).toISOString().split('T')[0];
-  };
-
-  const formatDate = (dateStr?: string) => {
-    if (!dateStr) return null;
-    
-    // Convert YYYY-MM-DD to comparable numbers
-    const todayStr = getLocalTodayStr();
-    
-    const d = new Date();
-    d.setDate(d.getDate() + 1);
-    const offset = d.getTimezoneOffset() * 60000;
-    const tmrStr = new Date(d.getTime() - offset).toISOString().split('T')[0];
-
-    if (dateStr === todayStr) return 'Today';
-    if (dateStr === tmrStr) return 'Tomorrow';
-    
-    // For other dates, format nicely
-    const [y, m, dNum] = dateStr.split('-').map(Number);
-    const dateObj = new Date(y, m - 1, dNum);
-    return dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-  };
 
   const getTimeAgo = (timestamp: number) => {
     const seconds = Math.floor((Date.now() - timestamp) / 1000);
@@ -55,13 +29,13 @@ export const TaskItem: React.FC<TaskItemProps> = ({
     return new Date(timestamp).toLocaleDateString();
   };
   
-  const dateDisplay = formatDate(task.dueDate);
+  const dateDisplay = formatIsoDateForDisplay(task.dueDate);
   const totalSubtasks = task.subtasks?.length || 0;
   const completedSubtasks = task.subtasks?.filter(s => s.completed).length || 0;
   const progressPercent = totalSubtasks > 0 ? (completedSubtasks / totalSubtasks) * 100 : 0;
 
   // Determine late status (String comparison works for ISO YYYY-MM-DD)
-  const isLate = task.dueDate && !task.completed && task.dueDate < getLocalTodayStr();
+  const isLate = task.dueDate && !task.completed && task.dueDate < todayLocalIsoDate();
 
   const priorityColor = {
       [Priority.HIGH]: 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.2)]',
@@ -92,6 +66,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
               e.stopPropagation();
               onToggle(task);
             }}
+            aria-label={task.completed ? 'Mark task as active' : 'Mark task as completed'}
             className={`
               relative w-6 h-6 rounded-full border-[1.5px] transition-all duration-300 flex items-center justify-center overflow-hidden
               ${task.completed 

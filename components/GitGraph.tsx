@@ -95,7 +95,7 @@ export const GitGraph: React.FC<GitGraphProps> = ({ tasks }) => {
                 <div className="flex items-center gap-4 mt-1 text-xs text-zinc-400 dark:text-zinc-600">
                    <div className="flex items-center gap-1">
                       <div className="w-4 h-4 rounded-full bg-zinc-200 dark:bg-zinc-800"></div>
-                      <span className="font-medium">ZenDo User</span>
+                      <span className="font-medium">Gitick User</span>
                    </div>
                    <span>committed on {dateStr} at {timeStr}</span>
                 </div>

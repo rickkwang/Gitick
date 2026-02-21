@@ -1,7 +1,7 @@
 {
   "name": "gitick---task-manager",
   "private": true,
-  "version": "0.2.16",
+  "version": "0.2.17",
   "description": "Gitick desktop and mobile task manager",
   "author": "Myrick Wang",
   "repository": {
@@ -13,6 +13,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "typecheck": "tsc --noEmit",
     "preview": "vite preview",
     "cap:sync": "npx cap sync",
     "app:doctor": "npx cap doctor",
@@ -68,13 +69,15 @@
         {
           "target": "dmg",
           "arch": [
-            "arm64"
+            "arm64",
+            "x64"
           ]
         },
         {
           "target": "zip",
           "arch": [
-            "arm64"
+            "arm64",
+            "x64"
           ]
         }
       ],

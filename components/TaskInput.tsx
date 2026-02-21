@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Task, Priority } from '../types';
 import { Icons } from '../constants';
+import { addDaysLocalIsoDate, todayLocalIsoDate } from '../utils/date';
 
 interface TaskInputProps {
   onAddTask: (task: Omit<Task, 'id' | 'createdAt'>) => void;
@@ -72,13 +73,6 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Helper to get local date string YYYY-MM-DD (Safe for local timezone)
-  const getLocalDateStr = (date: Date) => {
-    const offset = date.getTimezoneOffset() * 60000;
-    const localDate = new Date(date.getTime() - offset);
-    return localDate.toISOString().split('T')[0];
-  };
-
   const parseTaskInput = (text: string) => {
     let title = text;
     let priority: Priority | undefined = undefined;
@@ -93,14 +87,14 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
     }
 
     // 2. Tags Parsing (#tag)
-    const tagRegex = /#(\w+)/g;
-    const tagMatches = text.match(tagRegex);
-    if (tagMatches) {
-      tags = tagMatches.map(t => t.substring(1));
+    const tagRegex = /#([^\s#@!]+)/gu;
+    const tagMatches = Array.from(text.matchAll(tagRegex));
+    if (tagMatches.length > 0) {
+      tags = Array.from(new Set(tagMatches.map((match) => match[1].trim()).filter(Boolean)));
     }
 
     // 3. Project Parsing (@Project)
-    const projectRegex = /@(\w+)/i;
+    const projectRegex = /@([^\s#@!]+)/iu;
     const projectMatch = text.match(projectRegex);
     let projectFound = null;
     if (projectMatch) {
@@ -115,25 +109,25 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
 
     // Regex ensures we match whole words to avoid false positives inside words
     if (/\b(today|tod)\b/.test(lowerText)) {
-      dueDate = getLocalDateStr(today);
+      dueDate = todayLocalIsoDate();
       dateLabel = 'Today';
     } else if (/\b(tomorrow|tmr|tom)\b/.test(lowerText)) {
-      const tmr = new Date(today);
-      tmr.setDate(tmr.getDate() + 1);
-      dueDate = getLocalDateStr(tmr);
+      dueDate = addDaysLocalIsoDate(1);
       dateLabel = 'Tomorrow';
     } else if (/\b(next week)\b/.test(lowerText)) {
       const nextMon = new Date(today);
       nextMon.setDate(today.getDate() + ((1 + 7 - today.getDay()) % 7 || 7));
-      dueDate = getLocalDateStr(nextMon);
+      const diffDays = Math.round((nextMon.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+      dueDate = addDaysLocalIsoDate(diffDays);
       dateLabel = 'Next Week';
     }
 
     // Generate Clean Title for Preview
+    const projectTokenRegex = /@([^\s#@!]+)/gu;
     let cleanTitle = title
         .replace(priorityRegex, '')
         .replace(tagRegex, '')
-        .replace(projectRegex, '')
+        .replace(projectTokenRegex, '')
         .replace(/\b(today|tod|tomorrow|tmr|tom|next week)\b/gi, '')
         .replace(/\s+/g, ' ').trim();
 
@@ -162,7 +156,7 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
     // Determine Date
     // MODIFIED: Default to Today globally if no date was specifically parsed.
     // This ensures tasks appear in "Today" view by default.
-    let date = parsedData.dueDate || getLocalDateStr(new Date());
+    const date = parsedData.dueDate || todayLocalIsoDate();
 
     onAddTask({
       title: parsedData.cleanTitle || input, // Fallback to input if regex strips everything
@@ -277,6 +271,7 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
                 <button
                     onClick={submit} 
                     type="button"
+                    aria-label="Add task"
                     className={`flex items-center justify-center w-9 h-9 rounded-full bg-black dark:bg-white text-white dark:text-black transition-all duration-200 hover:scale-110 active:scale-95 ${input.length > 0 ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}
                 >
                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 10 4 15 9 20"></polyline><path d="M20 4v7a4 4 0 0 1-4 4H4"></path></svg>
@@ -289,6 +284,7 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
             <button
               type="button"
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              aria-label="Select project"
               className={`
                  h-14 px-4 md:px-6 flex items-center gap-2 rounded-[28px] border transition-all duration-200
                  bg-white dark:bg-zinc-900 

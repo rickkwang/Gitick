@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Icons } from '../constants';
+import { addDaysLocalIsoDate, toLocalIsoDate } from '../utils/date';
 
 interface DatePickerProps {
   selectedDate?: string; // YYYY-MM-DD
@@ -17,14 +18,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({ selectedDate, onSelect, 
     return new Date();
   });
 
-  const getLocalDateStr = (date: Date) => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  };
-
-  const todayStr = getLocalDateStr(new Date());
+  const todayStr = toLocalIsoDate(new Date());
 
   const handlePrevMonth = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -38,22 +32,18 @@ export const DatePicker: React.FC<DatePickerProps> = ({ selectedDate, onSelect, 
 
   const handleSelect = (day: number) => {
      const newDate = new Date(viewDate.getFullYear(), viewDate.getMonth(), day);
-     onSelect(getLocalDateStr(newDate));
+     onSelect(toLocalIsoDate(newDate));
      onClose();
   };
 
   const handleQuickAction = (action: 'today' | 'tomorrow' | 'nextWeek' | 'clear') => {
       const today = new Date();
       if (action === 'today') {
-          onSelect(getLocalDateStr(today));
+          onSelect(toLocalIsoDate(today));
       } else if (action === 'tomorrow') {
-          const tmr = new Date(today);
-          tmr.setDate(today.getDate() + 1);
-          onSelect(getLocalDateStr(tmr));
+          onSelect(addDaysLocalIsoDate(1, today));
       } else if (action === 'nextWeek') {
-          const next = new Date(today);
-          next.setDate(today.getDate() + 7);
-          onSelect(getLocalDateStr(next));
+          onSelect(addDaysLocalIsoDate(7, today));
       } else if (action === 'clear') {
           onSelect(undefined);
       }
@@ -84,12 +74,14 @@ export const DatePicker: React.FC<DatePickerProps> = ({ selectedDate, onSelect, 
             <div className="flex gap-1">
                 <button 
                   onClick={handlePrevMonth}
+                  aria-label="Previous month"
                   className="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-zinc-800 text-gray-500 dark:text-zinc-400 hover:text-black dark:hover:text-white transition-colors"
                 >
                     <Icons.ChevronLeft />
                 </button>
                 <button 
                   onClick={handleNextMonth}
+                  aria-label="Next month"
                   className="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-zinc-800 text-gray-500 dark:text-zinc-400 hover:text-black dark:hover:text-white transition-colors"
                 >
                     <Icons.ChevronRight />
@@ -110,7 +102,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({ selectedDate, onSelect, 
         <div className="grid grid-cols-7 gap-y-1 gap-x-1 mb-4">
             {blanks.map((_, i) => <div key={`blank-${i}`} />)}
             {days.map(d => {
-                const dateStr = getLocalDateStr(new Date(year, month, d));
+                const dateStr = toLocalIsoDate(new Date(year, month, d));
                 const isSelected = selectedDate === dateStr;
                 const isToday = dateStr === todayStr;
 

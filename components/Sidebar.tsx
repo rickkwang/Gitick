@@ -133,6 +133,7 @@ const NavItem: React.FC<{
                e.stopPropagation(); 
                onDeleteProject(id);
              }}
+             aria-label={`Delete project ${label}`}
              className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-20"
              title="Delete Project"
           >
@@ -251,6 +252,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 {/* Mobile Close Button */}
                 <button 
                   onClick={onCloseMobile} 
+                  aria-label="Close sidebar"
                   className="flex items-center justify-center p-2 -mr-2 rounded-lg text-gray-400 hover:text-black dark:hover:text-white transition-colors active:scale-95 transform"
                   title="Close Sidebar"
                >
@@ -275,6 +277,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                
                <button 
                   onClick={toggleCollapse} 
+                  aria-label="Collapse sidebar"
                   className="flex items-center justify-center p-2 rounded-lg text-gray-400 hover:text-black dark:hover:text-white hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
                   title="Collapse Sidebar"
                >
@@ -290,6 +293,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
              `}>
                 <button 
                   onClick={toggleCollapse} 
+                  aria-label="Expand sidebar"
                   className="group relative flex items-center justify-center w-12 h-12 rounded-xl hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
                   title="Expand Sidebar"
                 >
@@ -353,6 +357,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   <h3 className="text-[10px] font-bold text-gray-400 dark:text-zinc-600 uppercase tracking-widest pl-1">Projects</h3>
                   <button 
                     onClick={startAddProject}
+                    aria-label="Add project"
                     className="text-gray-300 dark:text-zinc-600 hover:text-black dark:hover:text-white transition-colors p-1 rounded-full hover:bg-gray-100 dark:hover:bg-zinc-800"
                     title="Add Project"
                   >

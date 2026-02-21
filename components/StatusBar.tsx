@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Icons } from '../constants';
 
 interface StatusBarProps {
@@ -18,6 +18,22 @@ export const StatusBar: React.FC<StatusBarProps> = ({
   isFocusActive,
   focusTimeLeft
 }) => {
+  const [isOnline, setIsOnline] = useState(() =>
+    typeof navigator !== 'undefined' ? navigator.onLine : true,
+  );
+
+  useEffect(() => {
+    const goOnline = () => setIsOnline(true);
+    const goOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', goOnline);
+    window.addEventListener('offline', goOffline);
+
+    return () => {
+      window.removeEventListener('online', goOnline);
+      window.removeEventListener('offline', goOffline);
+    };
+  }, []);
   
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
@@ -80,8 +96,8 @@ export const StatusBar: React.FC<StatusBarProps> = ({
 
         {/* Online Status */}
         <div className="flex items-center gap-1 hover:text-black dark:hover:text-zinc-300 transition-colors cursor-pointer">
-           <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
-           <span>Online</span>
+           <span className={`w-1.5 h-1.5 rounded-full ${isOnline ? 'bg-green-500' : 'bg-orange-400'}`}></span>
+           <span>{isOnline ? 'Online' : 'Offline'}</span>
         </div>
       </div>
     </div>
