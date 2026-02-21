@@ -5,6 +5,8 @@ const path = require('path');
 const isDev = !app.isPackaged;
 const isMac = process.platform === 'darwin';
 let mainWindow = null;
+let updaterCheckTask = null;
+let updaterDownloadTask = null;
 
 const sendUpdaterStatus = (payload) => {
   if (!mainWindow || mainWindow.isDestroyed()) return;
@@ -90,7 +92,14 @@ ipcMain.handle('updater:check', async () => {
   if (isDev) {
     return { ok: false, reason: 'dev-mode' };
   }
-  await autoUpdater.checkForUpdates();
+  if (updaterCheckTask) {
+    return { ok: true, reason: 'in-progress' };
+  }
+  updaterCheckTask = autoUpdater.checkForUpdates()
+    .finally(() => {
+      updaterCheckTask = null;
+    });
+  await updaterCheckTask;
   return { ok: true };
 });
 
@@ -98,7 +107,14 @@ ipcMain.handle('updater:download', async () => {
   if (isDev) {
     return { ok: false, reason: 'dev-mode' };
   }
-  await autoUpdater.downloadUpdate();
+  if (updaterDownloadTask) {
+    return { ok: true, reason: 'in-progress' };
+  }
+  updaterDownloadTask = autoUpdater.downloadUpdate()
+    .finally(() => {
+      updaterDownloadTask = null;
+    });
+  await updaterDownloadTask;
   return { ok: true };
 });
 

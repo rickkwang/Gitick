@@ -179,6 +179,7 @@ const App: React.FC = () => {
   const [desktopAppVersion, setDesktopAppVersion] = useState('');
   const [desktopUpdateStatus, setDesktopUpdateStatus] = useState('');
   const [isCheckingDesktopUpdate, setIsCheckingDesktopUpdate] = useState(false);
+  const [isStartupStatic, setIsStartupStatic] = useState(() => typeof window !== 'undefined');
   
   // --- GLOBAL FOCUS TIMER STATE ---
   const [focusEndTime, setFocusEndTime] = useState<number | null>(null);
@@ -372,7 +373,10 @@ const App: React.FC = () => {
     setIsCheckingDesktopUpdate(true);
     setDesktopUpdateStatus('Checking for updates...');
     try {
-      await window.gitickDesktop.updater.checkForUpdates();
+      const result = await window.gitickDesktop.updater.checkForUpdates();
+      if (result.reason === 'in-progress') {
+        setDesktopUpdateStatus('Update check already in progress...');
+      }
     } catch (error) {
       console.warn('Manual update check failed:', error);
       setDesktopUpdateStatus('Unable to check updates right now.');
@@ -488,7 +492,10 @@ const App: React.FC = () => {
 
     const runCheck = async () => {
       try {
-        await updater.checkForUpdates();
+        const result = await updater.checkForUpdates();
+        if (result.reason === 'in-progress') {
+          setDesktopUpdateStatus('Checking for updates...');
+        }
       } catch (error) {
         console.warn('Background update check call failed:', error);
         setDesktopUpdateStatus('Unable to check updates right now.');
@@ -514,6 +521,14 @@ const App: React.FC = () => {
       removeListener();
     };
   }, [isDesktopRuntime]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const timer = window.setTimeout(() => {
+      setIsStartupStatic(false);
+    }, 700);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   const addProject = (name: string) => {
       if (!projects.some(p => p.toLowerCase() === name.toLowerCase())) {
@@ -828,7 +843,7 @@ const App: React.FC = () => {
     <div
       className={`flex flex-col h-dvh font-sans text-gray-900 dark:text-dark-text bg-white dark:bg-zinc-950 overflow-hidden transition-colors duration-300 selection:bg-black selection:text-white dark:selection:bg-white dark:selection:text-black ${
         isDesktopMac ? 'pt-10' : ''
-      }`}
+      } ${isStartupStatic ? 'startup-static' : ''}`}
     > 
       {isDesktopMac && (
         <div
