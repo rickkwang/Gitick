@@ -2,6 +2,7 @@ const { app, BrowserWindow, shell, nativeTheme } = require('electron');
 const path = require('path');
 
 const isDev = !app.isPackaged;
+const isMac = process.platform === 'darwin';
 
 function createMainWindow() {
   const window = new BrowserWindow({
@@ -12,6 +13,8 @@ function createMainWindow() {
     title: 'Gitick',
     backgroundColor: nativeTheme.shouldUseDarkColors ? '#09090b' : '#ffffff',
     autoHideMenuBar: true,
+    titleBarStyle: isMac ? 'hiddenInset' : 'default',
+    trafficLightPosition: isMac ? { x: 14, y: 12 } : undefined,
     webPreferences: {
       preload: path.join(__dirname, 'preload.cjs'),
       contextIsolation: true,
