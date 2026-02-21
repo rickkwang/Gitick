@@ -54,10 +54,11 @@ function createMainWindow() {
     height: 860,
     minWidth: 980,
     minHeight: 680,
-    title: 'Gitick',
+    title: isMac ? '' : 'Gitick',
     backgroundColor: nativeTheme.shouldUseDarkColors ? '#09090b' : '#ffffff',
     autoHideMenuBar: true,
-    titleBarStyle: isMac ? 'hiddenInset' : 'default',
+    titleBarStyle: isMac ? 'hidden' : 'default',
+    titleBarOverlay: false,
     trafficLightPosition: isMac ? { x: 14, y: 12 } : undefined,
     webPreferences: {
       preload: path.join(__dirname, 'preload.cjs'),
