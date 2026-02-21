@@ -713,31 +713,9 @@ const App: React.FC = () => {
           onConfirm: async () => {
             desktopUpdateUserFlowRef.current = true;
             try {
-              const diagnosis = await updater.diagnose();
-              if (!diagnosis.ok) {
-                if (diagnosis.reason === 'not-in-applications' || diagnosis.reason === 'translocated-app') {
-                  openMoveToApplicationsDialog();
-                  return;
-                }
-                const friendly = getFriendlyUpdateError(
-                  diagnosis.message ?? diagnosis.reason ?? 'install failed',
-                  diagnosis.reason,
-                );
-                setDesktopUpdateStatus(friendly);
-                showToast(friendly);
-                return;
-              }
-
-              if (diagnosis.warningReason) {
-                const warning = getFriendlyUpdateError(
-                  diagnosis.warningMessage ?? diagnosis.warningReason,
-                  diagnosis.warningReason,
-                );
-                setDesktopUpdateStatus(warning);
-              }
-
               const result = await updater.quitAndInstall();
               if (result.ok) {
+                setDesktopUpdateStatus(result.message ?? 'Installing update and restarting app...');
                 return;
               }
 

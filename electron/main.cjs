@@ -1,13 +1,20 @@
 const { app, BrowserWindow, ipcMain, shell, nativeTheme } = require('electron');
 const { autoUpdater } = require('electron-updater');
 const path = require('path');
-const { spawnSync } = require('child_process');
+const { spawn, spawnSync } = require('child_process');
+const fs = require('fs');
+const os = require('os');
+const https = require('https');
+const { URL } = require('url');
 
 const isDev = !app.isPackaged;
 const isMac = process.platform === 'darwin';
 let mainWindow = null;
 let updaterCheckTask = null;
 let updaterDownloadTask = null;
+let latestAvailableVersion = null;
+let latestDownloadedVersion = null;
+let externalInstallTask = null;
 
 const sendUpdaterStatus = (payload) => {
   if (!mainWindow || mainWindow.isDestroyed()) return;
@@ -183,6 +190,7 @@ const setupAutoUpdater = () => {
   });
 
   autoUpdater.on('update-available', (info) => {
+    latestAvailableVersion = info?.version || latestAvailableVersion;
     sendUpdaterStatus({ type: 'available', version: info.version });
   });
 
@@ -198,6 +206,7 @@ const setupAutoUpdater = () => {
   });
 
   autoUpdater.on('update-downloaded', (info) => {
+    latestDownloadedVersion = info?.version || latestAvailableVersion || latestDownloadedVersion;
     sendUpdaterStatus({ type: 'downloaded', version: info.version });
   });
 
@@ -209,6 +218,161 @@ const setupAutoUpdater = () => {
       message,
     });
   });
+};
+
+const downloadFileWithProgress = (sourceUrl, outputPath) => new Promise((resolve, reject) => {
+  const request = (urlString) => {
+    const requestUrl = new URL(urlString);
+    const req = https.get(requestUrl, (res) => {
+      if (
+        res.statusCode &&
+        res.statusCode >= 300 &&
+        res.statusCode < 400 &&
+        res.headers.location
+      ) {
+        const redirectUrl = new URL(res.headers.location, requestUrl).toString();
+        res.resume();
+        request(redirectUrl);
+        return;
+      }
+
+      if (!res.statusCode || res.statusCode < 200 || res.statusCode >= 300) {
+        reject(new Error(`Download failed with status ${res.statusCode || 'unknown'}`));
+        res.resume();
+        return;
+      }
+
+      const total = Number(res.headers['content-length'] || 0);
+      let downloaded = 0;
+      const file = fs.createWriteStream(outputPath);
+
+      res.on('data', (chunk) => {
+        downloaded += chunk.length;
+        if (total > 0) {
+          const percent = Math.max(1, Math.min(100, Math.round((downloaded / total) * 100)));
+          sendUpdaterStatus({ type: 'download-progress', percent });
+        }
+      });
+
+      res.on('error', reject);
+      file.on('error', reject);
+      file.on('finish', () => {
+        file.close(() => resolve(outputPath));
+      });
+      res.pipe(file);
+    });
+
+    req.on('error', reject);
+  };
+
+  request(sourceUrl);
+});
+
+const resolveMacArchName = () => (process.arch === 'arm64' ? 'arm64' : 'x64');
+
+const buildGitHubZipUrlForVersion = (version) => {
+  const arch = resolveMacArchName();
+  return `https://github.com/rickkwang/Gitick/releases/download/v${version}/Gitick-${version}-${arch}.zip`;
+};
+
+const findExtractedAppBundle = (dir) => {
+  const direct = path.join(dir, 'Gitick.app');
+  if (fs.existsSync(direct)) return direct;
+
+  const entries = fs.readdirSync(dir, { withFileTypes: true });
+  for (const entry of entries) {
+    if (!entry.isDirectory()) continue;
+    if (entry.name.endsWith('.app')) {
+      return path.join(dir, entry.name);
+    }
+  }
+  return null;
+};
+
+const scheduleMacExternalInstall = async (sourceAppPath) => {
+  const scriptPath = path.join(os.tmpdir(), `gitick-install-${Date.now()}.sh`);
+  const escapedSource = sourceAppPath.replace(/"/g, '\\"');
+  const scriptContent = `#!/bin/bash
+set -e
+sleep 1
+SOURCE_APP="${escapedSource}"
+TARGET_APP="/Applications/Gitick.app"
+BACKUP_APP="/Applications/Gitick.app.backup.$(date +%s)"
+
+if [ ! -d "$SOURCE_APP" ]; then
+  exit 11
+fi
+
+if [ -d "$TARGET_APP" ]; then
+  mv "$TARGET_APP" "$BACKUP_APP"
+fi
+
+/usr/bin/ditto "$SOURCE_APP" "$TARGET_APP"
+/usr/bin/xattr -rd com.apple.quarantine "$TARGET_APP" >/dev/null 2>&1 || true
+/usr/bin/open -a "$TARGET_APP"
+/bin/rm -rf "$BACKUP_APP" >/dev/null 2>&1 || true
+`;
+
+  fs.writeFileSync(scriptPath, scriptContent, { encoding: 'utf8', mode: 0o700 });
+  const child = spawn('/bin/bash', [scriptPath], {
+    detached: true,
+    stdio: 'ignore',
+  });
+  if (child.error) {
+    throw new Error(child.error.message || 'Failed to launch installer script.');
+  }
+  child.unref();
+};
+
+const startExternalMacUpdateInstall = async () => {
+  if (externalInstallTask) {
+    return { ok: true, reason: 'in-progress' };
+  }
+
+  const targetVersion = latestDownloadedVersion || latestAvailableVersion;
+  if (!targetVersion) {
+    return {
+      ok: false,
+      reason: 'version-unknown',
+      message: 'No downloaded/available version found. Please check updates first.',
+    };
+  }
+
+  externalInstallTask = (async () => {
+    const workDir = path.join(os.tmpdir(), `gitick-update-${Date.now()}`);
+    const zipPath = path.join(workDir, 'update.zip');
+    const extractDir = path.join(workDir, 'expanded');
+    fs.mkdirSync(extractDir, { recursive: true });
+
+    const zipUrl = buildGitHubZipUrlForVersion(targetVersion);
+    await downloadFileWithProgress(zipUrl, zipPath);
+
+    const unzip = spawnSync('/usr/bin/ditto', ['-x', '-k', zipPath, extractDir], { encoding: 'utf8' });
+    if (unzip.status !== 0) {
+      throw new Error((unzip.stderr || unzip.stdout || 'Unable to extract update package').trim());
+    }
+
+    const extractedApp = findExtractedAppBundle(extractDir);
+    if (!extractedApp) {
+      throw new Error('Extracted update package does not contain Gitick.app.');
+    }
+
+    await scheduleMacExternalInstall(extractedApp);
+  })().finally(() => {
+    externalInstallTask = null;
+  });
+
+  try {
+    await externalInstallTask;
+    setImmediate(() => app.quit());
+    return { ok: true, reason: 'external-install-started', message: 'Installing update and restarting app...' };
+  } catch (error) {
+    return {
+      ok: false,
+      reason: classifyUpdaterReason(error?.message, 'external-install-failed'),
+      message: error?.message || 'Unable to install update automatically.',
+    };
+  }
 };
 
 function createMainWindow() {
@@ -298,6 +462,9 @@ ipcMain.handle('updater:download', async () => {
 
 ipcMain.handle('updater:quit-install', () => {
   if (!isDev) {
+    if (isMac) {
+      return startExternalMacUpdateInstall();
+    }
     const readiness = diagnoseUpdaterInstall();
     if (!readiness.ok) {
       sendUpdaterStatus({
