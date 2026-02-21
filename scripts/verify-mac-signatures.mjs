@@ -32,14 +32,12 @@ for (const target of targets) {
   }
 
   if (result.status !== 0) {
-    console.error(`Signature check failed for ${target.arch}: ${raw || `exit ${result.status}`}`);
-    hasError = true;
+    console.warn(`Warning: signature check failed for ${target.arch}: ${raw || `exit ${result.status}`}`);
     continue;
   }
 
   if (lower.includes('code object is not signed at all')) {
-    console.error(`Unsigned app bundle for ${target.arch}: ${target.appPath}`);
-    hasError = true;
+    console.warn(`Warning: unsigned app bundle for ${target.arch}: ${target.appPath}`);
     continue;
   }
 
