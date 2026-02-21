@@ -174,6 +174,8 @@ const App: React.FC = () => {
   const [undoAction, setUndoAction] = useState<(() => void) | undefined>(undefined);
   const toastTimeoutRef = useRef<number | null>(null);
   const desktopUpdateUserFlowRef = useRef(false);
+  const desktopUpdaterSignalRef = useRef(false);
+  const desktopUpdaterNoticeShownRef = useRef(false);
   
   // --- GLOBAL FOCUS TIMER STATE ---
   const [focusEndTime, setFocusEndTime] = useState<number | null>(null);
@@ -399,7 +401,12 @@ const App: React.FC = () => {
     if (!isDesktopRuntime || !window.gitickDesktop?.updater) return;
 
     const updater = window.gitickDesktop.updater;
+    desktopUpdaterSignalRef.current = false;
+    desktopUpdaterNoticeShownRef.current = false;
+
     const removeListener = updater.onStatus((payload) => {
+      desktopUpdaterSignalRef.current = true;
+
       if (payload.type === 'available') {
         const ok = window.confirm(`New version ${payload.version ?? ''} is available. Download now?`.trim());
         if (ok) {
@@ -427,13 +434,40 @@ const App: React.FC = () => {
           showToast(getFriendlyUpdateError(payload.message));
         } else {
           console.warn('Background update check failed:', payload.message);
+          if (!desktopUpdaterNoticeShownRef.current) {
+            showToast('Update service is temporarily unavailable. Retry after reopening the app.');
+            desktopUpdaterNoticeShownRef.current = true;
+          }
         }
         desktopUpdateUserFlowRef.current = false;
       }
     });
 
-    void updater.checkForUpdates();
+    const runCheck = async () => {
+      try {
+        await updater.checkForUpdates();
+      } catch (error) {
+        console.warn('Background update check call failed:', error);
+        if (!desktopUpdaterNoticeShownRef.current) {
+          showToast('Unable to check updates right now. Please reopen the app later.');
+          desktopUpdaterNoticeShownRef.current = true;
+        }
+      }
+    };
+
+    const initialTimer = window.setTimeout(() => {
+      void runCheck();
+    }, 1200);
+
+    const retryTimer = window.setTimeout(() => {
+      if (!desktopUpdaterSignalRef.current) {
+        void runCheck();
+      }
+    }, 10000);
+
     return () => {
+      window.clearTimeout(initialTimer);
+      window.clearTimeout(retryTimer);
       removeListener();
     };
   }, [isDesktopRuntime]);
