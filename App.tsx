@@ -173,6 +173,7 @@ const App: React.FC = () => {
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [undoAction, setUndoAction] = useState<(() => void) | undefined>(undefined);
   const toastTimeoutRef = useRef<number | null>(null);
+  const desktopUpdateUserFlowRef = useRef(false);
   
   // --- GLOBAL FOCUS TIMER STATE ---
   const [focusEndTime, setFocusEndTime] = useState<number | null>(null);
@@ -349,6 +350,17 @@ const App: React.FC = () => {
     }, 4000);
   };
 
+  const getFriendlyUpdateError = (raw: string) => {
+    const message = raw.replace(/\s+/g, ' ').trim().toLowerCase();
+    if (message.includes('network') || message.includes('timeout') || message.includes('econn')) {
+      return 'Update failed due to network issue. Please try again later.';
+    }
+    if (message.includes('not found') || message.includes('404')) {
+      return 'Update metadata is not available yet. Please retry shortly.';
+    }
+    return 'Update failed. Please try again later.';
+  };
+
   const requestInstallApp = async () => {
     if (nativeApp) {
       showToast('Running as native app');
@@ -391,6 +403,7 @@ const App: React.FC = () => {
       if (payload.type === 'available') {
         const ok = window.confirm(`New version ${payload.version ?? ''} is available. Download now?`.trim());
         if (ok) {
+          desktopUpdateUserFlowRef.current = true;
           void updater.downloadUpdate();
         }
       }
@@ -406,10 +419,16 @@ const App: React.FC = () => {
         } else {
           showToast('Update downloaded. It will install when you restart the app.');
         }
+        desktopUpdateUserFlowRef.current = false;
       }
 
       if (payload.type === 'error') {
-        showToast(`Update failed: ${payload.message}`);
+        if (desktopUpdateUserFlowRef.current) {
+          showToast(getFriendlyUpdateError(payload.message));
+        } else {
+          console.warn('Background update check failed:', payload.message);
+        }
+        desktopUpdateUserFlowRef.current = false;
       }
     });
 
