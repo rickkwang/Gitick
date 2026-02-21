@@ -75,8 +75,8 @@ const NavItem: React.FC<{
             transition-all duration-200
             h-11 px-0
             ${isActive 
-              ? 'bg-gray-100 dark:bg-zinc-800/90 text-black dark:text-white font-bold border border-gray-200/80 dark:border-zinc-700' 
-              : 'text-gray-500 dark:text-zinc-400 border border-transparent hover:bg-gray-50 dark:hover:bg-zinc-800/50 hover:border-gray-200/80 dark:hover:border-zinc-800 hover:text-gray-900 dark:hover:text-gray-200'}
+              ? 'bg-white dark:bg-zinc-800/90 text-black dark:text-white font-bold border border-gray-200/85 dark:border-zinc-700/90 shadow-sm' 
+              : 'text-gray-500 dark:text-zinc-400 border border-transparent hover:bg-white/80 dark:hover:bg-zinc-800/50 hover:border-gray-200/70 dark:hover:border-zinc-800 hover:text-gray-900 dark:hover:text-gray-200'}
           `}
         >
           {/* Icon Container - Fixed Width 48px (w-12) */}
@@ -310,7 +310,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
              </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto no-scrollbar py-3 space-y-7 px-3">
+          <div className="flex-1 overflow-y-auto no-scrollbar py-4 space-y-6 px-3">
             {/* Section: Overview */}
             <div>
               {/* CRITICAL: md: prefix ensures collapse logic only affects desktop. Mobile is always visible (h-6) */}
@@ -321,7 +321,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               `}>
                 <h3 className="text-[10px] font-bold text-gray-400 dark:text-zinc-600 uppercase tracking-widest whitespace-nowrap pl-1">Overview</h3>
               </div>
-              <nav className="space-y-1">
+              <nav className="space-y-1.5">
                 <NavItem 
                   id="next7days" label="Dashboard" icon={<Icons.Dashboard />} 
                   activeFilter={activeFilter} onFilterChange={onFilterChange} onCloseMobile={onCloseMobile} taskCount={taskCounts['next7days']} 
@@ -365,7 +365,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   </button>
               </div>
 
-              <nav className="space-y-1">
+              <nav className="space-y-1.5">
                 {projects.map(project => (
                   <NavItem 
                     key={project} 
@@ -413,7 +413,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                `}>
                  <h3 className="text-[10px] font-bold text-gray-400 dark:text-zinc-600 uppercase tracking-widest whitespace-nowrap pl-1">History</h3>
                </div>
-               <nav className="space-y-1">
+               <nav className="space-y-1.5">
                   <NavItem 
                     id="completed" label="Repository" icon={<Icons.CheckCircle />} 
                     activeFilter={activeFilter} onFilterChange={onFilterChange} onCloseMobile={onCloseMobile} taskCount={0} 
@@ -424,9 +424,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
           
           {/* User Profile Footer (Unified Design) */}
-          <div className="mt-auto px-3 pb-safe md:pb-4 pt-2 shrink-0">
+          <div className="mt-auto px-3 pb-safe md:pb-4 pt-3 shrink-0">
              {/* Subtle Divider */}
-             <div className="mx-2 mb-2 h-px bg-gray-200/80 dark:bg-zinc-800/80" />
+             <div className="mx-2 mb-3 h-px bg-gray-200/80 dark:bg-zinc-800/80" />
              
              <div className="px-2"> {/* Wrapper to match NavItem padding */}
                 <button 

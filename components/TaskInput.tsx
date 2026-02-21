@@ -210,17 +210,17 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
 
   return (
     <div className="w-full relative z-30 max-w-3xl mx-auto">
-      <form onSubmit={handleSubmit} className="flex items-end gap-2 md:gap-3 group transition-all duration-300">
+      <form onSubmit={handleSubmit} className="flex items-end gap-2.5 md:gap-3 group transition-all duration-300">
         
         {/* LEFT: Main Input Container */}
         {/* OPTICAL ALIGNMENT FIX: 
             For a rounded-[28px] container, pl-4 is too tight. 
             Increased to pl-6 (mobile) and pl-8 (desktop) to align visually with the curve. 
         */}
-        <div className="flex-1 relative bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-[28px] shadow-[0_2px_12px_rgba(0,0,0,0.04)] dark:shadow-none overflow-hidden transition-all duration-200 ease-out flex flex-col justify-center min-h-[3.5rem] hover:border-gray-200 dark:hover:border-zinc-700 focus-within:shadow-[0_8px_30px_rgba(0,0,0,0.08)] dark:focus-within:shadow-none focus-within:border-gray-300 dark:focus-within:border-zinc-600">
+        <div className="flex-1 relative bg-white/96 dark:bg-zinc-900/95 border border-gray-200/80 dark:border-zinc-800 rounded-[28px] shadow-[0_6px_22px_rgba(17,24,39,0.06)] dark:shadow-none overflow-hidden transition-all duration-200 ease-out flex flex-col justify-center min-h-[3.5rem] hover:border-gray-300/80 dark:hover:border-zinc-700 focus-within:shadow-[0_12px_30px_rgba(17,24,39,0.10)] dark:focus-within:shadow-none focus-within:border-gray-400/70 dark:focus-within:border-zinc-600">
             
             {/* Input Field Row - Fixed Height 3.5rem (h-14) to match button */}
-            <div className="flex items-center pl-6 md:pl-8 pr-12 md:pr-16 h-14 shrink-0">
+            <div className="flex items-center pl-5 md:pl-7 pr-12 md:pr-16 h-14 shrink-0">
                 <div className="text-gray-400 shrink-0">
                    <Icons.Plus />
                 </div>
@@ -231,14 +231,14 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={handleKeyDown}
                     placeholder={getPlaceholder()}
-                    className="w-full h-full pl-4 pr-4 bg-transparent text-black dark:text-white placeholder:text-gray-400 dark:placeholder:text-zinc-600 outline-none font-medium text-base" 
+                    className="w-full h-full pl-3.5 pr-4 bg-transparent text-black dark:text-white placeholder:text-gray-400 dark:placeholder:text-zinc-600 outline-none font-medium text-base" 
                     autoFocus={shouldAutoFocus}
                 />
             </div>
 
             {/* Smart Parsed Attributes (Pills) Row */}
             {(parsedPreview.priority || parsedPreview.tags.length > 0 || parsedPreview.dueDate) && (
-                <div className="flex items-center gap-2 px-8 md:px-10 pb-3 pt-0 animate-in fade-in slide-in-from-top-1 duration-200 overflow-x-auto no-scrollbar">
+                <div className="flex items-center gap-2 px-7 md:px-9 pb-3 pt-0 animate-in fade-in slide-in-from-top-1 duration-200 overflow-x-auto no-scrollbar">
                     <div className="h-px w-4 bg-gray-200 dark:bg-zinc-800 mr-1 shrink-0"></div>
                     
                     {parsedPreview.dueDate && (
@@ -287,10 +287,10 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
               aria-label="Select project"
               className={`
                  h-14 px-4 md:px-6 flex items-center gap-2 rounded-[28px] border transition-all duration-200
-                 bg-white dark:bg-zinc-900 
+                 bg-white/96 dark:bg-zinc-900/95 
                  ${isDropdownOpen 
-                    ? 'border-gray-400 dark:border-zinc-500 shadow-md' 
-                    : 'border-gray-100 dark:border-zinc-800 shadow-[0_2px_8px_rgba(0,0,0,0.04)] dark:shadow-none hover:border-gray-200 dark:hover:border-zinc-700 hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)] dark:hover:shadow-none'}
+                    ? 'border-gray-400/80 dark:border-zinc-500 shadow-md' 
+                    : 'border-gray-200/80 dark:border-zinc-800 shadow-[0_4px_14px_rgba(17,24,39,0.06)] dark:shadow-none hover:border-gray-300/80 dark:hover:border-zinc-700 hover:shadow-[0_8px_16px_rgba(17,24,39,0.08)] dark:hover:shadow-none'}
               `}
               title="Select Project"
             >

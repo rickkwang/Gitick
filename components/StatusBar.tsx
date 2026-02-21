@@ -42,7 +42,7 @@ export const StatusBar: React.FC<StatusBarProps> = ({
   };
 
   return (
-    <div className="h-8 pb-safe box-content bg-white/95 dark:bg-zinc-950/95 backdrop-blur-sm border-t border-gray-200/80 dark:border-zinc-800/80 flex items-center justify-between px-3 text-[10px] font-mono select-none text-gray-400 dark:text-zinc-500 z-50 shrink-0 transition-colors duration-300">
+    <div className="h-9 pb-safe box-content bg-white/95 dark:bg-zinc-950/95 backdrop-blur-sm border-t border-gray-200/80 dark:border-zinc-800/80 flex items-center justify-between px-4 text-[11px] font-mono select-none text-gray-400 dark:text-zinc-500 z-50 shrink-0 transition-colors duration-300">
       
       {/* LEFT: Context / Mode */}
       <div className="flex items-center gap-4">
@@ -75,7 +75,7 @@ export const StatusBar: React.FC<StatusBarProps> = ({
       </div>
 
       {/* RIGHT: Status Indicators */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 md:gap-5">
         
         {/* Focus Timer Mini Display */}
         {isFocusActive && (
