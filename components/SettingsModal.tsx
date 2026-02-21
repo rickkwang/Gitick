@@ -8,6 +8,8 @@ interface SettingsModalProps {
   onClose: () => void;
   isDarkMode: boolean;
   onToggleTheme: () => void;
+  desktopFontSize: number;
+  onChangeDesktopFontSize: (size: number) => void;
   userProfile: UserProfile;
   onUpdateProfile: (profile: UserProfile) => void;
   tasks: Task[];
@@ -31,6 +33,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   onClose,
   isDarkMode,
   onToggleTheme,
+  desktopFontSize,
+  onChangeDesktopFontSize,
   userProfile,
   onUpdateProfile,
   tasks,
@@ -250,6 +254,31 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       >
                         <span className={`inline-block h-4 w-4 transform rounded-full bg-gray-200 dark:bg-black transition-transform ${isDarkMode ? 'translate-x-6 bg-black' : 'translate-x-1 bg-white'}`} />
                       </button>
+                    </div>
+                 </div>
+
+                 <div className="rounded-2xl border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 md:p-6 space-y-4">
+                    <h4 className="text-sm font-medium text-gray-900 dark:text-white border-b border-gray-100 dark:border-zinc-800 pb-3">Text Size (Desktop)</h4>
+                    <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-zinc-800/30 rounded-2xl border border-gray-100 dark:border-zinc-800/50">
+                      <div>
+                        <p className="font-medium text-sm text-gray-900 dark:text-gray-200">Current: {desktopFontSize}px</p>
+                        <p className="text-xs text-gray-500 dark:text-zinc-500">Affects desktop layout only</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {[12, 13, 14, 15].map((size) => (
+                          <button
+                            key={size}
+                            onClick={() => onChangeDesktopFontSize(size)}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                              desktopFontSize === size
+                                ? 'bg-black text-white dark:bg-white dark:text-black'
+                                : 'bg-white text-gray-600 border border-gray-200 hover:border-black dark:bg-zinc-800 dark:text-zinc-300 dark:border-zinc-700 dark:hover:border-white'
+                            }`}
+                          >
+                            {size}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                  </div>
                </div>

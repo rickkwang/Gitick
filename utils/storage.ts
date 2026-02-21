@@ -4,6 +4,7 @@ export const STORAGE_KEYS = {
   profile: 'gitick-profile',
   sidebarCollapsed: 'gitick-sidebar-collapsed',
   theme: 'gitick-theme',
+  desktopFontSize: 'gitick-desktop-font-size',
 } as const;
 
 export const LEGACY_STORAGE_KEYS = {
@@ -12,6 +13,7 @@ export const LEGACY_STORAGE_KEYS = {
   profile: 'zendo-profile',
   sidebarCollapsed: 'zendo-sidebar-collapsed',
   theme: 'zendo-theme',
+  desktopFontSize: 'zendo-desktop-font-size',
 } as const;
 
 export const readStoredValue = (key: string): string | null => {

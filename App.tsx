@@ -159,6 +159,14 @@ const App: React.FC = () => {
      if (saved) return saved === 'dark';
      return window.matchMedia('(prefers-color-scheme: dark)').matches;
   });
+  const [desktopFontSize, setDesktopFontSize] = useState(() => {
+    if (typeof window === 'undefined') return 13;
+    const saved =
+      readStoredValue(STORAGE_KEYS.desktopFontSize) ?? readStoredValue(LEGACY_STORAGE_KEYS.desktopFontSize);
+    const parsed = Number(saved);
+    if (!Number.isFinite(parsed)) return 13;
+    return Math.min(15, Math.max(12, parsed));
+  });
   
   const [showSettings, setShowSettings] = useState(false);
   const nativeApp = isNativePlatform();
@@ -383,6 +391,11 @@ const App: React.FC = () => {
   }, [isDarkMode]);
 
   useEffect(() => {
+    writeStoredValue(STORAGE_KEYS.desktopFontSize, String(desktopFontSize));
+    document.documentElement.style.setProperty('--desktop-font-size', `${desktopFontSize}px`);
+  }, [desktopFontSize]);
+
+  useEffect(() => {
     if (selectedTask) {
       setIsRightSidebarOpen(true);
     } else {
@@ -418,11 +431,13 @@ const App: React.FC = () => {
       STORAGE_KEYS.profile,
       STORAGE_KEYS.sidebarCollapsed,
       STORAGE_KEYS.theme,
+      STORAGE_KEYS.desktopFontSize,
       LEGACY_STORAGE_KEYS.tasks,
       LEGACY_STORAGE_KEYS.projects,
       LEGACY_STORAGE_KEYS.profile,
       LEGACY_STORAGE_KEYS.sidebarCollapsed,
       LEGACY_STORAGE_KEYS.theme,
+      LEGACY_STORAGE_KEYS.desktopFontSize,
     ]);
     setTasks([]);
     setProjects(DEFAULT_PROJECTS);
@@ -435,6 +450,7 @@ const App: React.FC = () => {
     setIsSidebarCollapsed(true);
     setDesktopUpdateStatus('');
     setIsCheckingDesktopUpdate(false);
+    setDesktopFontSize(13);
     const fallbackDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     setIsDarkMode(fallbackDark);
     showToast('All local data has been reset.');
@@ -1213,7 +1229,7 @@ const App: React.FC = () => {
                <div className="flex-1 flex flex-col h-full relative">
                   
                   {/* Working Dir Header (Desktop Only) */}
-                  <div className="hidden md:flex h-16 items-center justify-between px-8 shrink-0 bg-gray-50/85 dark:bg-zinc-900/85 border-b border-gray-200/70 dark:border-zinc-800/80 backdrop-blur-sm z-10 transition-colors duration-300">
+                  <div className="hidden md:flex h-16 items-center justify-between px-8 shrink-0 bg-gray-50/85 dark:bg-zinc-900/85 backdrop-blur-sm z-10 transition-colors duration-300">
                      <div className="flex items-center gap-2 text-sm font-mono text-gray-500 dark:text-zinc-500">
                         <Icons.Folder />
                         <span className="truncate tracking-tight font-medium text-black dark:text-white opacity-70">{getBreadcrumb()}</span>
@@ -1482,6 +1498,8 @@ const App: React.FC = () => {
           onClose={() => setShowSettings(false)}
           isDarkMode={isDarkMode}
           onToggleTheme={() => setIsDarkMode(!isDarkMode)}
+          desktopFontSize={desktopFontSize}
+          onChangeDesktopFontSize={setDesktopFontSize}
           userProfile={userProfile}
           onUpdateProfile={setUserProfile}
           tasks={tasks}
