@@ -1246,9 +1246,9 @@ const App: React.FC = () => {
                           
                           {/* Heatmap Section */}
                           {filter === 'next7days' && (
-                             <div className="mb-12">
-                                <div className="p-7 bg-white/96 dark:bg-zinc-900/70 rounded-[24px] shadow-sm border border-gray-200/80 dark:border-zinc-800/80">
-                                   <div className="flex items-center justify-between mb-5">
+                             <div className="mb-10">
+                                <div className="p-5 md:p-6 bg-white/96 dark:bg-zinc-900/70 rounded-[22px] shadow-sm border border-gray-200/80 dark:border-zinc-800/80">
+                                   <div className="flex items-center justify-between mb-4">
                                       <div className="flex items-center gap-2">
                                          <Icons.Flame />
                                          <h3 className="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-widest">Contribution Graph</h3>

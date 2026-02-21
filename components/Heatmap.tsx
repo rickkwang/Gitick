@@ -168,49 +168,49 @@ export const Heatmap: React.FC<HeatmapProps> = ({ tasks }) => {
     return 'bg-green-800 dark:bg-green-400 border-transparent';
   };
 
-  const CELL_SIZE = 'w-3 h-3';
-  const GAP = 'gap-[3px]';
-  const COL_WIDTH = 15;
+  const CELL_SIZE = 'w-2.5 h-2.5';
+  const GAP = 'gap-[2px]';
+  const COL_WIDTH = 12;
   const todayKey = toLocalIsoDate(new Date());
 
   return (
-    <div className="w-full overflow-hidden flex flex-col gap-6">
-      <div className="grid grid-cols-3 divide-x divide-gray-100 dark:divide-zinc-800 border-b border-gray-100 dark:border-zinc-800 pb-4">
-        <div className="px-2 md:px-6 text-center">
+    <div className="w-full overflow-hidden flex flex-col gap-4">
+      <div className="grid grid-cols-3 divide-x divide-gray-100 dark:divide-zinc-800 border-b border-gray-100 dark:border-zinc-800 pb-3">
+        <div className="px-2 md:px-5 text-center">
           <div className="text-[10px] uppercase tracking-wider text-gray-400 dark:text-zinc-500 font-bold mb-1">
             Total
           </div>
-          <div className="text-xl md:text-2xl font-mono font-medium text-black dark:text-white">{visibleContributions}</div>
-          <div className="text-[9px] text-gray-400 dark:text-zinc-600 mt-1">{allTimeContributions} all-time</div>
+          <div className="text-lg md:text-xl font-mono font-medium text-black dark:text-white">{visibleContributions}</div>
+          <div className="text-[8px] text-gray-400 dark:text-zinc-600 mt-1">{allTimeContributions} all-time</div>
         </div>
-        <div className="px-2 md:px-6 text-center">
+        <div className="px-2 md:px-5 text-center">
           <div className="text-[10px] uppercase tracking-wider text-gray-400 dark:text-zinc-500 font-bold mb-1">
             Streak
           </div>
-          <div className="text-xl md:text-2xl font-mono font-medium text-black dark:text-white">{maxStreak}</div>
+          <div className="text-lg md:text-xl font-mono font-medium text-black dark:text-white">{maxStreak}</div>
         </div>
-        <div className="px-2 md:px-6 text-center">
+        <div className="px-2 md:px-5 text-center">
           <div className="text-[10px] uppercase tracking-wider text-gray-400 dark:text-zinc-500 font-bold mb-1">
             Current
           </div>
-          <div className="text-xl md:text-2xl font-mono font-medium text-black dark:text-white">{currentStreak}</div>
+          <div className="text-lg md:text-xl font-mono font-medium text-black dark:text-white">{currentStreak}</div>
         </div>
       </div>
 
       <div className="w-full pb-2 overflow-x-auto no-scrollbar">
-        <div className="flex gap-2 md:gap-4 px-2 w-max md:w-fit md:mx-auto">
-          <div className={`flex flex-col ${GAP} pt-[20px] text-[10px] font-mono text-gray-300 dark:text-zinc-600`}>
-            <div className="h-3 flex items-center opacity-0">Sun</div>
-            <div className="h-3 flex items-center">Mon</div>
-            <div className="h-3 flex items-center opacity-0">Tue</div>
-            <div className="h-3 flex items-center">Wed</div>
-            <div className="h-3 flex items-center opacity-0">Thu</div>
-            <div className="h-3 flex items-center">Fri</div>
-            <div className="h-3 flex items-center opacity-0">Sat</div>
+        <div className="flex gap-2 md:gap-3 px-2 w-max md:w-fit md:mx-auto">
+          <div className={`flex flex-col ${GAP} pt-[18px] text-[9px] font-mono text-gray-300 dark:text-zinc-600`}>
+            <div className="h-2.5 flex items-center opacity-0">Sun</div>
+            <div className="h-2.5 flex items-center">Mon</div>
+            <div className="h-2.5 flex items-center opacity-0">Tue</div>
+            <div className="h-2.5 flex items-center">Wed</div>
+            <div className="h-2.5 flex items-center opacity-0">Thu</div>
+            <div className="h-2.5 flex items-center">Fri</div>
+            <div className="h-2.5 flex items-center opacity-0">Sat</div>
           </div>
 
           <div className="shrink-0">
-            <div className="relative h-5 mb-0 text-[10px] font-mono text-gray-400 dark:text-zinc-500">
+            <div className="relative h-4 mb-0 text-[9px] font-mono text-gray-400 dark:text-zinc-500">
               {monthLabels.map((month) => (
                 <div
                   key={`${month.label}-${month.index}`}
@@ -248,10 +248,10 @@ export const Heatmap: React.FC<HeatmapProps> = ({ tasks }) => {
         </div>
       </div>
 
-      <div className="flex items-center justify-between pt-2 px-4 border-t border-transparent dark:border-zinc-800/50">
-        <div className="text-[10px] text-gray-400 dark:text-zinc-600 italic">{currentStreak > 0 ? 'On fire! 🔥' : 'Just start.'}</div>
+      <div className="flex items-center justify-between pt-1.5 px-3 border-t border-transparent dark:border-zinc-800/50">
+        <div className="text-[9px] text-gray-400 dark:text-zinc-600 italic">{currentStreak > 0 ? 'On fire! 🔥' : 'Just start.'}</div>
 
-        <div className="flex items-center gap-1.5 text-[9px] text-gray-400 font-mono">
+        <div className="flex items-center gap-1 text-[8px] text-gray-400 font-mono">
           <span>Less</span>
           <div className={`${CELL_SIZE} rounded-sm bg-gray-100 dark:bg-zinc-900`} />
           <div className={`${CELL_SIZE} rounded-sm bg-green-200 dark:bg-green-900`} />
