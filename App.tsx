@@ -176,7 +176,6 @@ const App: React.FC = () => {
   const desktopUpdateUserFlowRef = useRef(false);
   const manualDesktopCheckRef = useRef(false);
   const desktopUpdaterSignalRef = useRef(false);
-  const desktopUpdaterNoticeShownRef = useRef(false);
   const [desktopAppVersion, setDesktopAppVersion] = useState('');
   const [desktopUpdateStatus, setDesktopUpdateStatus] = useState('');
   const [isCheckingDesktopUpdate, setIsCheckingDesktopUpdate] = useState(false);
@@ -423,7 +422,6 @@ const App: React.FC = () => {
     const updater = window.gitickDesktop.updater;
     void updater.getVersion().then((version) => setDesktopAppVersion(version)).catch(() => undefined);
     desktopUpdaterSignalRef.current = false;
-    desktopUpdaterNoticeShownRef.current = false;
 
     const removeListener = updater.onStatus((payload) => {
       desktopUpdaterSignalRef.current = true;
@@ -477,12 +475,10 @@ const App: React.FC = () => {
         setDesktopUpdateStatus(friendly);
         if (desktopUpdateUserFlowRef.current) {
           showToast(friendly);
+        } else if (manualDesktopCheckRef.current) {
+          showToast('Unable to check updates right now.');
         } else {
           console.warn('Background update check failed:', payload.message);
-          if (!desktopUpdaterNoticeShownRef.current) {
-            showToast('Update service is temporarily unavailable. Retry after reopening the app.');
-            desktopUpdaterNoticeShownRef.current = true;
-          }
         }
         desktopUpdateUserFlowRef.current = false;
         manualDesktopCheckRef.current = false;
@@ -497,10 +493,6 @@ const App: React.FC = () => {
         console.warn('Background update check call failed:', error);
         setDesktopUpdateStatus('Unable to check updates right now.');
         setIsCheckingDesktopUpdate(false);
-        if (!desktopUpdaterNoticeShownRef.current) {
-          showToast('Unable to check updates right now. Please reopen the app later.');
-          desktopUpdaterNoticeShownRef.current = true;
-        }
       }
     };
 
