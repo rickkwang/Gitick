@@ -887,7 +887,7 @@ const App: React.FC = () => {
         {/* COL 2: Main Content */}
         <main className="flex-1 flex flex-col min-w-0 h-full bg-gray-50 dark:bg-zinc-900 relative z-0 transition-colors duration-300">
            
-           <div key={filter} className="h-full flex flex-col animate-in fade-in zoom-in-[0.99] duration-300">
+           <div key={filter} className="h-full flex flex-col">
              
              {filter === 'focus' ? (
                <FocusMode 
@@ -934,7 +934,7 @@ const App: React.FC = () => {
                           
                           {/* Heatmap Section */}
                           {filter === 'next7days' && (
-                             <div className="mb-8 animate-in fade-in slide-in-from-top-4 duration-500">
+                             <div className="mb-8">
                                 <div className="p-5 bg-white dark:bg-zinc-800/50 rounded-[24px] shadow-sm border border-transparent dark:border-zinc-800/50">
                                    <div className="flex items-center justify-between mb-4">
                                       <div className="flex items-center gap-2">
