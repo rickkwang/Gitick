@@ -4,9 +4,10 @@ import { Icons } from '../constants';
 
 interface GitGraphProps {
   tasks: Task[];
+  onDelete: (id: string) => void;
 }
 
-export const GitGraph: React.FC<GitGraphProps> = ({ tasks }) => {
+export const GitGraph: React.FC<GitGraphProps> = ({ tasks, onDelete }) => {
   // Sort by completedAt descending (newest commits at top)
   const sortedTasks = [...tasks].sort((a, b) => {
     return (b.completedAt || 0) - (a.completedAt || 0);
@@ -92,12 +93,22 @@ export const GitGraph: React.FC<GitGraphProps> = ({ tasks }) => {
                 </div>
 
                 {/* Meta */}
-                <div className="flex items-center gap-4 mt-1 text-xs text-zinc-400 dark:text-zinc-600">
+                <div className="flex items-center justify-between gap-4 mt-1 text-xs text-zinc-400 dark:text-zinc-600">
+                  <div className="flex items-center gap-4">
                    <div className="flex items-center gap-1">
                       <div className="w-4 h-4 rounded-full bg-zinc-200 dark:bg-zinc-800"></div>
                       <span className="font-medium">Gitick User</span>
                    </div>
                    <span>committed on {dateStr} at {timeStr}</span>
+                  </div>
+                  <button
+                    onClick={() => onDelete(task.id)}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity px-2 py-1 rounded-md border border-gray-200 dark:border-zinc-700 text-zinc-500 hover:text-red-500 hover:border-red-300 dark:hover:border-red-500/40"
+                    title="Delete committed todo"
+                    aria-label="Delete committed todo"
+                  >
+                    <Icons.Trash />
+                  </button>
                 </div>
               </div>
             </div>

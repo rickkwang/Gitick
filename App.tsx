@@ -1280,7 +1280,7 @@ const App: React.FC = () => {
                           
                           {/* LIST RENDERING */}
                           {filter === 'completed' ? (
-                             <GitGraph tasks={filteredTasks} />
+                             <GitGraph tasks={filteredTasks} onDelete={deleteTask} />
                           ) : (
                             <div className="pb-36">
                               {/* Grouped View for Dashboard (TickTick Style) */}
