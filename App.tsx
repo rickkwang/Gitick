@@ -174,8 +174,12 @@ const App: React.FC = () => {
   const [undoAction, setUndoAction] = useState<(() => void) | undefined>(undefined);
   const toastTimeoutRef = useRef<number | null>(null);
   const desktopUpdateUserFlowRef = useRef(false);
+  const manualDesktopCheckRef = useRef(false);
   const desktopUpdaterSignalRef = useRef(false);
   const desktopUpdaterNoticeShownRef = useRef(false);
+  const [desktopAppVersion, setDesktopAppVersion] = useState('');
+  const [desktopUpdateStatus, setDesktopUpdateStatus] = useState('');
+  const [isCheckingDesktopUpdate, setIsCheckingDesktopUpdate] = useState(false);
   
   // --- GLOBAL FOCUS TIMER STATE ---
   const [focusEndTime, setFocusEndTime] = useState<number | null>(null);
@@ -363,6 +367,22 @@ const App: React.FC = () => {
     return 'Update failed. Please try again later.';
   };
 
+  const requestDesktopUpdateCheck = async () => {
+    if (!window.gitickDesktop?.updater) return;
+    manualDesktopCheckRef.current = true;
+    setIsCheckingDesktopUpdate(true);
+    setDesktopUpdateStatus('Checking for updates...');
+    try {
+      await window.gitickDesktop.updater.checkForUpdates();
+    } catch (error) {
+      console.warn('Manual update check failed:', error);
+      setDesktopUpdateStatus('Unable to check updates right now.');
+      showToast('Unable to check updates right now.');
+      manualDesktopCheckRef.current = false;
+      setIsCheckingDesktopUpdate(false);
+    }
+  };
+
   const requestInstallApp = async () => {
     if (nativeApp) {
       showToast('Running as native app');
@@ -401,25 +421,37 @@ const App: React.FC = () => {
     if (!isDesktopRuntime || !window.gitickDesktop?.updater) return;
 
     const updater = window.gitickDesktop.updater;
+    void updater.getVersion().then((version) => setDesktopAppVersion(version)).catch(() => undefined);
     desktopUpdaterSignalRef.current = false;
     desktopUpdaterNoticeShownRef.current = false;
 
     const removeListener = updater.onStatus((payload) => {
       desktopUpdaterSignalRef.current = true;
 
+      if (payload.type === 'checking') {
+        setIsCheckingDesktopUpdate(true);
+        setDesktopUpdateStatus('Checking for updates...');
+      }
+
       if (payload.type === 'available') {
+        setDesktopUpdateStatus(`Update ${payload.version ?? ''} is available.`.trim());
         const ok = window.confirm(`New version ${payload.version ?? ''} is available. Download now?`.trim());
         if (ok) {
           desktopUpdateUserFlowRef.current = true;
+          setDesktopUpdateStatus('Downloading update...');
           void updater.downloadUpdate();
+        } else {
+          setIsCheckingDesktopUpdate(false);
         }
       }
 
       if (payload.type === 'download-progress' && payload.percent % 25 === 0) {
+        setDesktopUpdateStatus(`Downloading... ${payload.percent}%`);
         showToast(`Downloading update... ${payload.percent}%`);
       }
 
       if (payload.type === 'downloaded') {
+        setDesktopUpdateStatus(`Update ${payload.version ?? ''} downloaded. Restart to install.`.trim());
         const restartNow = window.confirm(`Version ${payload.version ?? ''} is ready. Restart now to install?`.trim());
         if (restartNow) {
           void updater.quitAndInstall();
@@ -427,11 +459,24 @@ const App: React.FC = () => {
           showToast('Update downloaded. It will install when you restart the app.');
         }
         desktopUpdateUserFlowRef.current = false;
+        manualDesktopCheckRef.current = false;
+        setIsCheckingDesktopUpdate(false);
+      }
+
+      if (payload.type === 'not-available') {
+        setDesktopUpdateStatus('You are using the latest version.');
+        if (manualDesktopCheckRef.current) {
+          showToast('You are already on the latest version.');
+        }
+        manualDesktopCheckRef.current = false;
+        setIsCheckingDesktopUpdate(false);
       }
 
       if (payload.type === 'error') {
+        const friendly = getFriendlyUpdateError(payload.message);
+        setDesktopUpdateStatus(friendly);
         if (desktopUpdateUserFlowRef.current) {
-          showToast(getFriendlyUpdateError(payload.message));
+          showToast(friendly);
         } else {
           console.warn('Background update check failed:', payload.message);
           if (!desktopUpdaterNoticeShownRef.current) {
@@ -440,6 +485,8 @@ const App: React.FC = () => {
           }
         }
         desktopUpdateUserFlowRef.current = false;
+        manualDesktopCheckRef.current = false;
+        setIsCheckingDesktopUpdate(false);
       }
     });
 
@@ -448,6 +495,8 @@ const App: React.FC = () => {
         await updater.checkForUpdates();
       } catch (error) {
         console.warn('Background update check call failed:', error);
+        setDesktopUpdateStatus('Unable to check updates right now.');
+        setIsCheckingDesktopUpdate(false);
         if (!desktopUpdaterNoticeShownRef.current) {
           showToast('Unable to check updates right now. Please reopen the app later.');
           desktopUpdaterNoticeShownRef.current = true;
@@ -456,11 +505,13 @@ const App: React.FC = () => {
     };
 
     const initialTimer = window.setTimeout(() => {
+      setIsCheckingDesktopUpdate(true);
       void runCheck();
     }, 1200);
 
     const retryTimer = window.setTimeout(() => {
       if (!desktopUpdaterSignalRef.current) {
+        setIsCheckingDesktopUpdate(true);
         void runCheck();
       }
     }, 10000);
@@ -1150,6 +1201,11 @@ const App: React.FC = () => {
           isStandaloneInstalled={isStandaloneInstalled}
           canInstallApp={Boolean(deferredInstallPrompt)}
           onRequestInstallApp={requestInstallApp}
+          desktopAppVersion={desktopAppVersion}
+          canCheckDesktopUpdate={isDesktopRuntime}
+          desktopUpdateStatus={desktopUpdateStatus}
+          isCheckingDesktopUpdate={isCheckingDesktopUpdate}
+          onCheckDesktopUpdate={requestDesktopUpdateCheck}
         />
       )}
 

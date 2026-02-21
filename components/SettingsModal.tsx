@@ -16,6 +16,11 @@ interface SettingsModalProps {
   isStandaloneInstalled: boolean;
   canInstallApp: boolean;
   onRequestInstallApp: () => Promise<boolean>;
+  desktopAppVersion: string;
+  canCheckDesktopUpdate: boolean;
+  desktopUpdateStatus: string;
+  isCheckingDesktopUpdate: boolean;
+  onCheckDesktopUpdate: () => Promise<void>;
 }
 
 type SettingsTab = 'profile' | 'general' | 'data' | 'about';
@@ -102,7 +107,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   runtimePlatform,
   isStandaloneInstalled,
   canInstallApp,
-  onRequestInstallApp
+  onRequestInstallApp,
+  desktopAppVersion,
+  canCheckDesktopUpdate,
+  desktopUpdateStatus,
+  isCheckingDesktopUpdate,
+  onCheckDesktopUpdate,
 }) => {
   const [activeTab, setActiveTab] = useState<SettingsTab>('profile');
   const [importError, setImportError] = useState('');
@@ -196,7 +206,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           
           <div className="mt-auto hidden md:block">
              <div className="text-[10px] text-gray-400 font-mono">
-                Version 3.5.0 (Ready)
+                Version {desktopAppVersion || 'Web'}
              </div>
           </div>
         </div>
@@ -367,8 +377,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     </p>
                  </div>
 
-                 <div className="space-y-4">
-                    <h4 className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-zinc-600">Install as App</h4>
+                <div className="space-y-4">
+                   <h4 className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-zinc-600">Install & Updates</h4>
 
                     <div className="rounded-xl border border-gray-200 dark:border-zinc-700 p-4 bg-white dark:bg-zinc-800/40 space-y-3">
                       <div className="flex items-center justify-between">
@@ -397,6 +407,28 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                         <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">
                           You are using the native Capacitor shell.
                         </p>
+                      )}
+                      {canCheckDesktopUpdate && (
+                        <div className="pt-2 border-t border-gray-100 dark:border-zinc-700 space-y-2">
+                          <div className="flex items-center justify-between">
+                            <p className="text-xs uppercase tracking-wider text-gray-400 dark:text-zinc-500">Desktop Version</p>
+                            <span className="text-xs font-mono text-black dark:text-white">{desktopAppVersion || 'Unknown'}</span>
+                          </div>
+                          <button
+                            onClick={() => { void onCheckDesktopUpdate(); }}
+                            disabled={isCheckingDesktopUpdate}
+                            className={`w-full rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors ${
+                              isCheckingDesktopUpdate
+                                ? 'bg-gray-200 text-gray-500 dark:bg-zinc-700 dark:text-zinc-400 cursor-not-allowed'
+                                : 'bg-black text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200'
+                            }`}
+                          >
+                            {isCheckingDesktopUpdate ? 'Checking...' : 'Check for Updates'}
+                          </button>
+                          {desktopUpdateStatus && (
+                            <p className="text-xs text-gray-500 dark:text-zinc-400">{desktopUpdateStatus}</p>
+                          )}
+                        </div>
                       )}
                     </div>
                     
