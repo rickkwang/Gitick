@@ -718,7 +718,7 @@ const App: React.FC = () => {
   };
 
   // --- Filter & Sorting Logic ---
-  const getFilteredTasks = () => {
+  const filteredTasks = useMemo(() => {
     const todayStr = getLocalTodayStr();
     
     // Base Filtering
@@ -739,7 +739,7 @@ const App: React.FC = () => {
     }
 
     // Advanced Sorting
-    return filtered.sort((a, b) => {
+    return [...filtered].sort((a, b) => {
         // 1. Completion check
         if (a.completed !== b.completed) return a.completed ? 1 : -1;
 
@@ -759,9 +759,7 @@ const App: React.FC = () => {
         // 4. Creation Date
         return b.createdAt - a.createdAt;
     });
-  };
-
-  const filteredTasks = getFilteredTasks();
+  }, [filter, projects, tasks]);
 
   // --- Grouping Logic for "TickTick" style Dashboard ---
   const taskGroups = useMemo(() => {
@@ -798,18 +796,18 @@ const App: React.FC = () => {
   }, [filteredTasks, filter]);
 
 
-  const getCounts = () => {
-     const counts: Record<string, number> = {};
-     const active = tasks.filter(t => !t.completed);
-     counts['inbox'] = active.filter(t => t.list === 'Inbox' || !t.list).length;
-     const todayStr = getLocalTodayStr();
-     counts['today'] = active.filter(t => t.dueDate === todayStr).length;
-     counts['next7days'] = active.length;
-     projects.forEach(l => {
-        counts[l] = active.filter(t => t.list === l).length;
-     });
-     return counts;
-  }
+  const taskCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    const active = tasks.filter((t) => !t.completed);
+    counts['inbox'] = active.filter((t) => t.list === 'Inbox' || !t.list).length;
+    const todayStr = getLocalTodayStr();
+    counts['today'] = active.filter((t) => t.dueDate === todayStr).length;
+    counts['next7days'] = active.length;
+    projects.forEach((projectName) => {
+      counts[projectName] = active.filter((t) => t.list === projectName).length;
+    });
+    return counts;
+  }, [projects, tasks]);
 
   const getBreadcrumb = () => {
     switch(filter) {
@@ -839,6 +837,31 @@ const App: React.FC = () => {
 
   // Only show input on Dashboard, Today, Inbox, OR active projects
   const showTaskInput = ['next7days', 'today', 'inbox'].includes(filter) || projects.includes(filter);
+  const searchResults = useMemo(() => {
+    const keyword = searchQuery.trim().toLowerCase();
+    if (!keyword) return [];
+    return tasks.filter((task) => {
+      const inTitle = task.title.toLowerCase().includes(keyword);
+      const inTags = task.tags.some((tag) => tag.toLowerCase().includes(keyword));
+      return inTitle || inTags;
+    });
+  }, [searchQuery, tasks]);
+
+  const renderEmptyState = () => (
+    <div className="flex flex-col items-center justify-center pt-24 text-center select-none opacity-60">
+      <div className="w-20 h-20 rounded-3xl bg-white dark:bg-zinc-900 border border-gray-200/80 dark:border-zinc-800/80 flex items-center justify-center text-gray-300 dark:text-zinc-600 mb-6 shadow-sm">
+        <div className="scale-150">
+          {emptyState.icon}
+        </div>
+      </div>
+      <p className="text-base font-medium text-gray-900 dark:text-white">
+        {emptyState.title}
+      </p>
+      <p className="text-xs font-mono text-gray-400 dark:text-zinc-500 mt-2">
+        {emptyState.sub}
+      </p>
+    </div>
+  );
 
   // --- Keyboard Shortcuts ---
   useEffect(() => {
@@ -966,7 +989,7 @@ const App: React.FC = () => {
           isCollapsed={isSidebarCollapsed}
           toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
           onCloseMobile={() => setIsSidebarOpen(false)}
-          taskCounts={getCounts()}
+          taskCounts={taskCounts}
           onOpenSettings={() => setShowSettings(true)}
           isFocusActive={isFocusActive}
           focusTimeLeft={focusTimeLeft}
@@ -978,7 +1001,7 @@ const App: React.FC = () => {
         />
 
         {/* COL 2: Main Content */}
-        <main className="flex-1 flex flex-col min-w-0 h-full bg-gradient-to-b from-gray-50 to-gray-100/40 dark:from-zinc-900 dark:to-zinc-950 relative z-0 transition-colors duration-300">
+        <main className="flex-1 flex flex-col min-w-0 h-full bg-gradient-to-b from-gray-50 via-gray-50 to-gray-100/30 dark:from-zinc-900 dark:via-zinc-900 dark:to-zinc-950 relative z-0 transition-colors duration-300">
            
            <div key={filter} className="h-full flex flex-col">
              
@@ -995,7 +1018,7 @@ const App: React.FC = () => {
                <div className="flex-1 flex flex-col h-full relative">
                   
                   {/* Working Dir Header (Desktop Only) */}
-                  <div className="hidden md:flex h-14 items-center justify-between px-6 shrink-0 bg-gray-50/90 dark:bg-zinc-900/90 border-b border-gray-200/70 dark:border-zinc-800/80 backdrop-blur-sm z-10 transition-colors duration-300">
+                  <div className="hidden md:flex h-16 items-center justify-between px-8 shrink-0 bg-gray-50/85 dark:bg-zinc-900/85 border-b border-gray-200/70 dark:border-zinc-800/80 backdrop-blur-sm z-10 transition-colors duration-300">
                      <div className="flex items-center gap-2 text-sm font-mono text-gray-500 dark:text-zinc-500">
                         <Icons.Folder />
                         <span className="truncate tracking-tight font-medium text-black dark:text-white opacity-70">{getBreadcrumb()}</span>
@@ -1023,13 +1046,13 @@ const App: React.FC = () => {
 
                   {/* Scrollable List Area */}
                   <div className="flex-1 overflow-y-auto main-scroll scroll-smooth">
-                      <div className="max-w-4xl mx-auto w-full px-4 md:px-6 py-5 md:py-6">
+                      <div className="max-w-5xl mx-auto w-full px-4 md:px-8 py-6 md:py-8">
                           
                           {/* Heatmap Section */}
                           {filter === 'next7days' && (
-                             <div className="mb-8">
-                                <div className="p-5 bg-white/96 dark:bg-zinc-900/70 rounded-[24px] shadow-sm border border-gray-200/80 dark:border-zinc-800/80">
-                                   <div className="flex items-center justify-between mb-4">
+                             <div className="mb-10">
+                                <div className="p-6 bg-white/96 dark:bg-zinc-900/70 rounded-[24px] shadow-sm border border-gray-200/80 dark:border-zinc-800/80">
+                                   <div className="flex items-center justify-between mb-5">
                                       <div className="flex items-center gap-2">
                                          <Icons.Flame />
                                          <h3 className="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-widest">Contribution Graph</h3>
@@ -1051,19 +1074,7 @@ const App: React.FC = () => {
                               {/* Grouped View for Dashboard (TickTick Style) */}
                               {filter === 'next7days' && taskGroups ? (
                                   Object.values(taskGroups).flat().length === 0 ? (
-                                      <div className="flex flex-col items-center justify-center pt-24 text-center select-none opacity-60">
-                                          <div className="w-20 h-20 rounded-3xl bg-white dark:bg-zinc-900 border border-gray-200/80 dark:border-zinc-800/80 flex items-center justify-center text-gray-300 dark:text-zinc-600 mb-6 shadow-sm">
-                                            <div className="scale-150">
-                                               {emptyState.icon}
-                                            </div>
-                                          </div>
-                                          <p className="text-base font-medium text-gray-900 dark:text-white">
-                                            {emptyState.title}
-                                          </p>
-                                          <p className="text-xs font-mono text-gray-400 dark:text-zinc-500 mt-2">
-                                            {emptyState.sub}
-                                          </p>
-                                      </div>
+                                      renderEmptyState()
                                   ) : (
                                     <>
                                         {renderTaskList(taskGroups['Overdue'], 'Overdue')}
@@ -1076,7 +1087,7 @@ const App: React.FC = () => {
                               ) : (
                                   /* Flat List for other views */
                                   filteredTasks.length > 0 ? (
-                                    <div className="space-y-2">
+                                    <div className="space-y-3">
                                       {filteredTasks.map(task => (
                                           <TaskItem 
                                             key={task.id}
@@ -1088,19 +1099,7 @@ const App: React.FC = () => {
                                       ))}
                                     </div>
                                   ) : (
-                                    <div className="flex flex-col items-center justify-center pt-24 text-center select-none opacity-60">
-                                      <div className="w-20 h-20 rounded-3xl bg-white dark:bg-zinc-900 border border-gray-200/80 dark:border-zinc-800/80 flex items-center justify-center text-gray-300 dark:text-zinc-600 mb-6 shadow-sm">
-                                        <div className="scale-150">
-                                           {emptyState.icon}
-                                        </div>
-                                      </div>
-                                      <p className="text-base font-medium text-gray-900 dark:text-white">
-                                        {emptyState.title}
-                                      </p>
-                                      <p className="text-xs font-mono text-gray-400 dark:text-zinc-500 mt-2">
-                                        {emptyState.sub}
-                                      </p>
-                                  </div>
+                                    renderEmptyState()
                                   )
                               )}
                             </div>
@@ -1112,11 +1111,11 @@ const App: React.FC = () => {
                   {showTaskInput && (
                      <div className="absolute bottom-0 left-0 right-0 z-20 pointer-events-none">
                         {/* Gradient Mask to catch scrolling text - Taller and solid at bottom */}
-                        <div className="absolute bottom-0 left-0 right-0 h-44 bg-gradient-to-t from-gray-50/95 via-gray-50/85 to-transparent dark:from-zinc-900 dark:via-zinc-900/85" />
+                        <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-gray-50/95 via-gray-50/80 to-transparent dark:from-zinc-900 dark:via-zinc-900/80" />
 
                         {/* Input Container - Padded from bottom including Safe Area */}
-                        <div className="relative z-10 w-full flex justify-center px-4 pt-8 pb-safe">
-                           <div className="max-w-2xl w-full pointer-events-auto mb-2">
+                        <div className="relative z-10 w-full flex justify-center px-4 pt-10 pb-safe">
+                           <div className="max-w-3xl w-full pointer-events-auto mb-3">
                               <TaskInput onAddTask={addTask} activeList={filter} projects={projects} />
                            </div>
                         </div>
@@ -1223,9 +1222,9 @@ const App: React.FC = () => {
                {/* Results Area */}
                <div className="overflow-y-auto p-2 custom-scroll bg-white/50 dark:bg-zinc-900/50 min-h-[100px]">
                   {searchQuery ? (
-                      tasks.filter(t => t.title.toLowerCase().includes(searchQuery.toLowerCase()) || t.tags.includes(searchQuery)).length > 0 ? (
+                      searchResults.length > 0 ? (
                         <div className="space-y-1 p-2">
-                            {tasks.filter(t => t.title.toLowerCase().includes(searchQuery.toLowerCase()) || t.tags.includes(searchQuery)).slice(0, 10).map(task => (
+                            {searchResults.slice(0, 10).map(task => (
                               <button 
                                   key={task.id}
                                   onClick={() => { setSelectedTask(task); setShowSearch(false); setSearchQuery(''); }}
@@ -1269,9 +1268,9 @@ const App: React.FC = () => {
                {/* Footer hints */}
                {searchQuery && (
                   <div className="px-4 py-2 bg-gray-50/80 dark:bg-black/20 border-t border-gray-100/50 dark:border-white/5 flex justify-end">
-                      <span className="text-[10px] text-gray-400 dark:text-zinc-600 font-mono">
-                          {tasks.filter(t => t.title.toLowerCase().includes(searchQuery.toLowerCase()) || t.tags.includes(searchQuery)).length} results found
-                      </span>
+                          <span className="text-[10px] text-gray-400 dark:text-zinc-600 font-mono">
+                          {searchResults.length} results found
+                          </span>
                   </div>
                )}
             </div>

@@ -110,9 +110,9 @@ export const TaskItem: React.FC<TaskItemProps> = ({
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 min-w-0 pt-0.5">
+      <div className="flex-1 min-w-0 pt-1">
         <div className="flex items-start justify-between gap-4">
-            <span className={`text-[15px] md:text-base font-medium transition-all duration-300 break-words leading-6 ${task.completed ? 'text-gray-400 dark:text-zinc-600 line-through decoration-gray-300 dark:decoration-zinc-700' : 'text-gray-900 dark:text-zinc-100'}`}>
+            <span className={`text-[15px] md:text-base font-medium transition-all duration-300 break-words leading-6 md:leading-7 ${task.completed ? 'text-gray-400 dark:text-zinc-600 line-through decoration-gray-300 dark:decoration-zinc-700' : 'text-gray-900 dark:text-zinc-100'}`}>
               {task.title}
             </span>
             
@@ -128,7 +128,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
         </div>
         
         {/* Metadata Row */}
-        <div className="flex flex-wrap items-center gap-2 mt-2.5">
+        <div className="flex flex-wrap items-center gap-2.5 mt-3">
            
            {/* Date Badge - Softer look */}
            {dateDisplay && !task.completed && (
