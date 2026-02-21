@@ -11,6 +11,11 @@ interface SettingsModalProps {
   tasks: Task[];
   onImportData: (tasks: Task[]) => void;
   onClearData: () => void;
+  isNativeApp: boolean;
+  runtimePlatform: string;
+  isStandaloneInstalled: boolean;
+  canInstallApp: boolean;
+  onRequestInstallApp: () => Promise<boolean>;
 }
 
 type SettingsTab = 'profile' | 'general' | 'data' | 'about';
@@ -92,7 +97,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   onUpdateProfile,
   tasks,
   onImportData,
-  onClearData
+  onClearData,
+  isNativeApp,
+  runtimePlatform,
+  isStandaloneInstalled,
+  canInstallApp,
+  onRequestInstallApp
 }) => {
   const [activeTab, setActiveTab] = useState<SettingsTab>('profile');
   const [importError, setImportError] = useState('');
@@ -150,6 +160,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     { id: 'data', label: 'Data & Sync', icon: <Icons.Briefcase /> },
     { id: 'about', label: 'About & Install', icon: <Icons.GitCommit /> },
   ];
+
+  const runtimeLabel = isNativeApp
+    ? `Native (${runtimePlatform})`
+    : isStandaloneInstalled
+      ? 'Installed PWA'
+      : 'Browser';
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-0 md:p-4">
@@ -353,6 +369,36 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
                  <div className="space-y-4">
                     <h4 className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-zinc-600">Install as App</h4>
+
+                    <div className="rounded-xl border border-gray-200 dark:border-zinc-700 p-4 bg-white dark:bg-zinc-800/40 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <p className="text-xs uppercase tracking-wider text-gray-400 dark:text-zinc-500">Current Runtime</p>
+                        <span className="text-xs font-mono text-black dark:text-white">{runtimeLabel}</span>
+                      </div>
+                      {!isNativeApp && !isStandaloneInstalled && (
+                        <button
+                          onClick={() => { void onRequestInstallApp(); }}
+                          disabled={!canInstallApp}
+                          className={`w-full rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
+                            canInstallApp
+                              ? 'bg-black text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200'
+                              : 'bg-gray-200 text-gray-500 dark:bg-zinc-700 dark:text-zinc-400 cursor-not-allowed'
+                          }`}
+                        >
+                          {canInstallApp ? 'Install Gitick App' : 'Open in Chrome/Safari to install'}
+                        </button>
+                      )}
+                      {!isNativeApp && isStandaloneInstalled && (
+                        <p className="text-xs text-green-600 dark:text-green-400 font-medium">
+                          Gitick is already installed on this device.
+                        </p>
+                      )}
+                      {isNativeApp && (
+                        <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">
+                          You are using the native Capacitor shell.
+                        </p>
+                      )}
+                    </div>
                     
                     <div className="bg-gray-50 dark:bg-zinc-800/30 rounded-xl p-4 space-y-4 border border-gray-100 dark:border-zinc-800/50">
                         <div className="flex gap-3 items-start">
@@ -374,7 +420,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
                  <div className="p-4 rounded-xl bg-green-50 dark:bg-green-900/10 border border-green-100 dark:border-green-900/30">
                     <p className="text-xs text-green-700 dark:text-green-400 font-medium">
-                       🔒 <span className="font-bold">Local First:</span> Your data is stored locally in your browser. We don't see your tasks. Remember to export your data if you switch devices!
+                       🔒 <span className="font-bold">Local First:</span> Your data is stored locally on your current device (browser or app). We don't see your tasks. Export backup before switching devices.
                     </p>
                  </div>
                </div>

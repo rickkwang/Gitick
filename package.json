@@ -8,15 +8,22 @@
     "build": "vite build",
     "preview": "vite preview",
     "cap:sync": "npx cap sync",
+    "app:doctor": "npx cap doctor",
     "app:prepare": "npm run build && npx cap sync",
     "app:android": "npx cap open android",
-    "app:ios": "npx cap open ios"
+    "app:ios": "npx cap open ios",
+    "app:run:android": "npm run app:prepare && npx cap run android",
+    "app:run:ios": "npm run app:prepare && npx cap run ios"
   },
   "dependencies": {
     "@capacitor/android": "^8.1.0",
+    "@capacitor/app": "^8.0.1",
     "@capacitor/cli": "^8.1.0",
     "@capacitor/core": "^8.1.0",
     "@capacitor/ios": "^8.1.0",
+    "@capacitor/keyboard": "^8.0.0",
+    "@capacitor/splash-screen": "^8.0.1",
+    "@capacitor/status-bar": "^8.0.1",
     "react": "^19.2.1",
     "react-dom": "^19.2.1"
   },

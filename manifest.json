@@ -1,27 +1,32 @@
 {
+  "id": "/",
   "name": "Gitick",
   "short_name": "Gitick",
+  "description": "A minimalist, local-first task manager for desktop and mobile.",
   "start_url": "/",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
   "background_color": "#ffffff",
   "theme_color": "#09090b",
-  "orientation": "portrait",
+  "orientation": "any",
   "scope": "/",
+  "categories": ["productivity", "utilities"],
   "icons": [
     {
-      "src": "https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/2705.png",
-      "sizes": "72x72",
-      "type": "image/png"
-    },
-    {
-      "src": "https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/2705.png",
+      "src": "/icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/2705.png",
+      "src": "/icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }

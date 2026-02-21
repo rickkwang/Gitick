@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { TaskInput } from './components/TaskInput';
 import { TaskItem } from './components/TaskItem';
@@ -10,6 +10,13 @@ import { StatusBar } from './components/StatusBar';
 import { SettingsModal } from './components/SettingsModal';
 import { Task, FilterType, UserProfile, Priority } from './types';
 import { Icons, PROJECTS as DEFAULT_PROJECTS } from './constants';
+import {
+  getRuntimePlatform,
+  initNativeAppShell,
+  isNativePlatform,
+  registerAndroidBackButton,
+  syncStatusBarWithTheme,
+} from './services/nativeApp';
 
 // --- ONBOARDING DATA ---
 const ONBOARDING_TASKS: Task[] = [
@@ -77,6 +84,15 @@ const playSuccessSound = () => {
   }
 };
 
+interface DeferredInstallPromptEvent extends Event {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>;
+}
+
+type StandaloneNavigator = Navigator & {
+  standalone?: boolean;
+};
+
 const App: React.FC = () => {
   // Helper for lazy state initialization from localStorage
   const loadState = <T,>(key: string, fallback: T | null): T => {
@@ -121,6 +137,18 @@ const App: React.FC = () => {
   });
   
   const [showSettings, setShowSettings] = useState(false);
+  const nativeApp = isNativePlatform();
+  const runtimePlatform = getRuntimePlatform();
+  const [deferredInstallPrompt, setDeferredInstallPrompt] = useState<DeferredInstallPromptEvent | null>(null);
+  const [isStandaloneInstalled, setIsStandaloneInstalled] = useState(() => {
+    if (typeof window === 'undefined') return nativeApp;
+    const standaloneNavigator = window.navigator as StandaloneNavigator;
+    return (
+      nativeApp ||
+      window.matchMedia('(display-mode: standalone)').matches ||
+      standaloneNavigator.standalone === true
+    );
+  });
   
   // Projects State
   const [projects, setProjects] = useState<string[]>(() => loadState('zendo-projects', DEFAULT_PROJECTS));
@@ -233,6 +261,44 @@ const App: React.FC = () => {
       }
   };
 
+  useEffect(() => {
+    void initNativeAppShell();
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const standaloneNavigator = window.navigator as StandaloneNavigator;
+    const media = window.matchMedia('(display-mode: standalone)');
+    const updateStandalone = () => {
+      setIsStandaloneInstalled(
+        nativeApp || media.matches || standaloneNavigator.standalone === true,
+      );
+    };
+
+    const handleBeforeInstallPrompt = (event: Event) => {
+      const installPromptEvent = event as DeferredInstallPromptEvent;
+      installPromptEvent.preventDefault();
+      setDeferredInstallPrompt(installPromptEvent);
+    };
+
+    const handleInstalled = () => {
+      setDeferredInstallPrompt(null);
+      updateStandalone();
+    };
+
+    updateStandalone();
+    media.addEventListener?.('change', updateStandalone);
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt as EventListener);
+    window.addEventListener('appinstalled', handleInstalled);
+
+    return () => {
+      media.removeEventListener?.('change', updateStandalone);
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt as EventListener);
+      window.removeEventListener('appinstalled', handleInstalled);
+    };
+  }, [nativeApp]);
+
   // Persistence Effects
   useEffect(() => {
     localStorage.setItem('zendo-tasks', JSON.stringify(tasks));
@@ -257,6 +323,7 @@ const App: React.FC = () => {
     } else {
       document.documentElement.classList.remove('dark');
     }
+    void syncStatusBarWithTheme(isDarkMode);
   }, [isDarkMode]);
 
   useEffect(() => {
@@ -277,6 +344,40 @@ const App: React.FC = () => {
       setStatusMessage(null);
       setUndoAction(undefined);
     }, 4000);
+  };
+
+  const requestInstallApp = async () => {
+    if (nativeApp) {
+      showToast('Running as native app');
+      return true;
+    }
+
+    if (isStandaloneInstalled) {
+      showToast('App already installed');
+      return true;
+    }
+
+    if (!deferredInstallPrompt) {
+      showToast('Install entry unavailable. Use browser menu.');
+      return false;
+    }
+
+    try {
+      await deferredInstallPrompt.prompt();
+      const { outcome } = await deferredInstallPrompt.userChoice;
+      if (outcome === 'accepted') {
+        showToast('Install started');
+      } else {
+        showToast('Install canceled');
+      }
+      return outcome === 'accepted';
+    } catch (error) {
+      console.error('Install prompt failed', error);
+      showToast('Install failed');
+      return false;
+    } finally {
+      setDeferredInstallPrompt(null);
+    }
   };
 
   const addProject = (name: string) => {
@@ -334,7 +435,12 @@ const App: React.FC = () => {
   const performToggle = (id: string) => {
     const now = Date.now();
     const task = tasks.find(t => t.id === id);
-    if (task && !task.completed) playSuccessSound();
+    if (task && !task.completed) {
+      playSuccessSound();
+      if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+        navigator.vibrate(20);
+      }
+    }
 
     setTasks(prev => prev.map(t => 
       t.id === id ? { ...t, completed: !t.completed, completedAt: !t.completed ? now : undefined } : t
@@ -519,6 +625,36 @@ const App: React.FC = () => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [showSettings, selectedTask, isSidebarOpen, isRightSidebarOpen, showSearch]);
+
+  const handleAndroidBack = useCallback(
+    (_canGoBack: boolean) => {
+      if (showSearch) {
+        setShowSearch(false);
+        setSearchQuery('');
+        return true;
+      }
+      if (showSettings) {
+        setShowSettings(false);
+        return true;
+      }
+      if (selectedTask) {
+        setSelectedTask(null);
+        return true;
+      }
+      if (isRightSidebarOpen) {
+        setIsRightSidebarOpen(false);
+        return true;
+      }
+      if (isSidebarOpen) {
+        setIsSidebarOpen(false);
+        return true;
+      }
+      return false;
+    },
+    [isRightSidebarOpen, isSidebarOpen, selectedTask, showSearch, showSettings],
+  );
+
+  useEffect(() => registerAndroidBackButton(handleAndroidBack), [handleAndroidBack]);
 
   const renderTaskList = (taskList: Task[], groupName?: string) => {
      if (taskList.length === 0) return null;
@@ -905,6 +1041,11 @@ const App: React.FC = () => {
           tasks={tasks}
           onImportData={handleImportData}
           onClearData={() => setTasks([])}
+          isNativeApp={nativeApp}
+          runtimePlatform={runtimePlatform}
+          isStandaloneInstalled={isStandaloneInstalled}
+          canInstallApp={Boolean(deferredInstallPrompt)}
+          onRequestInstallApp={requestInstallApp}
         />
       )}
 

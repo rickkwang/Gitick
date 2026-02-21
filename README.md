@@ -54,9 +54,18 @@ To run this project locally on your machine:
 
 3. Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
-## 📲 第一轮 App 化（电脑 + 手机）
+## 📲 App 化进度（电脑 + 手机）
 
-当前项目已接入 `Capacitor`，并启用 PWA Service Worker：
+### 第一轮（已完成）
+- 接入 `Capacitor`（Android/iOS 工程已生成）
+- 启用 PWA Service Worker（基础离线能力）
+
+### 第二轮（已完成）
+- 设置页支持一键安装入口（支持 `beforeinstallprompt`）
+- 支持 PWA 新版本可用时提示刷新
+- 本地化 PWA 图标与 Manifest（不再依赖外链图标）
+- 原生壳增强：`StatusBar` / `SplashScreen` / `Keyboard` / Android 返回键行为
+- 运行环境识别（Browser / Installed PWA / Native）
 
 1. **准备 Web 资源并同步到原生工程**
    ```bash
@@ -73,10 +82,22 @@ To run this project locally on your machine:
    npm run app:ios
    ```
 
+4. **检查 Capacitor 环境**
+   ```bash
+   npm run app:doctor
+   ```
+
+5. **直接运行到设备/模拟器**
+   ```bash
+   npm run app:run:android
+   npm run app:run:ios
+   ```
+
 说明：
 - 电脑端可直接通过浏览器安装为桌面应用（PWA）。
 - 手机端可先用浏览器安装（PWA），或通过 Capacitor 工程打包为原生 App。
 - 每次你改完前端代码后，执行一次 `npm run app:prepare` 再去原生工程运行。
+- 设置页 `About & Install` 里可以直接看到当前运行环境并触发安装。
 
 ## 📝 License
 
