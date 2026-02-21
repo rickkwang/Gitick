@@ -542,10 +542,10 @@ const App: React.FC = () => {
       normalizedReason === 'signature-check-failed' ||
       message.includes('code object is not signed')
     ) {
-      return 'Current app build is not properly signed for in-app update. Please install the latest DMG package manually.';
+      return 'Current build signature is not ideal. Gitick will try fallback installer update flow.';
     }
     if (normalizedReason === 'adhoc-signature') {
-      return 'Current app build uses ad-hoc signing. Please install the latest Developer ID signed DMG manually.';
+      return 'Current build uses ad-hoc signing. In-app update may fail on some macOS setups, fallback installer will be used.';
     }
     if (message.includes('zip file not provided') || message.includes('err_updater_zip_file_not_found')) {
       return 'Release assets are incomplete (missing .zip update package). Please republish this version.';

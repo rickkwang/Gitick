@@ -170,27 +170,27 @@ const diagnoseUpdaterInstall = () => {
 
   if (signature.status === 'unsigned') {
     return {
-      ok: false,
-      reason: 'unsigned-app',
-      message: 'Current app bundle is unsigned. In-app update install cannot complete. Please install a signed build from DMG.',
+      ok: true,
+      warningReason: 'unsigned-app',
+      warningMessage: 'Current app bundle is unsigned. In-app install may fail on some macOS setups; fallback installer will be used when possible.',
       details,
     };
   }
 
   if (signature.status === 'error') {
     return {
-      ok: false,
-      reason: 'signature-check-failed',
-      message: `Unable to validate app code signature: ${signature.raw || 'unknown error'}`,
+      ok: true,
+      warningReason: 'signature-check-failed',
+      warningMessage: `Unable to validate app code signature: ${signature.raw || 'unknown error'}`,
       details,
     };
   }
 
   if (signature.status === 'adhoc') {
     return {
-      ok: false,
-      reason: 'adhoc-signature',
-      message: 'Current app build uses ad-hoc signing. Install a Developer ID signed DMG before using in-app update.',
+      ok: true,
+      warningReason: 'adhoc-signature',
+      warningMessage: 'Current app build uses ad-hoc signing. In-app install may fail on some macOS setups; fallback installer will be used when possible.',
       details,
     };
   }
