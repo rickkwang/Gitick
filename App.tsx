@@ -488,13 +488,7 @@ const App: React.FC = () => {
   const getFriendlyUpdateError = (raw: string, reason?: string) => {
     const message = raw.replace(/\s+/g, ' ').trim().toLowerCase();
     const normalizedReason = (reason ?? '').trim().toLowerCase();
-    if (
-      normalizedReason === 'not-in-applications' ||
-      normalizedReason === 'translocated-app' ||
-      message.includes('/applications') ||
-      message.includes('not-in-applications') ||
-      message.includes('apptranslocation')
-    ) {
+    if (normalizedReason === 'not-in-applications' || message.includes('/applications') || message.includes('not-in-applications')) {
       return 'Please move Gitick.app to /Applications, then retry in-app update.';
     }
     if (normalizedReason === 'user-cancelled') {
@@ -502,17 +496,6 @@ const App: React.FC = () => {
     }
     if (normalizedReason === 'move-failed') {
       return 'Unable to move Gitick.app to /Applications. Please move it manually, then retry.';
-    }
-    if (
-      normalizedReason === 'unsigned-app' ||
-      normalizedReason === 'signature-invalid' ||
-      normalizedReason === 'signature-check-failed' ||
-      message.includes('code object is not signed')
-    ) {
-      return 'Current app build is not properly signed for in-app update. Please install the latest DMG package manually.';
-    }
-    if (normalizedReason === 'adhoc-signature') {
-      return 'Current build uses ad-hoc signing. In-app update may fail on some macOS setups.';
     }
     if (message.includes('zip file not provided') || message.includes('err_updater_zip_file_not_found')) {
       return 'Release assets are incomplete (missing .zip update package). Please republish this version.';
@@ -530,23 +513,6 @@ const App: React.FC = () => {
     desktopUpdateUserFlowRef.current = false;
     manualDesktopCheckRef.current = false;
     setIsCheckingDesktopUpdate(false);
-  };
-
-  const openMoveToApplicationsDialog = () => {
-    setConfirmDialog({
-      title: 'Move app to /Applications?',
-      description: 'Gitick.app must be in /Applications for in-app updates on macOS. Move it now and relaunch?',
-      confirmLabel: 'Move App',
-      cancelLabel: 'Not Now',
-      onConfirm: async () => {
-        await tryMoveDesktopAppToApplications();
-      },
-      onCancel: async () => {
-        const friendly = getFriendlyUpdateError('install failed', 'not-in-applications');
-        setDesktopUpdateStatus(friendly);
-        showToast(friendly);
-      },
-    });
   };
 
   const tryMoveDesktopAppToApplications = async () => {
@@ -587,11 +553,6 @@ const App: React.FC = () => {
       const result = await window.gitickDesktop.updater.checkForUpdates();
       if (result.reason === 'in-progress') {
         setDesktopUpdateStatus('Update check already in progress...');
-      } else if (!result.ok) {
-        const friendly = getFriendlyUpdateError(result.message ?? result.reason ?? 'check failed', result.reason);
-        setDesktopUpdateStatus(friendly);
-        showToast(friendly);
-        finishDesktopUpdateFlow();
       }
     } catch (error) {
       console.warn('Manual update check failed:', error);
@@ -641,20 +602,6 @@ const App: React.FC = () => {
 
     const updater = window.gitickDesktop.updater;
     void updater.getVersion().then((version) => setDesktopAppVersion(version)).catch(() => undefined);
-    void updater
-      .diagnose()
-      .then((diagnosis) => {
-        if (!diagnosis.ok) {
-          const friendly = getFriendlyUpdateError(diagnosis.message ?? diagnosis.reason ?? 'install failed', diagnosis.reason);
-          setDesktopUpdateStatus(friendly);
-          return;
-        }
-        if (diagnosis.warningReason) {
-          const warning = getFriendlyUpdateError(diagnosis.warningMessage ?? diagnosis.warningReason, diagnosis.warningReason);
-          setDesktopUpdateStatus((current) => current || warning);
-        }
-      })
-      .catch(() => undefined);
     desktopUpdaterSignalRef.current = false;
 
     const removeListener = updater.onStatus((payload) => {
@@ -678,7 +625,7 @@ const App: React.FC = () => {
             try {
               const result = await updater.downloadUpdate();
               if (!result.ok) {
-                const friendly = getFriendlyUpdateError(result.message ?? result.reason ?? 'download failed', result.reason);
+                const friendly = getFriendlyUpdateError(result.reason ?? 'download failed', result.reason);
                 setDesktopUpdateStatus(friendly);
                 showToast(friendly);
                 finishDesktopUpdateFlow();
@@ -713,40 +660,31 @@ const App: React.FC = () => {
           onConfirm: async () => {
             desktopUpdateUserFlowRef.current = true;
             try {
-              const diagnosis = await updater.diagnose();
-              if (!diagnosis.ok) {
-                if (diagnosis.reason === 'not-in-applications' || diagnosis.reason === 'translocated-app') {
-                  openMoveToApplicationsDialog();
-                  return;
-                }
-                const friendly = getFriendlyUpdateError(
-                  diagnosis.message ?? diagnosis.reason ?? 'install failed',
-                  diagnosis.reason,
-                );
-                setDesktopUpdateStatus(friendly);
-                showToast(friendly);
-                return;
-              }
-
-              if (diagnosis.warningReason) {
-                const warning = getFriendlyUpdateError(
-                  diagnosis.warningMessage ?? diagnosis.warningReason,
-                  diagnosis.warningReason,
-                );
-                setDesktopUpdateStatus(warning);
-              }
-
               const result = await updater.quitAndInstall();
               if (result.ok) {
                 return;
               }
 
-              if (result.reason === 'not-in-applications' || result.reason === 'translocated-app') {
-                openMoveToApplicationsDialog();
+              if (result.reason === 'not-in-applications') {
+                setConfirmDialog({
+                  title: 'Move app to /Applications?',
+                  description:
+                    'Gitick.app must be in /Applications for in-app updates on macOS. Move it now and relaunch?',
+                  confirmLabel: 'Move App',
+                  cancelLabel: 'Not Now',
+                  onConfirm: async () => {
+                    await tryMoveDesktopAppToApplications();
+                  },
+                  onCancel: async () => {
+                    const friendly = getFriendlyUpdateError('install failed', 'not-in-applications');
+                    setDesktopUpdateStatus(friendly);
+                    showToast(friendly);
+                  },
+                });
                 return;
               }
 
-              const friendly = getFriendlyUpdateError(result.message ?? result.reason ?? 'install failed', result.reason);
+              const friendly = getFriendlyUpdateError(result.reason ?? 'install failed', result.reason);
               setDesktopUpdateStatus(friendly);
               showToast(friendly);
             } catch (error) {
@@ -775,12 +713,12 @@ const App: React.FC = () => {
       }
 
       if (payload.type === 'error') {
-        const friendly = getFriendlyUpdateError(payload.message, payload.reason);
+        const friendly = getFriendlyUpdateError(payload.message);
         setDesktopUpdateStatus(friendly);
         if (desktopUpdateUserFlowRef.current) {
           showToast(friendly);
         } else if (manualDesktopCheckRef.current) {
-          showToast(friendly);
+          showToast('Unable to check updates right now.');
         } else {
           console.warn('Background update check failed:', payload.message);
         }
@@ -793,10 +731,6 @@ const App: React.FC = () => {
         const result = await updater.checkForUpdates();
         if (result.reason === 'in-progress') {
           setDesktopUpdateStatus('Checking for updates...');
-        } else if (!result.ok) {
-          const friendly = getFriendlyUpdateError(result.message ?? result.reason ?? 'check failed', result.reason);
-          setDesktopUpdateStatus(friendly);
-          setIsCheckingDesktopUpdate(false);
         }
       } catch (error) {
         console.warn('Background update check call failed:', error);
@@ -1137,15 +1071,16 @@ const App: React.FC = () => {
      if (groupName === 'Today') headerClass = "text-blue-500";
 
      return (
-        <div className="mb-8 md:mb-10">
+        <div className="mb-6">
            {groupName && (
-              // Keep sticky grouping headers aligned with card content while reducing visual density.
-              <div className={`sticky top-0 bg-gray-50/85 dark:bg-zinc-900/85 backdrop-blur-md z-10 py-3 mb-3 border-b border-gray-200/60 dark:border-zinc-800/80 flex items-center gap-3 transition-colors ${headerClass} px-4 md:px-6`}>
+              // OPTICAL FIX: Added px-5 md:px-6 to align header text with TaskItem content (checkbox)
+              // This fixes the "floating header" look relative to the rounded cards
+              <div className={`sticky top-0 bg-gray-50/92 dark:bg-zinc-900/92 backdrop-blur-md z-10 py-3 mb-2 border-b border-gray-200/60 dark:border-zinc-800/80 flex items-center gap-3 transition-colors ${headerClass} px-5 md:px-6`}>
                   <span className="text-[11px] font-black uppercase tracking-widest opacity-90 transform translate-y-[1px]">{groupName}</span>
                   <span className="text-[9px] font-bold font-mono opacity-60 bg-gray-200/50 dark:bg-zinc-800 px-2 py-0.5 rounded-full text-black dark:text-white min-w-[1.5rem] text-center">{taskList.length}</span>
               </div>
            )}
-           <div className="space-y-2.5 md:space-y-3">
+           <div className="space-y-2">
               {taskList.map(task => (
                  <TaskItem 
                     key={task.id}
@@ -1181,14 +1116,14 @@ const App: React.FC = () => {
                <button
                  onClick={() => setIsSidebarOpen(true)}
                  aria-label="Open sidebar"
-                 className="text-black dark:text-white p-1.5 rounded-lg hover:bg-gray-100/80 dark:hover:bg-zinc-800/70 transition-colors"
+                 className="text-black dark:text-white p-1"
                >
                  <Icons.Menu />
                </button>
-               <span className="font-bold text-black dark:text-white tracking-tight text-[15px]">Gitick</span>
+               <span className="font-bold text-black dark:text-white tracking-tight">Gitick</span>
             </div>
             {/* Mobile context indicator */}
-            <div className="text-[10px] font-mono text-gray-500 dark:text-zinc-500 px-2.5 py-1 rounded-lg border border-gray-200/70 dark:border-zinc-800 bg-white/70 dark:bg-zinc-900/70">
+            <div className="text-[10px] font-mono text-gray-400 dark:text-zinc-600 px-2 py-1 bg-gray-50 dark:bg-zinc-900 rounded-md">
                {filter === 'next7days' ? 'Dashboard' : filter}
             </div>
          </div>
@@ -1217,7 +1152,7 @@ const App: React.FC = () => {
         />
 
         {/* COL 2: Main Content */}
-        <main className="flex-1 flex flex-col min-w-0 h-full bg-gradient-to-b from-gray-50 via-white to-gray-50/40 dark:from-zinc-900 dark:via-zinc-900 dark:to-zinc-950 relative z-0 transition-colors duration-300">
+        <main className="flex-1 flex flex-col min-w-0 h-full bg-gradient-to-b from-gray-50 via-gray-50/95 to-white dark:from-zinc-900 dark:via-zinc-900 dark:to-zinc-950 relative z-0 transition-colors duration-300">
            
            <div key={filter} className="h-full flex flex-col">
              
@@ -1234,7 +1169,7 @@ const App: React.FC = () => {
                <div className="flex-1 flex flex-col h-full relative">
                   
                   {/* Working Dir Header (Desktop Only) */}
-                  <div className="hidden md:flex h-[68px] items-center justify-between px-7 lg:px-10 shrink-0 bg-gray-50/78 dark:bg-zinc-900/82 border-b border-gray-200/70 dark:border-zinc-800/80 backdrop-blur-sm z-10 transition-colors duration-300">
+                  <div className="hidden md:flex h-16 items-center justify-between px-8 shrink-0 bg-gray-50/85 dark:bg-zinc-900/85 border-b border-gray-200/70 dark:border-zinc-800/80 backdrop-blur-sm z-10 transition-colors duration-300">
                      <div className="flex items-center gap-2 text-sm font-mono text-gray-500 dark:text-zinc-500">
                         <Icons.Folder />
                         <span className="truncate tracking-tight font-medium text-black dark:text-white opacity-70">{getBreadcrumb()}</span>
@@ -1251,7 +1186,7 @@ const App: React.FC = () => {
                         <button 
                           onClick={() => { setShowSearch(true); setTimeout(() => searchInputRef.current?.focus(), 50); }}
                           aria-label="Open quick search"
-                          className="group flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white/80 dark:bg-zinc-800/60 hover:bg-white dark:hover:bg-zinc-800 border border-gray-200/60 dark:border-zinc-700/80 transition-all duration-200"
+                          className="group flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-100/50 dark:bg-zinc-800/50 hover:bg-white dark:hover:bg-zinc-800 border border-transparent hover:border-gray-200 dark:hover:border-zinc-700 transition-all duration-200"
                           title="Quick Search (Cmd+K)"
                         >
                            <Icons.Search />
@@ -1263,13 +1198,13 @@ const App: React.FC = () => {
 
                   {/* Scrollable List Area */}
                   <div className="flex-1 overflow-y-auto main-scroll scroll-smooth">
-                      <div className="max-w-[1120px] mx-auto w-full px-4 md:px-9 lg:px-10 py-8 md:py-10">
+                      <div className="max-w-[1100px] mx-auto w-full px-5 md:px-10 py-7 md:py-10">
                           
                           {/* Heatmap Section */}
                           {filter === 'next7days' && (
-                             <div className="mb-14">
-                                <div className="p-6 md:p-7 bg-white/92 dark:bg-zinc-900/68 rounded-[24px] shadow-[0_12px_30px_rgba(17,24,39,0.04)] dark:shadow-none border border-gray-200/80 dark:border-zinc-800/80">
-                                   <div className="flex items-center justify-between mb-6">
+                             <div className="mb-12">
+                                <div className="p-7 bg-white/96 dark:bg-zinc-900/70 rounded-[24px] shadow-sm border border-gray-200/80 dark:border-zinc-800/80">
+                                   <div className="flex items-center justify-between mb-5">
                                       <div className="flex items-center gap-2">
                                          <Icons.Flame />
                                          <h3 className="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-widest">Contribution Graph</h3>
@@ -1287,7 +1222,7 @@ const App: React.FC = () => {
                           {filter === 'completed' ? (
                              <GitGraph tasks={filteredTasks} />
                           ) : (
-                            <div className="pb-40">
+                            <div className="pb-36">
                               {/* Grouped View for Dashboard (TickTick Style) */}
                               {filter === 'next7days' && taskGroups ? (
                                   Object.values(taskGroups).flat().length === 0 ? (
@@ -1303,7 +1238,7 @@ const App: React.FC = () => {
                               ) : (
                                   /* Flat List for other views */
                                   filteredTasks.length > 0 ? (
-                                    <div className="space-y-4 md:space-y-5">
+                                    <div className="space-y-4">
                                       {filteredTasks.map(task => (
                                           <TaskItem 
                                             key={task.id}
@@ -1327,11 +1262,11 @@ const App: React.FC = () => {
                   {showTaskInput && (
                      <div className="absolute bottom-0 left-0 right-0 z-20 pointer-events-none">
                         {/* Gradient Mask to catch scrolling text - Taller and solid at bottom */}
-                        <div className="absolute bottom-0 left-0 right-0 h-64 bg-gradient-to-t from-gray-50/95 via-gray-50/75 to-transparent dark:from-zinc-900 dark:via-zinc-900/75" />
+                        <div className="absolute bottom-0 left-0 right-0 h-56 bg-gradient-to-t from-gray-50/95 via-gray-50/80 to-transparent dark:from-zinc-900 dark:via-zinc-900/80" />
 
                         {/* Input Container - Padded from bottom including Safe Area */}
                         <div className="relative z-10 w-full flex justify-center px-4 pt-10 pb-safe">
-                           <div className="max-w-3xl w-full pointer-events-auto mb-4">
+                           <div className="max-w-3xl w-full pointer-events-auto mb-3">
                               <TaskInput onAddTask={addTask} activeList={filter} projects={projects} />
                            </div>
                         </div>

@@ -7,37 +7,15 @@ type GitickUpdaterStatus =
   | { type: 'not-available' }
   | { type: 'download-progress'; percent: number }
   | { type: 'downloaded'; version?: string }
-  | { type: 'error'; message: string; reason?: string };
-
-interface GitickUpdaterResult {
-  ok: boolean;
-  reason?: string;
-  message?: string;
-}
-
-interface GitickUpdaterDiagnosis extends GitickUpdaterResult {
-  warningReason?: string;
-  warningMessage?: string;
-  details?: {
-    isMac: boolean;
-    isDev: boolean;
-    executablePath: string;
-    bundlePath: string | null;
-    inApplicationsFolder: boolean | null;
-    isTranslocated: boolean;
-    signatureStatus: string;
-    teamIdentifier: string | null;
-  };
-}
+  | { type: 'error'; message: string };
 
 interface GitickDesktopApi {
   platform: string;
   updater?: {
     getVersion: () => Promise<string>;
-    diagnose: () => Promise<GitickUpdaterDiagnosis>;
-    checkForUpdates: () => Promise<GitickUpdaterResult>;
-    downloadUpdate: () => Promise<GitickUpdaterResult>;
-    quitAndInstall: () => Promise<GitickUpdaterResult>;
+    checkForUpdates: () => Promise<{ ok: boolean; reason?: string }>;
+    downloadUpdate: () => Promise<{ ok: boolean; reason?: string }>;
+    quitAndInstall: () => Promise<{ ok: boolean; reason?: string }>;
     moveToApplications: () => Promise<{ ok: boolean; reason?: string; message?: string }>;
     onStatus: (callback: (payload: GitickUpdaterStatus) => void) => () => void;
   };
