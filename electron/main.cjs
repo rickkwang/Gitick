@@ -13,11 +13,29 @@ const sendUpdaterStatus = (payload) => {
   mainWindow.webContents.send('updater:status', payload);
 };
 
+const ensureUpdaterInstallReady = () => {
+  if (!isMac || isDev) {
+    return { ok: true };
+  }
+
+  if (typeof app.isInApplicationsFolder === 'function' && !app.isInApplicationsFolder()) {
+    return {
+      ok: false,
+      reason: 'not-in-applications',
+      message: 'In-app updates on macOS require Gitick.app to be installed in /Applications.',
+    };
+  }
+
+  return { ok: true };
+};
+
 const setupAutoUpdater = () => {
   if (isDev) return;
 
   autoUpdater.autoDownload = false;
   autoUpdater.autoInstallOnAppQuit = true;
+  // Older releases may miss blockmap artifacts; full download is more reliable.
+  autoUpdater.disableDifferentialDownload = true;
 
   autoUpdater.on('checking-for-update', () => {
     sendUpdaterStatus({ type: 'checking' });
@@ -120,6 +138,14 @@ ipcMain.handle('updater:download', async () => {
 
 ipcMain.handle('updater:quit-install', () => {
   if (!isDev) {
+    const readiness = ensureUpdaterInstallReady();
+    if (!readiness.ok) {
+      sendUpdaterStatus({
+        type: 'error',
+        message: readiness.message,
+      });
+      return { ok: false, reason: readiness.reason };
+    }
     setImmediate(() => autoUpdater.quitAndInstall());
   }
   return { ok: true };

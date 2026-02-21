@@ -358,6 +358,12 @@ const App: React.FC = () => {
 
   const getFriendlyUpdateError = (raw: string) => {
     const message = raw.replace(/\s+/g, ' ').trim().toLowerCase();
+    if (message.includes('/applications') || message.includes('not-in-applications')) {
+      return 'Please move Gitick.app to /Applications, then retry in-app update.';
+    }
+    if (message.includes('zip file not provided') || message.includes('err_updater_zip_file_not_found')) {
+      return 'Release assets are incomplete (missing .zip update package). Please republish this version.';
+    }
     if (message.includes('network') || message.includes('timeout') || message.includes('econn')) {
       return 'Update failed due to network issue. Please try again later.';
     }

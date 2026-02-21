@@ -19,6 +19,7 @@ const blockmapPath = join(root, 'release', blockmapName);
 const zipPath = join(root, 'release', zipName);
 const zipBlockmapPath = join(root, 'release', zipBlockmapName);
 const latestPath = join(root, 'release', latestName);
+const expectedAssetNames = [dmgName, blockmapName, zipName, zipBlockmapName, latestName];
 
 const required = [dmgPath, blockmapPath, zipPath, zipBlockmapPath, latestPath];
 for (const file of required) {
@@ -71,4 +72,24 @@ if (!releaseExists) {
   ]);
 }
 
-console.log(`Published ${tag} with DMG, blockmap, and latest-mac.yml`);
+const verify = spawnSync('gh', ['release', 'view', tag, '--repo', repo, '--json', 'assets'], {
+  stdio: 'pipe',
+  encoding: 'utf8',
+});
+
+if (verify.status !== 0) {
+  console.error(`Failed to verify uploaded assets for ${tag}.`);
+  process.stderr.write(verify.stderr || '');
+  process.exit(verify.status ?? 1);
+}
+
+const verifyJson = JSON.parse(verify.stdout || '{}');
+const uploadedNames = new Set((verifyJson.assets || []).map((asset) => asset.name));
+const missing = expectedAssetNames.filter((name) => !uploadedNames.has(name));
+
+if (missing.length > 0) {
+  console.error(`Release ${tag} is missing assets: ${missing.join(', ')}`);
+  process.exit(1);
+}
+
+console.log(`Published ${tag} with updater artifacts: ${expectedAssetNames.join(', ')}`);
