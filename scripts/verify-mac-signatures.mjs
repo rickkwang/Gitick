@@ -32,12 +32,14 @@ for (const target of targets) {
   }
 
   if (result.status !== 0) {
-    console.warn(`Warning: signature check failed for ${target.arch}: ${raw || `exit ${result.status}`}`);
+    console.error(`Signature check failed for ${target.arch}: ${raw || `exit ${result.status}`}`);
+    hasError = true;
     continue;
   }
 
   if (lower.includes('code object is not signed at all')) {
-    console.warn(`Warning: unsigned app bundle for ${target.arch}: ${target.appPath}`);
+    console.error(`Unsigned app bundle for ${target.arch}: ${target.appPath}`);
+    hasError = true;
     continue;
   }
 
@@ -46,15 +48,18 @@ for (const target of targets) {
   const teamIdentifier = teamIdentifierMatch?.[1]?.trim() || null;
 
   if (isAdhoc) {
-    console.warn(`Warning: ${target.arch} build is ad-hoc signed. In-app updater reliability may vary across macOS setups.`);
+    console.error(`${target.arch} build is ad-hoc signed. Blocking release.`);
+    hasError = true;
   } else if (!teamIdentifier) {
-    console.warn(`Warning: ${target.arch} signature missing TeamIdentifier.`);
+    console.error(`${target.arch} signature missing TeamIdentifier. Blocking release.`);
+    hasError = true;
   } else {
     console.log(`Verified ${target.arch} signature. TeamIdentifier=${teamIdentifier}`);
   }
 }
 
 if (hasError) {
+  console.error('Mac signature verification failed.');
   process.exit(1);
 }
 
