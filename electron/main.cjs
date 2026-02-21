@@ -15,6 +15,7 @@ let updaterDownloadTask = null;
 let latestAvailableVersion = null;
 let latestDownloadedVersion = null;
 let externalInstallTask = null;
+const RELEASE_METADATA_URL = 'https://github.com/rickkwang/Gitick/releases/latest/download/latest-mac.yml';
 
 const sendUpdaterStatus = (payload) => {
   if (!mainWindow || mainWindow.isDestroyed()) return;
@@ -33,6 +34,52 @@ const classifyUpdaterReason = (rawMessage = '', fallbackReason = 'unknown') => {
   }
   return fallbackReason;
 };
+
+const parseVersionFromLatestMacYml = (raw = '') => {
+  const match = raw.match(/^\s*version:\s*([0-9]+\.[0-9]+\.[0-9]+)\s*$/m);
+  return match?.[1] || null;
+};
+
+const compareSemver = (a, b) => {
+  const ap = a.split('.').map((n) => Number(n));
+  const bp = b.split('.').map((n) => Number(n));
+  for (let i = 0; i < 3; i += 1) {
+    const diff = (ap[i] || 0) - (bp[i] || 0);
+    if (diff !== 0) return diff > 0 ? 1 : -1;
+  }
+  return 0;
+};
+
+const fetchText = (sourceUrl) => new Promise((resolve, reject) => {
+  const request = (urlString) => {
+    const requestUrl = new URL(urlString);
+    const req = https.get(requestUrl, (res) => {
+      if (res.statusCode && res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+        const redirectUrl = new URL(res.headers.location, requestUrl).toString();
+        res.resume();
+        request(redirectUrl);
+        return;
+      }
+
+      if (!res.statusCode || res.statusCode < 200 || res.statusCode >= 300) {
+        reject(new Error(`Request failed with status ${res.statusCode || 'unknown'}`));
+        res.resume();
+        return;
+      }
+
+      let body = '';
+      res.setEncoding('utf8');
+      res.on('data', (chunk) => {
+        body += chunk;
+      });
+      res.on('end', () => resolve(body));
+    });
+
+    req.on('error', reject);
+  };
+
+  request(sourceUrl);
+});
 
 const getMacBundlePath = () => {
   const executablePath = app.getPath('exe');
@@ -426,7 +473,20 @@ ipcMain.handle('updater:check', async () => {
       updaterCheckTask = null;
     });
   try {
-    await updaterCheckTask;
+    const result = await updaterCheckTask;
+    const directVersion = result?.updateInfo?.version;
+    if (directVersion && compareSemver(directVersion, app.getVersion()) > 0) {
+      latestAvailableVersion = directVersion;
+      sendUpdaterStatus({ type: 'available', version: directVersion });
+    }
+    if (!directVersion) {
+      const latestYml = await fetchText(RELEASE_METADATA_URL);
+      const metadataVersion = parseVersionFromLatestMacYml(latestYml);
+      if (metadataVersion && compareSemver(metadataVersion, app.getVersion()) > 0) {
+        latestAvailableVersion = metadataVersion;
+        sendUpdaterStatus({ type: 'available', version: metadataVersion });
+      }
+    }
     return { ok: true };
   } catch (error) {
     return {
