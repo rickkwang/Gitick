@@ -825,7 +825,7 @@ const App: React.FC = () => {
            {groupName && (
               // OPTICAL FIX: Added px-5 md:px-6 to align header text with TaskItem content (checkbox)
               // This fixes the "floating header" look relative to the rounded cards
-              <div className={`sticky top-0 bg-gray-50/95 dark:bg-zinc-900/95 backdrop-blur-md z-10 py-3 mb-2 flex items-center gap-3 transition-colors ${headerClass} px-5 md:px-6`}>
+              <div className={`sticky top-0 bg-gray-50/92 dark:bg-zinc-900/92 backdrop-blur-md z-10 py-3 mb-2 border-b border-gray-200/60 dark:border-zinc-800/80 flex items-center gap-3 transition-colors ${headerClass} px-5 md:px-6`}>
                   <span className="text-[11px] font-black uppercase tracking-widest opacity-90 transform translate-y-[1px]">{groupName}</span>
                   <span className="text-[9px] font-bold font-mono opacity-60 bg-gray-200/50 dark:bg-zinc-800 px-2 py-0.5 rounded-full text-black dark:text-white min-w-[1.5rem] text-center">{taskList.length}</span>
               </div>
@@ -860,7 +860,7 @@ const App: React.FC = () => {
       )}
       
       {/* Mobile Header with Safe Area Padding */}
-      <header className="md:hidden bg-white dark:bg-zinc-950 border-b border-transparent shrink-0 z-50 pt-safe transition-colors duration-300">
+      <header className="md:hidden bg-white/95 dark:bg-zinc-950/95 border-b border-gray-100 dark:border-zinc-800 shrink-0 z-50 pt-safe backdrop-blur-sm transition-colors duration-300">
          <div className="h-14 flex items-center px-4 justify-between">
             <div className="flex items-center gap-3">
                <button onClick={() => setIsSidebarOpen(true)} className="text-black dark:text-white p-1">
@@ -898,7 +898,7 @@ const App: React.FC = () => {
         />
 
         {/* COL 2: Main Content */}
-        <main className="flex-1 flex flex-col min-w-0 h-full bg-gray-50 dark:bg-zinc-900 relative z-0 transition-colors duration-300">
+        <main className="flex-1 flex flex-col min-w-0 h-full bg-gradient-to-b from-gray-50 to-gray-100/40 dark:from-zinc-900 dark:to-zinc-950 relative z-0 transition-colors duration-300">
            
            <div key={filter} className="h-full flex flex-col">
              
@@ -915,7 +915,7 @@ const App: React.FC = () => {
                <div className="flex-1 flex flex-col h-full relative">
                   
                   {/* Working Dir Header (Desktop Only) */}
-                  <div className="hidden md:flex h-14 items-center justify-between px-6 shrink-0 bg-gray-50 dark:bg-zinc-900 z-10 transition-colors duration-300">
+                  <div className="hidden md:flex h-14 items-center justify-between px-6 shrink-0 bg-gray-50/90 dark:bg-zinc-900/90 border-b border-gray-200/70 dark:border-zinc-800/80 backdrop-blur-sm z-10 transition-colors duration-300">
                      <div className="flex items-center gap-2 text-sm font-mono text-gray-500 dark:text-zinc-500">
                         <Icons.Folder />
                         <span className="truncate tracking-tight font-medium text-black dark:text-white opacity-70">{getBreadcrumb()}</span>
@@ -943,12 +943,12 @@ const App: React.FC = () => {
 
                   {/* Scrollable List Area */}
                   <div className="flex-1 overflow-y-auto main-scroll scroll-smooth">
-                      <div className="max-w-4xl mx-auto w-full px-4 md:px-6 py-4">
+                      <div className="max-w-4xl mx-auto w-full px-4 md:px-6 py-5 md:py-6">
                           
                           {/* Heatmap Section */}
                           {filter === 'next7days' && (
                              <div className="mb-8">
-                                <div className="p-5 bg-white dark:bg-zinc-800/50 rounded-[24px] shadow-sm border border-transparent dark:border-zinc-800/50">
+                                <div className="p-5 bg-white/96 dark:bg-zinc-900/70 rounded-[24px] shadow-sm border border-gray-200/80 dark:border-zinc-800/80">
                                    <div className="flex items-center justify-between mb-4">
                                       <div className="flex items-center gap-2">
                                          <Icons.Flame />
@@ -972,7 +972,7 @@ const App: React.FC = () => {
                               {filter === 'next7days' && taskGroups ? (
                                   Object.values(taskGroups).flat().length === 0 ? (
                                       <div className="flex flex-col items-center justify-center pt-24 text-center select-none opacity-60">
-                                          <div className="w-20 h-20 rounded-3xl bg-white dark:bg-zinc-800 flex items-center justify-center text-gray-300 dark:text-zinc-600 mb-6 shadow-sm">
+                                          <div className="w-20 h-20 rounded-3xl bg-white dark:bg-zinc-900 border border-gray-200/80 dark:border-zinc-800/80 flex items-center justify-center text-gray-300 dark:text-zinc-600 mb-6 shadow-sm">
                                             <div className="scale-150">
                                                {emptyState.icon}
                                             </div>
@@ -1009,7 +1009,7 @@ const App: React.FC = () => {
                                     </div>
                                   ) : (
                                     <div className="flex flex-col items-center justify-center pt-24 text-center select-none opacity-60">
-                                      <div className="w-20 h-20 rounded-3xl bg-white dark:bg-zinc-800 flex items-center justify-center text-gray-300 dark:text-zinc-600 mb-6 shadow-sm">
+                                      <div className="w-20 h-20 rounded-3xl bg-white dark:bg-zinc-900 border border-gray-200/80 dark:border-zinc-800/80 flex items-center justify-center text-gray-300 dark:text-zinc-600 mb-6 shadow-sm">
                                         <div className="scale-150">
                                            {emptyState.icon}
                                         </div>
@@ -1032,7 +1032,7 @@ const App: React.FC = () => {
                   {showTaskInput && (
                      <div className="absolute bottom-0 left-0 right-0 z-20 pointer-events-none">
                         {/* Gradient Mask to catch scrolling text - Taller and solid at bottom */}
-                        <div className="absolute bottom-0 left-0 right-0 h-44 bg-gradient-to-t from-gray-50 via-gray-50 to-transparent dark:from-zinc-900 dark:via-zinc-900" />
+                        <div className="absolute bottom-0 left-0 right-0 h-44 bg-gradient-to-t from-gray-50/95 via-gray-50/85 to-transparent dark:from-zinc-900 dark:via-zinc-900/85" />
 
                         {/* Input Container - Padded from bottom including Safe Area */}
                         <div className="relative z-10 w-full flex justify-center px-4 pt-8 pb-safe">
@@ -1051,7 +1051,7 @@ const App: React.FC = () => {
         {/* COL 3: Staging Area */}
         <aside 
           className={`
-             hidden lg:flex flex-col h-full bg-white dark:bg-zinc-950 overflow-hidden border-l border-gray-100 dark:border-zinc-900
+             hidden lg:flex flex-col h-full bg-white/95 dark:bg-zinc-950/95 backdrop-blur-sm overflow-hidden border-l border-gray-200/70 dark:border-zinc-800/80
              transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)] 
              ${isRightSidebarOpen && filter !== 'focus' ? 'w-96 translate-x-0 opacity-100' : 'w-0 translate-x-10 opacity-0'}
           `}

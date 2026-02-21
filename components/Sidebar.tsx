@@ -75,8 +75,8 @@ const NavItem: React.FC<{
             transition-all duration-200
             h-11 px-0
             ${isActive 
-              ? 'bg-gray-100 dark:bg-zinc-800 text-black dark:text-white font-bold' 
-              : 'text-gray-500 dark:text-zinc-400 hover:bg-gray-50 dark:hover:bg-zinc-800/50 hover:text-gray-900 dark:hover:text-gray-200'}
+              ? 'bg-gray-100 dark:bg-zinc-800/90 text-black dark:text-white font-bold border border-gray-200/80 dark:border-zinc-700' 
+              : 'text-gray-500 dark:text-zinc-400 border border-transparent hover:bg-gray-50 dark:hover:bg-zinc-800/50 hover:border-gray-200/80 dark:hover:border-zinc-800 hover:text-gray-900 dark:hover:text-gray-200'}
           `}
         >
           {/* Icon Container - Fixed Width 48px (w-12) */}
@@ -203,7 +203,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   // Optimized for "Silky" feel (ChatGPT/Obsidian style)
   // Using a custom spring-like bezier for more natural movement
   const sidebarClasses = `
-    fixed inset-y-0 left-0 z-[60] bg-white dark:bg-zinc-950 flex flex-col border-r border-transparent dark:border-zinc-800
+    fixed inset-y-0 left-0 z-[60] bg-white/95 dark:bg-zinc-950/95 backdrop-blur-sm flex flex-col border-r border-gray-200/75 dark:border-zinc-800/85
     
     /* MOBILE CONFIGURATION */
     w-[280px]
@@ -421,7 +421,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           {/* User Profile Footer (Unified Design) */}
           <div className="mt-auto px-3 pb-safe md:pb-4 pt-2 shrink-0">
              {/* Subtle Divider */}
-             <div className="mx-2 mb-2 h-px bg-gray-100 dark:bg-zinc-900" />
+             <div className="mx-2 mb-2 h-px bg-gray-200/80 dark:bg-zinc-800/80" />
              
              <div className="px-2"> {/* Wrapper to match NavItem padding */}
                 <button 

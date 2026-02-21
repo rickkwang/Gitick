@@ -73,16 +73,16 @@ export const TaskItem: React.FC<TaskItemProps> = ({
     <div 
       onClick={() => onSelect(task)}
       className={`
-        group relative flex items-start gap-4 p-4 px-5 md:py-5 md:px-6 rounded-[24px] cursor-pointer transition-all duration-200 border transform active:scale-[0.99]
+        group relative flex items-start gap-4 p-4 px-5 md:py-5 md:px-6 rounded-xl md:rounded-2xl cursor-pointer transition-all duration-200 border active:scale-[0.995]
         ${selected 
-          ? 'bg-white dark:bg-zinc-900 border-gray-300 dark:border-zinc-600 shadow-[0_4px_20px_rgba(0,0,0,0.06)] dark:shadow-none z-10 scale-[1.01]' 
-          : 'bg-white dark:bg-dark-surface border-transparent hover:bg-gray-50/50 dark:hover:bg-zinc-900 hover:border-gray-200 dark:hover:border-zinc-800'}
-        ${task.completed ? 'opacity-60 grayscale' : 'opacity-100'}
+          ? 'bg-white dark:bg-zinc-900 border-gray-300/90 dark:border-zinc-600/90 shadow-[0_8px_24px_rgba(0,0,0,0.06)] dark:shadow-none z-10' 
+          : 'bg-white/96 dark:bg-dark-surface border-gray-200/75 dark:border-zinc-800/85 hover:bg-white dark:hover:bg-zinc-900 hover:border-gray-300/80 dark:hover:border-zinc-700'}
+        ${task.completed ? 'opacity-70' : 'opacity-100'}
       `}
     >
       {/* Priority Indicator Dot (Left Edge) - OPTICAL ADJUSTMENT: Moved inward to left-2 */}
       {!task.completed && (
-          <div className={`absolute left-2 top-1/2 -translate-y-1/2 h-8 w-1 rounded-full ${priorityColor[task.priority]} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
+          <div className={`absolute left-2 top-1/2 -translate-y-1/2 h-8 w-1 rounded-full ${priorityColor[task.priority]} opacity-0 group-hover:opacity-90 transition-opacity duration-300`} />
       )}
 
       {/* Custom Checkbox */}
@@ -112,7 +112,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
       {/* Main Content */}
       <div className="flex-1 min-w-0 pt-0.5">
         <div className="flex items-start justify-between gap-4">
-            <span className={`text-[15px] md:text-base font-medium transition-all duration-300 break-words leading-relaxed ${task.completed ? 'text-gray-400 dark:text-zinc-600 line-through decoration-gray-300 dark:decoration-zinc-700' : 'text-gray-900 dark:text-zinc-100'}`}>
+            <span className={`text-[15px] md:text-base font-medium transition-all duration-300 break-words leading-6 ${task.completed ? 'text-gray-400 dark:text-zinc-600 line-through decoration-gray-300 dark:decoration-zinc-700' : 'text-gray-900 dark:text-zinc-100'}`}>
               {task.title}
             </span>
             
@@ -132,14 +132,14 @@ export const TaskItem: React.FC<TaskItemProps> = ({
            
            {/* Date Badge - Softer look */}
            {dateDisplay && !task.completed && (
-             <span className={`flex items-center gap-1.5 text-[10px] font-semibold px-2 py-0.5 rounded-full transition-colors ${isLate ? 'text-red-500 bg-red-50 dark:bg-red-900/20' : 'text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-zinc-800'}`}>
+             <span className={`flex items-center gap-1.5 text-[10px] font-semibold px-2 py-0.5 rounded-full transition-colors border ${isLate ? 'text-red-500 bg-red-50 dark:bg-red-900/20 border-red-100 dark:border-red-900/30' : 'text-gray-500 dark:text-gray-400 bg-gray-100/80 dark:bg-zinc-800 border-gray-200/70 dark:border-zinc-700/80'}`}>
                <Icons.Calendar /> {dateDisplay}
              </span>
            )}
 
            {/* Tags - Redesigned as Chips */}
            {task.tags.map(tag => (
-              <span key={tag} className="flex items-center gap-1 px-1.5 py-0.5 rounded-[5px] bg-zinc-50 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700 text-[9px] font-mono font-medium text-zinc-500 dark:text-zinc-400">
+              <span key={tag} className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-zinc-50 dark:bg-zinc-800/80 border border-zinc-200/80 dark:border-zinc-700/80 text-[9px] font-mono font-medium text-zinc-500 dark:text-zinc-400">
                 <Icons.Tag />
                 {tag}
               </span>

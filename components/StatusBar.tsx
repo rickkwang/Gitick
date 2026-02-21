@@ -26,7 +26,7 @@ export const StatusBar: React.FC<StatusBarProps> = ({
   };
 
   return (
-    <div className="h-8 pb-safe box-content bg-white dark:bg-zinc-950 flex items-center justify-between px-3 text-[10px] font-mono select-none text-gray-400 dark:text-zinc-500 z-50 shrink-0 transition-colors duration-300">
+    <div className="h-8 pb-safe box-content bg-white/95 dark:bg-zinc-950/95 backdrop-blur-sm border-t border-gray-200/80 dark:border-zinc-800/80 flex items-center justify-between px-3 text-[10px] font-mono select-none text-gray-400 dark:text-zinc-500 z-50 shrink-0 transition-colors duration-300">
       
       {/* LEFT: Context / Mode */}
       <div className="flex items-center gap-4">
@@ -45,7 +45,7 @@ export const StatusBar: React.FC<StatusBarProps> = ({
         {message && (
           <div className="flex items-center gap-3 animate-in fade-in slide-in-from-left-2 duration-200 text-black dark:text-white">
              <span className="w-px h-3 bg-gray-200 dark:bg-zinc-700"></span>
-             <span className="font-bold">{message}</span>
+             <span className="font-semibold">{message}</span>
              {onUndo && (
                <button 
                  onClick={onUndo}
