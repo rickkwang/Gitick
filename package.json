@@ -1,7 +1,7 @@
 {
   "name": "gitick---task-manager",
   "private": true,
-  "version": "0.2.22",
+  "version": "0.2.23",
   "description": "Gitick desktop and mobile task manager",
   "author": "Myrick Wang",
   "repository": {
@@ -65,7 +65,6 @@
     ],
     "mac": {
       "category": "public.app-category.productivity",
-      "identity": "-",
       "target": [
         {
           "target": "dmg",

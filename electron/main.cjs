@@ -134,9 +134,9 @@ const diagnoseUpdaterInstall = () => {
 
   if (signature.status === 'adhoc') {
     return {
-      ok: true,
-      warningReason: 'adhoc-signature',
-      warningMessage: 'Current build is ad-hoc signed. In-app update reliability may be limited on some macOS setups.',
+      ok: false,
+      reason: 'adhoc-signature',
+      message: 'Current app build uses ad-hoc signing. Install a Developer ID signed DMG before using in-app update.',
       details,
     };
   }

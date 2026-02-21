@@ -48,10 +48,20 @@ for (const target of targets) {
   const teamIdentifier = teamIdentifierMatch?.[1]?.trim() || null;
 
   if (isAdhoc) {
-    console.warn(`Warning: ${target.arch} build is ad-hoc signed. In-app updater reliability may vary across macOS setups.`);
-  } else {
-    console.log(`Verified ${target.arch} signature. TeamIdentifier=${teamIdentifier ?? 'unknown'}`);
+    console.error(
+      `Invalid signature for ${target.arch}: ad-hoc signing detected. A Developer ID signed build is required for stable in-app updates.`,
+    );
+    hasError = true;
+    continue;
   }
+
+  if (!teamIdentifier) {
+    console.error(`Invalid signature for ${target.arch}: missing TeamIdentifier.`);
+    hasError = true;
+    continue;
+  }
+
+  console.log(`Verified ${target.arch} signature. TeamIdentifier=${teamIdentifier}`);
 }
 
 if (hasError) {

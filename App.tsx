@@ -512,7 +512,7 @@ const App: React.FC = () => {
       return 'Current app build is not properly signed for in-app update. Please install the latest DMG package manually.';
     }
     if (normalizedReason === 'adhoc-signature') {
-      return 'Current build uses ad-hoc signing. In-app update may fail on some macOS setups.';
+      return 'Current app build uses ad-hoc signing. Please install the latest Developer ID signed DMG manually.';
     }
     if (message.includes('zip file not provided') || message.includes('err_updater_zip_file_not_found')) {
       return 'Release assets are incomplete (missing .zip update package). Please republish this version.';
