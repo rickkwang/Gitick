@@ -21,6 +21,7 @@ interface SidebarProps {
   // Collapse State
   isCollapsed: boolean;
   toggleCollapse: () => void;
+  isDesktopMac: boolean;
 }
 
 const NavItem: React.FC<{ 
@@ -70,7 +71,7 @@ const NavItem: React.FC<{
             onCloseMobile();
           }}
           className={`
-            flex items-center w-full text-sm font-medium rounded-xl outline-none select-none
+            flex items-center w-full text-[13px] font-medium rounded-xl outline-none select-none
             transition-all duration-200
             h-11 px-0
             ${isActive 
@@ -156,7 +157,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onDeleteProject,
   userProfile,
   isCollapsed,
-  toggleCollapse
+  toggleCollapse,
+  isDesktopMac,
 }) => {
   const [isAddingProject, setIsAddingProject] = useState(false);
   const [newProjectName, setNewProjectName] = useState('');
@@ -230,19 +232,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
       />
       
       <aside className={sidebarClasses}>
-        <div className="flex flex-col h-full overflow-hidden w-full pt-safe md:pt-0">
+        <div className={`flex flex-col h-full overflow-hidden w-full pt-safe md:pt-0 ${isDesktopMac ? 'pt-5 md:pt-2' : ''}`}>
           
           {/* Header - Completely Refactored for Zero-Flicker */}
-          <div className="h-16 md:h-20 relative flex items-center shrink-0 select-none w-full">
+          <div className="h-[76px] md:h-[88px] relative flex items-center shrink-0 select-none w-full">
              
              {/* 1. MOBILE HEADER: Static, Always Visible on Mobile (md:hidden) */}
              {/* This separates mobile logic from desktop state, preventing logo flicker during open */}
-             <div className="md:hidden absolute inset-0 px-5 flex items-center justify-between">
-                <div className="flex items-center gap-3 text-black dark:text-white">
+             <div className="md:hidden absolute inset-0 px-6 flex items-center justify-between">
+                <div className="flex items-center gap-3.5 text-black dark:text-white">
                     <span className="shrink-0 flex items-center justify-center">
                         <Icons.GitickLogo />
                     </span>
-                    <span className="text-lg font-bold tracking-tight whitespace-nowrap">
+                    <span className="text-base font-semibold tracking-tight whitespace-nowrap">
                         Gitick
                     </span>
                 </div>
@@ -258,15 +260,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
              {/* 2. DESKTOP HEADER - EXPANDED (hidden on mobile) */}
              <div className={`
-                hidden md:flex absolute inset-0 px-5 items-center justify-between
+                hidden md:flex absolute inset-0 px-6 items-center justify-between
                 transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)]
                 ${renderCollapsed ? 'opacity-0 -translate-x-4 pointer-events-none' : 'opacity-100 translate-x-0 delay-100'}
              `}>
-               <div className="flex items-center gap-3 text-black dark:text-white overflow-hidden">
+               <div className="flex items-center gap-3.5 text-black dark:text-white overflow-hidden">
                  <span className="shrink-0 flex items-center justify-center">
                    <Icons.GitickLogo />
                  </span>
-                 <span className="text-lg font-bold tracking-tight whitespace-nowrap">
+                 <span className="text-base font-semibold tracking-tight whitespace-nowrap">
                    Gitick
                  </span>
                </div>
@@ -304,7 +306,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
              </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto no-scrollbar py-2 space-y-6 px-3">
+          <div className="flex-1 overflow-y-auto no-scrollbar py-3 space-y-7 px-3">
             {/* Section: Overview */}
             <div>
               {/* CRITICAL: md: prefix ensures collapse logic only affects desktop. Mobile is always visible (h-6) */}
@@ -446,7 +448,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       ${renderCollapsed ? 'md:opacity-0 md:w-0 md:translate-x-4' : 'md:opacity-100 md:w-auto md:translate-x-0'}
                   `}>
                       <div className="flex flex-col items-start leading-tight">
-                          <span className="text-sm font-bold text-gray-900 dark:text-white truncate max-w-[120px]">{userProfile.name}</span>
+                          <span className="text-[13px] font-bold text-gray-900 dark:text-white truncate max-w-[120px]">{userProfile.name}</span>
                           <span className="text-[10px] text-gray-400 dark:text-zinc-500 font-medium">Settings</span>
                       </div>
                       

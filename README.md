@@ -110,11 +110,20 @@ To run this project locally on your machine:
    npm run desktop:dmg
    ```
 
-3. **找到安装包**
+3. **一键发布可自动更新版本（推荐）**
+   ```bash
+   npm run desktop:release
+   ```
+   这个命令会自动上传以下 3 个文件到 GitHub Release，确保 App 内更新可用：
+   - `Gitick-<version>-arm64.dmg`
+   - `Gitick-<version>-arm64.dmg.blockmap`
+   - `latest-mac.yml`
+
+4. **找到安装包**
    - 输出目录：`release/`
    - 文件示例：`Gitick-0.2.0-universal.dmg`
 
-4. **安装**
+5. **安装**
    - 双击 `.dmg`
    - 将 `Gitick.app` 拖入 `Applications`
 

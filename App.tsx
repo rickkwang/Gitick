@@ -139,6 +139,8 @@ const App: React.FC = () => {
   const [showSettings, setShowSettings] = useState(false);
   const nativeApp = isNativePlatform();
   const runtimePlatform = getRuntimePlatform();
+  const desktopPlatform = typeof window !== 'undefined' ? window.gitickDesktop?.platform : undefined;
+  const isDesktopMac = desktopPlatform === 'darwin';
   const isDesktopRuntime = typeof window !== 'undefined' && Boolean(window.gitickDesktop?.updater);
   const [deferredInstallPrompt, setDeferredInstallPrompt] = useState<DeferredInstallPromptEvent | null>(null);
   const [isStandaloneInstalled, setIsStandaloneInstalled] = useState(() => {
@@ -727,7 +729,11 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-dvh font-sans text-gray-900 dark:text-dark-text bg-white dark:bg-zinc-950 overflow-hidden transition-colors duration-300 selection:bg-black selection:text-white dark:selection:bg-white dark:selection:text-black"> 
+    <div
+      className={`flex flex-col h-dvh font-sans text-gray-900 dark:text-dark-text bg-white dark:bg-zinc-950 overflow-hidden transition-colors duration-300 selection:bg-black selection:text-white dark:selection:bg-white dark:selection:text-black ${
+        isDesktopMac ? 'pt-7' : ''
+      }`}
+    > 
       
       {/* Mobile Header with Safe Area Padding */}
       <header className="md:hidden bg-white dark:bg-zinc-950 border-b border-transparent shrink-0 z-50 pt-safe transition-colors duration-300">
@@ -764,6 +770,7 @@ const App: React.FC = () => {
           onAddProject={addProject}
           onDeleteProject={deleteProject}
           userProfile={userProfile}
+          isDesktopMac={isDesktopMac}
         />
 
         {/* COL 2: Main Content */}
