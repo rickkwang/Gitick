@@ -54,6 +54,30 @@ To run this project locally on your machine:
 
 3. Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
+## 📲 第一轮 App 化（电脑 + 手机）
+
+当前项目已接入 `Capacitor`，并启用 PWA Service Worker：
+
+1. **准备 Web 资源并同步到原生工程**
+   ```bash
+   npm run app:prepare
+   ```
+
+2. **打开 Android 工程**
+   ```bash
+   npm run app:android
+   ```
+
+3. **打开 iOS 工程（仅 macOS + Xcode）**
+   ```bash
+   npm run app:ios
+   ```
+
+说明：
+- 电脑端可直接通过浏览器安装为桌面应用（PWA）。
+- 手机端可先用浏览器安装（PWA），或通过 Capacitor 工程打包为原生 App。
+- 每次你改完前端代码后，执行一次 `npm run app:prepare` 再去原生工程运行。
+
 ## 📝 License
 
 MIT

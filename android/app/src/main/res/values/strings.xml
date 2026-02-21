@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Gitick</string>
+    <string name="title_activity_main">Gitick</string>
+    <string name="package_name">com.rickkwang.gitick</string>
+    <string name="custom_url_scheme">com.rickkwang.gitick</string>
+</resources>
