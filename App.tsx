@@ -356,10 +356,17 @@ const App: React.FC = () => {
     }, 4000);
   };
 
-  const getFriendlyUpdateError = (raw: string) => {
+  const getFriendlyUpdateError = (raw: string, reason?: string) => {
     const message = raw.replace(/\s+/g, ' ').trim().toLowerCase();
-    if (message.includes('/applications') || message.includes('not-in-applications')) {
+    const normalizedReason = (reason ?? '').trim().toLowerCase();
+    if (normalizedReason === 'not-in-applications' || message.includes('/applications') || message.includes('not-in-applications')) {
       return 'Please move Gitick.app to /Applications, then retry in-app update.';
+    }
+    if (normalizedReason === 'user-cancelled') {
+      return 'Move was canceled. Please move Gitick.app to /Applications and retry.';
+    }
+    if (normalizedReason === 'move-failed') {
+      return 'Unable to move Gitick.app to /Applications. Please move it manually, then retry.';
     }
     if (message.includes('zip file not provided') || message.includes('err_updater_zip_file_not_found')) {
       return 'Release assets are incomplete (missing .zip update package). Please republish this version.';
@@ -371,6 +378,41 @@ const App: React.FC = () => {
       return 'Update metadata is not available yet. Please retry shortly.';
     }
     return 'Update failed. Please try again later.';
+  };
+
+  const finishDesktopUpdateFlow = () => {
+    desktopUpdateUserFlowRef.current = false;
+    manualDesktopCheckRef.current = false;
+    setIsCheckingDesktopUpdate(false);
+  };
+
+  const tryMoveDesktopAppToApplications = async () => {
+    if (!window.gitickDesktop?.updater?.moveToApplications) {
+      const friendly = getFriendlyUpdateError('move failed', 'move-failed');
+      setDesktopUpdateStatus(friendly);
+      showToast(friendly);
+      return false;
+    }
+
+    try {
+      const result = await window.gitickDesktop.updater.moveToApplications();
+      if (result.ok) {
+        setDesktopUpdateStatus('Moving Gitick.app to /Applications and relaunching...');
+        showToast('Moving Gitick.app to /Applications...');
+        return true;
+      }
+
+      const friendly = getFriendlyUpdateError(result.message ?? result.reason ?? 'move failed', result.reason);
+      setDesktopUpdateStatus(friendly);
+      showToast(friendly);
+      return false;
+    } catch (error) {
+      console.warn('Move to /Applications failed:', error);
+      const friendly = getFriendlyUpdateError('move failed', 'move-failed');
+      setDesktopUpdateStatus(friendly);
+      showToast(friendly);
+      return false;
+    }
   };
 
   const requestDesktopUpdateCheck = async () => {
@@ -447,7 +489,22 @@ const App: React.FC = () => {
         if (ok) {
           desktopUpdateUserFlowRef.current = true;
           setDesktopUpdateStatus('Downloading update...');
-          void updater.downloadUpdate();
+          void updater.downloadUpdate()
+            .then((result) => {
+              if (!result.ok) {
+                const friendly = getFriendlyUpdateError(result.reason ?? 'download failed', result.reason);
+                setDesktopUpdateStatus(friendly);
+                showToast(friendly);
+                finishDesktopUpdateFlow();
+              }
+            })
+            .catch((error) => {
+              console.warn('Download update call failed:', error);
+              const friendly = getFriendlyUpdateError('download failed');
+              setDesktopUpdateStatus(friendly);
+              showToast(friendly);
+              finishDesktopUpdateFlow();
+            });
         } else {
           setIsCheckingDesktopUpdate(false);
         }
@@ -462,13 +519,38 @@ const App: React.FC = () => {
         setDesktopUpdateStatus(`Update ${payload.version ?? ''} downloaded. Restart to install.`.trim());
         const restartNow = window.confirm(`Version ${payload.version ?? ''} is ready. Restart now to install?`.trim());
         if (restartNow) {
-          void updater.quitAndInstall();
+          desktopUpdateUserFlowRef.current = true;
+          void updater.quitAndInstall()
+            .then(async (result) => {
+              if (result.ok) {
+                return;
+              }
+
+              if (result.reason === 'not-in-applications') {
+                const moveNow = window.confirm('Gitick.app must be in /Applications for in-app update. Move it now?');
+                if (moveNow) {
+                  await tryMoveDesktopAppToApplications();
+                  return;
+                }
+              }
+
+              const friendly = getFriendlyUpdateError(result.reason ?? 'install failed', result.reason);
+              setDesktopUpdateStatus(friendly);
+              showToast(friendly);
+            })
+            .catch((error) => {
+              console.warn('Install update call failed:', error);
+              const friendly = getFriendlyUpdateError('install failed');
+              setDesktopUpdateStatus(friendly);
+              showToast(friendly);
+            })
+            .finally(() => {
+              finishDesktopUpdateFlow();
+            });
         } else {
           showToast('Update downloaded. It will install when you restart the app.');
+          finishDesktopUpdateFlow();
         }
-        desktopUpdateUserFlowRef.current = false;
-        manualDesktopCheckRef.current = false;
-        setIsCheckingDesktopUpdate(false);
       }
 
       if (payload.type === 'not-available') {
@@ -490,9 +572,7 @@ const App: React.FC = () => {
         } else {
           console.warn('Background update check failed:', payload.message);
         }
-        desktopUpdateUserFlowRef.current = false;
-        manualDesktopCheckRef.current = false;
-        setIsCheckingDesktopUpdate(false);
+        finishDesktopUpdateFlow();
       }
     });
 

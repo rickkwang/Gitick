@@ -129,6 +129,7 @@ To run this project locally on your machine:
    - 双击 `.dmg`
    - 将 `Gitick.app` 拖入 `Applications`
    - 仅当 App 位于 `/Applications` 时，App 内自动更新才能可靠安装
+   - 若点击更新后提示安装失败，先在 App 内选择将 Gitick 移动到 `/Applications`，重启后再执行更新
 
 说明：
 - 电脑端可直接通过浏览器安装为桌面应用（PWA）。

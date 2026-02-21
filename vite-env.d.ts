@@ -15,7 +15,8 @@ interface GitickDesktopApi {
     getVersion: () => Promise<string>;
     checkForUpdates: () => Promise<{ ok: boolean; reason?: string }>;
     downloadUpdate: () => Promise<{ ok: boolean; reason?: string }>;
-    quitAndInstall: () => Promise<{ ok: boolean }>;
+    quitAndInstall: () => Promise<{ ok: boolean; reason?: string }>;
+    moveToApplications: () => Promise<{ ok: boolean; reason?: string; message?: string }>;
     onStatus: (callback: (payload: GitickUpdaterStatus) => void) => () => void;
   };
 }

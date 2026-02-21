@@ -29,6 +29,32 @@ const ensureUpdaterInstallReady = () => {
   return { ok: true };
 };
 
+const moveAppToApplicationsFolder = () => {
+  if (!isMac || isDev) {
+    return { ok: false, reason: 'unsupported' };
+  }
+
+  if (typeof app.isInApplicationsFolder === 'function' && app.isInApplicationsFolder()) {
+    return { ok: true, reason: 'already-in-applications' };
+  }
+
+  try {
+    const moved = app.moveToApplicationsFolder({
+      conflictHandler: () => true,
+    });
+    if (!moved) {
+      return { ok: false, reason: 'user-cancelled' };
+    }
+    return { ok: true };
+  } catch (error) {
+    return {
+      ok: false,
+      reason: 'move-failed',
+      message: error?.message || 'Unable to move app to /Applications.',
+    };
+  }
+};
+
 const setupAutoUpdater = () => {
   if (isDev) return;
 
@@ -149,6 +175,17 @@ ipcMain.handle('updater:quit-install', () => {
     setImmediate(() => autoUpdater.quitAndInstall());
   }
   return { ok: true };
+});
+
+ipcMain.handle('updater:move-to-applications', () => {
+  const result = moveAppToApplicationsFolder();
+  if (!result.ok && result.message) {
+    sendUpdaterStatus({
+      type: 'error',
+      message: result.message,
+    });
+  }
+  return result;
 });
 
 app.whenReady().then(() => {

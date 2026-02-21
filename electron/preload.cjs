@@ -7,6 +7,7 @@ contextBridge.exposeInMainWorld('gitickDesktop', {
     checkForUpdates: () => ipcRenderer.invoke('updater:check'),
     downloadUpdate: () => ipcRenderer.invoke('updater:download'),
     quitAndInstall: () => ipcRenderer.invoke('updater:quit-install'),
+    moveToApplications: () => ipcRenderer.invoke('updater:move-to-applications'),
     onStatus: (callback) => {
       const listener = (_event, payload) => callback(payload);
       ipcRenderer.on('updater:status', listener);
