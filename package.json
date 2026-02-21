@@ -1,7 +1,7 @@
 {
   "name": "gitick---task-manager",
   "private": true,
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Gitick desktop and mobile task manager",
   "author": "Myrick Wang",
   "main": "electron/main.cjs",
@@ -17,7 +17,7 @@
     "app:ios": "npx cap open ios",
     "app:run:android": "npm run app:prepare && npx cap run android",
     "app:run:ios": "npm run app:prepare && npx cap run ios",
-    "desktop:dev": "concurrently -k \"vite --host 127.0.0.1 --port 5173\" \"wait-on tcp:5173 && VITE_DEV_SERVER_URL=http://127.0.0.1:5173 electron .\"",
+    "desktop:dev": "concurrently -k \"vite --host 127.0.0.1 --port 3000\" \"wait-on tcp:3000 && VITE_DEV_SERVER_URL=http://127.0.0.1:3000 electron .\"",
     "desktop:pack": "npm run build && electron-builder --dir",
     "desktop:dmg": "npm run build && electron-builder --mac dmg"
   },
