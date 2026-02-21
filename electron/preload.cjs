@@ -4,6 +4,7 @@ contextBridge.exposeInMainWorld('gitickDesktop', {
   platform: process.platform,
   updater: {
     getVersion: () => ipcRenderer.invoke('updater:get-version'),
+    diagnose: () => ipcRenderer.invoke('updater:diagnose'),
     checkForUpdates: () => ipcRenderer.invoke('updater:check'),
     downloadUpdate: () => ipcRenderer.invoke('updater:download'),
     quitAndInstall: () => ipcRenderer.invoke('updater:quit-install'),

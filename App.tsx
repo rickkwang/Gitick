@@ -488,7 +488,13 @@ const App: React.FC = () => {
   const getFriendlyUpdateError = (raw: string, reason?: string) => {
     const message = raw.replace(/\s+/g, ' ').trim().toLowerCase();
     const normalizedReason = (reason ?? '').trim().toLowerCase();
-    if (normalizedReason === 'not-in-applications' || message.includes('/applications') || message.includes('not-in-applications')) {
+    if (
+      normalizedReason === 'not-in-applications' ||
+      normalizedReason === 'translocated-app' ||
+      message.includes('/applications') ||
+      message.includes('not-in-applications') ||
+      message.includes('apptranslocation')
+    ) {
       return 'Please move Gitick.app to /Applications, then retry in-app update.';
     }
     if (normalizedReason === 'user-cancelled') {
@@ -496,6 +502,17 @@ const App: React.FC = () => {
     }
     if (normalizedReason === 'move-failed') {
       return 'Unable to move Gitick.app to /Applications. Please move it manually, then retry.';
+    }
+    if (
+      normalizedReason === 'unsigned-app' ||
+      normalizedReason === 'signature-invalid' ||
+      normalizedReason === 'signature-check-failed' ||
+      message.includes('code object is not signed')
+    ) {
+      return 'Current app build is not properly signed for in-app update. Please install the latest DMG package manually.';
+    }
+    if (normalizedReason === 'adhoc-signature') {
+      return 'Current build uses ad-hoc signing. In-app update may fail on some macOS setups.';
     }
     if (message.includes('zip file not provided') || message.includes('err_updater_zip_file_not_found')) {
       return 'Release assets are incomplete (missing .zip update package). Please republish this version.';
@@ -513,6 +530,23 @@ const App: React.FC = () => {
     desktopUpdateUserFlowRef.current = false;
     manualDesktopCheckRef.current = false;
     setIsCheckingDesktopUpdate(false);
+  };
+
+  const openMoveToApplicationsDialog = () => {
+    setConfirmDialog({
+      title: 'Move app to /Applications?',
+      description: 'Gitick.app must be in /Applications for in-app updates on macOS. Move it now and relaunch?',
+      confirmLabel: 'Move App',
+      cancelLabel: 'Not Now',
+      onConfirm: async () => {
+        await tryMoveDesktopAppToApplications();
+      },
+      onCancel: async () => {
+        const friendly = getFriendlyUpdateError('install failed', 'not-in-applications');
+        setDesktopUpdateStatus(friendly);
+        showToast(friendly);
+      },
+    });
   };
 
   const tryMoveDesktopAppToApplications = async () => {
@@ -553,6 +587,11 @@ const App: React.FC = () => {
       const result = await window.gitickDesktop.updater.checkForUpdates();
       if (result.reason === 'in-progress') {
         setDesktopUpdateStatus('Update check already in progress...');
+      } else if (!result.ok) {
+        const friendly = getFriendlyUpdateError(result.message ?? result.reason ?? 'check failed', result.reason);
+        setDesktopUpdateStatus(friendly);
+        showToast(friendly);
+        finishDesktopUpdateFlow();
       }
     } catch (error) {
       console.warn('Manual update check failed:', error);
@@ -602,6 +641,20 @@ const App: React.FC = () => {
 
     const updater = window.gitickDesktop.updater;
     void updater.getVersion().then((version) => setDesktopAppVersion(version)).catch(() => undefined);
+    void updater
+      .diagnose()
+      .then((diagnosis) => {
+        if (!diagnosis.ok) {
+          const friendly = getFriendlyUpdateError(diagnosis.message ?? diagnosis.reason ?? 'install failed', diagnosis.reason);
+          setDesktopUpdateStatus(friendly);
+          return;
+        }
+        if (diagnosis.warningReason) {
+          const warning = getFriendlyUpdateError(diagnosis.warningMessage ?? diagnosis.warningReason, diagnosis.warningReason);
+          setDesktopUpdateStatus((current) => current || warning);
+        }
+      })
+      .catch(() => undefined);
     desktopUpdaterSignalRef.current = false;
 
     const removeListener = updater.onStatus((payload) => {
@@ -625,7 +678,7 @@ const App: React.FC = () => {
             try {
               const result = await updater.downloadUpdate();
               if (!result.ok) {
-                const friendly = getFriendlyUpdateError(result.reason ?? 'download failed', result.reason);
+                const friendly = getFriendlyUpdateError(result.message ?? result.reason ?? 'download failed', result.reason);
                 setDesktopUpdateStatus(friendly);
                 showToast(friendly);
                 finishDesktopUpdateFlow();
@@ -660,31 +713,40 @@ const App: React.FC = () => {
           onConfirm: async () => {
             desktopUpdateUserFlowRef.current = true;
             try {
+              const diagnosis = await updater.diagnose();
+              if (!diagnosis.ok) {
+                if (diagnosis.reason === 'not-in-applications' || diagnosis.reason === 'translocated-app') {
+                  openMoveToApplicationsDialog();
+                  return;
+                }
+                const friendly = getFriendlyUpdateError(
+                  diagnosis.message ?? diagnosis.reason ?? 'install failed',
+                  diagnosis.reason,
+                );
+                setDesktopUpdateStatus(friendly);
+                showToast(friendly);
+                return;
+              }
+
+              if (diagnosis.warningReason) {
+                const warning = getFriendlyUpdateError(
+                  diagnosis.warningMessage ?? diagnosis.warningReason,
+                  diagnosis.warningReason,
+                );
+                setDesktopUpdateStatus(warning);
+              }
+
               const result = await updater.quitAndInstall();
               if (result.ok) {
                 return;
               }
 
-              if (result.reason === 'not-in-applications') {
-                setConfirmDialog({
-                  title: 'Move app to /Applications?',
-                  description:
-                    'Gitick.app must be in /Applications for in-app updates on macOS. Move it now and relaunch?',
-                  confirmLabel: 'Move App',
-                  cancelLabel: 'Not Now',
-                  onConfirm: async () => {
-                    await tryMoveDesktopAppToApplications();
-                  },
-                  onCancel: async () => {
-                    const friendly = getFriendlyUpdateError('install failed', 'not-in-applications');
-                    setDesktopUpdateStatus(friendly);
-                    showToast(friendly);
-                  },
-                });
+              if (result.reason === 'not-in-applications' || result.reason === 'translocated-app') {
+                openMoveToApplicationsDialog();
                 return;
               }
 
-              const friendly = getFriendlyUpdateError(result.reason ?? 'install failed', result.reason);
+              const friendly = getFriendlyUpdateError(result.message ?? result.reason ?? 'install failed', result.reason);
               setDesktopUpdateStatus(friendly);
               showToast(friendly);
             } catch (error) {
@@ -713,12 +775,12 @@ const App: React.FC = () => {
       }
 
       if (payload.type === 'error') {
-        const friendly = getFriendlyUpdateError(payload.message);
+        const friendly = getFriendlyUpdateError(payload.message, payload.reason);
         setDesktopUpdateStatus(friendly);
         if (desktopUpdateUserFlowRef.current) {
           showToast(friendly);
         } else if (manualDesktopCheckRef.current) {
-          showToast('Unable to check updates right now.');
+          showToast(friendly);
         } else {
           console.warn('Background update check failed:', payload.message);
         }
@@ -731,6 +793,10 @@ const App: React.FC = () => {
         const result = await updater.checkForUpdates();
         if (result.reason === 'in-progress') {
           setDesktopUpdateStatus('Checking for updates...');
+        } else if (!result.ok) {
+          const friendly = getFriendlyUpdateError(result.message ?? result.reason ?? 'check failed', result.reason);
+          setDesktopUpdateStatus(friendly);
+          setIsCheckingDesktopUpdate(false);
         }
       } catch (error) {
         console.warn('Background update check call failed:', error);
