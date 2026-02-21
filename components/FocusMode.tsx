@@ -5,7 +5,9 @@ interface FocusModeProps {
   timeLeft: number;
   setTimeLeft: React.Dispatch<React.SetStateAction<number>>;
   isActive: boolean;
-  setIsActive: React.Dispatch<React.SetStateAction<boolean>>;
+  onStart: () => void;
+  onPause: () => void;
+  onReset: () => void;
   mode: 'focus' | 'break';
   setMode: React.Dispatch<React.SetStateAction<'focus' | 'break'>>;
 }
@@ -14,15 +16,23 @@ export const FocusMode: React.FC<FocusModeProps> = ({
   timeLeft, 
   setTimeLeft, 
   isActive, 
-  setIsActive, 
+  onStart,
+  onPause,
+  onReset,
   mode, 
   setMode 
 }) => {
   
-  const toggleTimer = () => setIsActive(!isActive);
+  const toggleTimer = () => {
+    if (isActive) {
+      onPause();
+      return;
+    }
+    onStart();
+  };
   const switchMode = (newMode: 'focus' | 'break') => {
     setMode(newMode);
-    setIsActive(false);
+    onPause();
     setTimeLeft(newMode === 'focus' ? 25 * 60 : 5 * 60);
   };
 
@@ -35,8 +45,7 @@ export const FocusMode: React.FC<FocusModeProps> = ({
   };
 
   const resetTimer = () => {
-    setIsActive(false);
-    setTimeLeft(mode === 'focus' ? 25 * 60 : 5 * 60);
+    onReset();
   };
 
   const setPreset = (minutes: number) => {
@@ -52,6 +61,7 @@ export const FocusMode: React.FC<FocusModeProps> = ({
 
   // Preset options in minutes
   const presets = [15, 25, 45, 60];
+  const defaultTime = mode === 'focus' ? 25 * 60 : 5 * 60;
 
   const visualMax = Math.max(60 * 60, timeLeft); 
   const progress = ((visualMax - timeLeft) / visualMax) * 100;
@@ -113,7 +123,7 @@ export const FocusMode: React.FC<FocusModeProps> = ({
               {isActive ? 'Pause' : 'Start Focus'}
             </button>
 
-            {isActive && (
+            {(isActive || timeLeft !== defaultTime) && (
                <button
                  onClick={resetTimer}
                  className="h-16 w-16 flex items-center justify-center rounded-full border border-gray-200 dark:border-zinc-800 text-gray-400 dark:text-zinc-500 hover:text-red-500 hover:border-red-200 dark:hover:border-red-900/30 transition-all bg-white dark:bg-black hover:bg-red-50 dark:hover:bg-red-900/10"

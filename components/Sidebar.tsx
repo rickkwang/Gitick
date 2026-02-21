@@ -440,8 +440,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 >
                   {/* Icon Container - Perfectly aligned with NavItem w-12 */}
                   <div className="shrink-0 w-12 h-full flex items-center justify-center transform-gpu transition-transform duration-200 group-hover:scale-105">
-                      <div className={`w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-bold text-white shadow-sm ring-1 ring-white/10 dark:ring-black/10 ${userProfile.avatarColor}`}>
-                          {userProfile.name.charAt(0).toUpperCase()}
+                      <div className={`w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-bold text-white shadow-sm ring-1 ring-white/10 dark:ring-black/10 overflow-hidden ${userProfile.avatarColor}`}>
+                          {userProfile.avatarImage ? (
+                            <img src={userProfile.avatarImage} alt="User avatar" className="w-full h-full object-cover" />
+                          ) : (
+                            userProfile.name.charAt(0).toUpperCase()
+                          )}
                       </div>
                   </div>
 

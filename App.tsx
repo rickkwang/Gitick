@@ -124,6 +124,7 @@ const DEFAULT_USER_PROFILE: UserProfile = {
   email: 'user@gitick.app',
   jobTitle: 'Productivity Master',
   avatarColor: 'bg-zinc-900',
+  avatarImage: '',
 };
 
 const App: React.FC = () => {
@@ -217,6 +218,7 @@ const App: React.FC = () => {
             typeof profile.avatarColor === 'string' && profile.avatarColor.trim()
               ? profile.avatarColor.trim()
               : DEFAULT_USER_PROFILE.avatarColor,
+          avatarImage: typeof profile.avatarImage === 'string' ? profile.avatarImage : '',
         };
       },
     ),
@@ -244,6 +246,7 @@ const App: React.FC = () => {
   const [focusTimeLeft, setFocusTimeLeft] = useState(25 * 60);
   const [isFocusActive, setIsFocusActive] = useState(false);
   const [focusModeType, setFocusModeType] = useState<'focus' | 'break'>('focus');
+  const getDefaultFocusSeconds = (mode: 'focus' | 'break') => (mode === 'focus' ? 25 * 60 : 5 * 60);
 
   // Helper: Format Time
   const formatTime = (seconds: number) => {
@@ -266,6 +269,11 @@ const App: React.FC = () => {
   const pauseTimer = () => {
     setIsFocusActive(false);
     setFocusEndTime(null);
+  };
+
+  const resetTimer = () => {
+    pauseTimer();
+    setFocusTimeLeft(getDefaultFocusSeconds(focusModeType));
   };
 
   // Timer Tick Effect (High Precision)
@@ -307,23 +315,19 @@ const App: React.FC = () => {
 
   // Handle Focus Mode UI Updates (Wrapping the logic for the component)
   const handleSetTimeLeft = (val: number | ((prev: number) => number)) => {
-      if (typeof val === 'function') {
-          setFocusTimeLeft(prev => {
-              return val(prev);
-          });
-      } else {
-          setFocusTimeLeft(val);
-      }
+      setFocusTimeLeft((prev) => {
+        const nextValue = typeof val === 'function' ? val(prev) : val;
+        const safeValue = Math.max(1, Math.floor(nextValue));
+        if (isFocusActive) {
+          setFocusEndTime(Date.now() + safeValue * 1000);
+        }
+        return safeValue;
+      });
   };
 
-  const handleSetIsActive = (val: boolean | ((prev: boolean) => boolean)) => {
-      const shouldBeActive = typeof val === 'function' ? val(isFocusActive) : val;
-      if (shouldBeActive) {
-          startTimer();
-      } else {
-          pauseTimer();
-      }
-  };
+  const handleStartFocus = () => startTimer();
+  const handlePauseFocus = () => pauseTimer();
+  const handleResetFocus = () => resetTimer();
 
   useEffect(() => {
     void initNativeAppShell();
@@ -1221,7 +1225,9 @@ const App: React.FC = () => {
                  timeLeft={focusTimeLeft}
                  setTimeLeft={handleSetTimeLeft}
                  isActive={isFocusActive}
-                 setIsActive={handleSetIsActive}
+                 onStart={handleStartFocus}
+                 onPause={handlePauseFocus}
+                 onReset={handleResetFocus}
                  mode={focusModeType}
                  setMode={setFocusModeType}
                />

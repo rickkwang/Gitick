@@ -32,4 +32,5 @@ export interface UserProfile {
   email: string;
   jobTitle: string;
   avatarColor: string; // Tailwind color class or hex
+  avatarImage?: string; // Data URL for custom avatar image
 }

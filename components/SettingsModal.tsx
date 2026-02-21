@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Icons } from '../constants';
 import { UserProfile, Task } from '../types';
 import { sanitizeTaskList } from '../utils/taskSanitizer';
@@ -53,14 +53,55 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<SettingsTab>('profile');
   const [importError, setImportError] = useState('');
+  const [avatarError, setAvatarError] = useState('');
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
 
   // Local state for profile form to avoid constant re-renders on every keystroke
   const [localProfile, setLocalProfile] = useState(userProfile);
+  useEffect(() => {
+    setLocalProfile(userProfile);
+  }, [userProfile]);
 
   const handleProfileSave = () => {
     onUpdateProfile(localProfile);
     // Visual feedback usually goes here, but we'll assume fast update
+  };
+
+  const handleAvatarUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      setAvatarError('Avatar must be an image file.');
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      setAvatarError('Avatar file is too large. Max size is 2MB.');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (loadEvent) => {
+      const result = loadEvent.target?.result;
+      if (typeof result !== 'string') {
+        setAvatarError('Failed to read avatar image.');
+        return;
+      }
+      const nextProfile = { ...localProfile, avatarImage: result };
+      setLocalProfile(nextProfile);
+      onUpdateProfile(nextProfile);
+      setAvatarError('');
+      if (avatarInputRef.current) {
+        avatarInputRef.current.value = '';
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveAvatar = () => {
+    const nextProfile = { ...localProfile, avatarImage: '' };
+    setLocalProfile(nextProfile);
+    onUpdateProfile(nextProfile);
+    setAvatarError('');
   };
 
   const handleExport = () => {
@@ -172,12 +213,46 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                <div className="space-y-7">
                  <div className="rounded-2xl border border-gray-200 dark:border-zinc-800 bg-gray-50/60 dark:bg-zinc-800/20 p-5 md:p-6">
                    <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-                   <div className={`w-20 h-20 rounded-full flex items-center justify-center text-3xl font-bold text-white shadow-lg ${localProfile.avatarColor} shrink-0`}>
-                      {localProfile.name.charAt(0).toUpperCase()}
+                   <div className={`w-20 h-20 rounded-full flex items-center justify-center text-3xl font-bold text-white shadow-lg overflow-hidden ${localProfile.avatarColor} shrink-0`}>
+                      {localProfile.avatarImage ? (
+                        <img
+                          src={localProfile.avatarImage}
+                          alt="User avatar"
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        localProfile.name.charAt(0).toUpperCase()
+                      )}
                    </div>
                    <div className="space-y-1 pt-2 text-center md:text-left">
                      <p className="font-medium text-black dark:text-white">Profile Photo</p>
-                     <p className="text-xs text-gray-400 dark:text-zinc-500">Pick a background color for your avatar.</p>
+                     <p className="text-xs text-gray-400 dark:text-zinc-500">Upload your own avatar, or use initials with background color.</p>
+                     <div className="flex justify-center md:justify-start gap-2 mt-2">
+                        <button
+                          onClick={() => avatarInputRef.current?.click()}
+                          className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-black text-white dark:bg-white dark:text-black"
+                        >
+                          Upload
+                        </button>
+                        {localProfile.avatarImage && (
+                          <button
+                            onClick={handleRemoveAvatar}
+                            className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-300 text-gray-600 hover:text-red-500 hover:border-red-300 dark:border-zinc-700 dark:text-zinc-300 dark:hover:text-red-400 dark:hover:border-red-900/50"
+                          >
+                            Remove
+                          </button>
+                        )}
+                        <input
+                          ref={avatarInputRef}
+                          type="file"
+                          accept="image/*"
+                          onChange={handleAvatarUpload}
+                          className="hidden"
+                        />
+                     </div>
+                     {avatarError && (
+                       <p className="text-xs text-red-500 mt-2">{avatarError}</p>
+                     )}
                      <div className="flex justify-center md:justify-start gap-2 mt-2">
                         {['bg-zinc-900', 'bg-blue-600', 'bg-green-600', 'bg-purple-600', 'bg-orange-500'].map(color => (
                           <button 
