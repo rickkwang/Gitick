@@ -246,7 +246,12 @@ const App: React.FC = () => {
   const [focusTimeLeft, setFocusTimeLeft] = useState(25 * 60);
   const [isFocusActive, setIsFocusActive] = useState(false);
   const [focusModeType, setFocusModeType] = useState<'focus' | 'break'>('focus');
+  const isFocusActiveRef = useRef(isFocusActive);
   const getDefaultFocusSeconds = (mode: 'focus' | 'break') => (mode === 'focus' ? 25 * 60 : 5 * 60);
+
+  useEffect(() => {
+    isFocusActiveRef.current = isFocusActive;
+  }, [isFocusActive]);
 
   // Helper: Format Time
   const formatTime = (seconds: number) => {
@@ -257,6 +262,7 @@ const App: React.FC = () => {
 
   // Start Timer Logic
   const startTimer = () => {
+     if (isFocusActiveRef.current) return;
      const now = Date.now();
      const end = now + (focusTimeLeft * 1000);
      setFocusEndTime(end);
@@ -318,11 +324,18 @@ const App: React.FC = () => {
       setFocusTimeLeft((prev) => {
         const nextValue = typeof val === 'function' ? val(prev) : val;
         const safeValue = Math.max(1, Math.floor(nextValue));
-        if (isFocusActive) {
+        if (isFocusActiveRef.current) {
           setFocusEndTime(Date.now() + safeValue * 1000);
         }
         return safeValue;
       });
+  };
+
+  const handleFocusModeChange = (nextMode: 'focus' | 'break') => {
+    setFocusModeType(nextMode);
+    setIsFocusActive(false);
+    setFocusEndTime(null);
+    setFocusTimeLeft(getDefaultFocusSeconds(nextMode));
   };
 
   const handleStartFocus = () => startTimer();
@@ -1229,7 +1242,7 @@ const App: React.FC = () => {
                  onPause={handlePauseFocus}
                  onReset={handleResetFocus}
                  mode={focusModeType}
-                 setMode={setFocusModeType}
+                 setMode={handleFocusModeChange}
                />
              ) : (
                <div className="flex-1 flex flex-col h-full relative">

@@ -9,7 +9,7 @@ interface FocusModeProps {
   onPause: () => void;
   onReset: () => void;
   mode: 'focus' | 'break';
-  setMode: React.Dispatch<React.SetStateAction<'focus' | 'break'>>;
+  setMode: (mode: 'focus' | 'break') => void;
 }
 
 export const FocusMode: React.FC<FocusModeProps> = ({ 
@@ -23,17 +23,10 @@ export const FocusMode: React.FC<FocusModeProps> = ({
   setMode 
 }) => {
   
-  const toggleTimer = () => {
-    if (isActive) {
-      onPause();
-      return;
-    }
-    onStart();
-  };
   const switchMode = (newMode: 'focus' | 'break') => {
-    setMode(newMode);
-    onPause();
-    setTimeLeft(newMode === 'focus' ? 25 * 60 : 5 * 60);
+    if (newMode !== mode) {
+      setMode(newMode);
+    }
   };
 
   const adjustTime = (minutes: number) => {
@@ -62,6 +55,12 @@ export const FocusMode: React.FC<FocusModeProps> = ({
   // Preset options in minutes
   const presets = [15, 25, 45, 60];
   const defaultTime = mode === 'focus' ? 25 * 60 : 5 * 60;
+  const canReset = isActive || timeLeft !== defaultTime;
+  const startLabel = timeLeft === defaultTime
+    ? mode === 'focus'
+      ? 'Start Focus'
+      : 'Start Break'
+    : 'Resume';
 
   const visualMax = Math.max(60 * 60, timeLeft); 
   const progress = ((visualMax - timeLeft) / visualMax) * 100;
@@ -109,29 +108,47 @@ export const FocusMode: React.FC<FocusModeProps> = ({
       {/* Bottom Section: Controls */}
       <div className="shrink-0 p-8 pb-safe md:pb-12 flex flex-col items-center gap-8 bg-white dark:bg-dark-surface z-20">
           
-          {/* Main Action Button */}
-          <div className="flex items-center gap-4 w-full max-w-sm justify-center">
+          {/* Main Action Buttons */}
+          <div className="w-full max-w-md grid grid-cols-3 gap-2 md:gap-3">
              <button
-              onClick={toggleTimer}
+              onClick={onStart}
+              disabled={isActive}
               className={`
-              h-16 px-12 rounded-full text-sm font-bold uppercase tracking-widest transition-all duration-300 transform hover:scale-105 active:scale-95
-              ${isActive 
-                  ? 'bg-white dark:bg-zinc-900 text-black dark:text-white border-2 border-black dark:border-zinc-700 hover:bg-gray-50 dark:hover:bg-zinc-800' 
-                  : 'bg-black dark:bg-white text-white dark:text-black shadow-2xl shadow-black/20 dark:shadow-white/10 border-2 border-transparent'}
+                h-12 rounded-2xl text-xs md:text-sm font-semibold uppercase tracking-wide border transition-all duration-200
+                ${isActive
+                  ? 'bg-gray-100 dark:bg-zinc-900 text-gray-300 dark:text-zinc-700 border-gray-200 dark:border-zinc-800 cursor-not-allowed'
+                  : 'bg-black dark:bg-white text-white dark:text-black border-transparent hover:shadow-lg hover:shadow-black/15 dark:hover:shadow-white/10'}
               `}
             >
-              {isActive ? 'Pause' : 'Start Focus'}
+              {startLabel}
             </button>
 
-            {(isActive || timeLeft !== defaultTime) && (
-               <button
-                 onClick={resetTimer}
-                 className="h-16 w-16 flex items-center justify-center rounded-full border border-gray-200 dark:border-zinc-800 text-gray-400 dark:text-zinc-500 hover:text-red-500 hover:border-red-200 dark:hover:border-red-900/30 transition-all bg-white dark:bg-black hover:bg-red-50 dark:hover:bg-red-900/10"
-                 title="Reset"
-               >
-                  <Icons.Refresh />
-               </button>
-            )}
+            <button
+              onClick={onPause}
+              disabled={!isActive}
+              className={`
+                h-12 rounded-2xl text-xs md:text-sm font-semibold uppercase tracking-wide border transition-colors duration-200
+                ${isActive
+                  ? 'bg-white dark:bg-zinc-900 text-black dark:text-white border-gray-300 dark:border-zinc-700 hover:bg-gray-50 dark:hover:bg-zinc-800'
+                  : 'bg-gray-100 dark:bg-zinc-900 text-gray-300 dark:text-zinc-700 border-gray-200 dark:border-zinc-800 cursor-not-allowed'}
+              `}
+            >
+              Stop
+            </button>
+
+            <button
+              onClick={resetTimer}
+              disabled={!canReset}
+              className={`
+                h-12 rounded-2xl text-xs md:text-sm font-semibold uppercase tracking-wide border transition-colors duration-200 flex items-center justify-center gap-1.5
+                ${canReset
+                  ? 'bg-white dark:bg-zinc-900 text-gray-600 dark:text-zinc-300 border-gray-300 dark:border-zinc-700 hover:text-red-500 hover:border-red-300 dark:hover:text-red-400 dark:hover:border-red-800'
+                  : 'bg-gray-100 dark:bg-zinc-900 text-gray-300 dark:text-zinc-700 border-gray-200 dark:border-zinc-800 cursor-not-allowed'}
+              `}
+            >
+              <Icons.Refresh />
+              Reset
+            </button>
           </div>
 
           {/* Time Adjustment Controls (Hidden when active to reduce clutter) */}

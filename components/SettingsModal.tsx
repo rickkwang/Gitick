@@ -224,24 +224,22 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                         localProfile.name.charAt(0).toUpperCase()
                       )}
                    </div>
-                   <div className="space-y-1 pt-2 text-center md:text-left">
+                   <div className="space-y-1 pt-1 text-center md:text-left flex-1 min-w-0">
                      <p className="font-medium text-black dark:text-white">Profile Photo</p>
-                     <p className="text-xs text-gray-400 dark:text-zinc-500">Upload your own avatar, or use initials with background color.</p>
-                     <div className="flex justify-center md:justify-start gap-2 mt-2">
+                     <p className="text-xs text-gray-400 dark:text-zinc-500">Upload your avatar image, or keep initials with a background color.</p>
+                     <div className="mt-3 space-y-3">
                         <button
                           onClick={() => avatarInputRef.current?.click()}
-                          className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-black text-white dark:bg-white dark:text-black"
+                          className="group w-full md:max-w-[360px] rounded-2xl border border-dashed border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-900/50 px-3.5 py-3 text-left hover:border-black dark:hover:border-zinc-500 hover:bg-gray-50 dark:hover:bg-zinc-900 transition-colors"
                         >
-                          Upload
+                          <span className="inline-flex w-8 h-8 items-center justify-center rounded-lg bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-zinc-300 group-hover:text-black dark:group-hover:text-white transition-colors">
+                            <Icons.Upload />
+                          </span>
+                          <p className="mt-2 text-xs font-semibold text-gray-700 dark:text-zinc-200">
+                            {localProfile.avatarImage ? 'Replace avatar image' : 'Choose avatar image'}
+                          </p>
+                          <p className="text-[11px] text-gray-400 dark:text-zinc-500">PNG / JPG / WebP, up to 2MB</p>
                         </button>
-                        {localProfile.avatarImage && (
-                          <button
-                            onClick={handleRemoveAvatar}
-                            className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-300 text-gray-600 hover:text-red-500 hover:border-red-300 dark:border-zinc-700 dark:text-zinc-300 dark:hover:text-red-400 dark:hover:border-red-900/50"
-                          >
-                            Remove
-                          </button>
-                        )}
                         <input
                           ref={avatarInputRef}
                           type="file"
@@ -249,24 +247,32 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                           onChange={handleAvatarUpload}
                           className="hidden"
                         />
+                        <div className="flex flex-wrap items-center justify-center md:justify-start gap-2.5">
+                          {localProfile.avatarImage && (
+                            <button
+                              onClick={handleRemoveAvatar}
+                              className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-300 text-gray-600 hover:text-red-500 hover:border-red-300 dark:border-zinc-700 dark:text-zinc-300 dark:hover:text-red-400 dark:hover:border-red-900/50 transition-colors"
+                            >
+                              Remove photo
+                            </button>
+                          )}
+                          {['bg-zinc-900', 'bg-blue-600', 'bg-green-600', 'bg-purple-600', 'bg-orange-500'].map(color => (
+                            <button 
+                              key={color}
+                              onClick={() => {
+                                const newProfile = { ...localProfile, avatarColor: color };
+                                setLocalProfile(newProfile);
+                                onUpdateProfile(newProfile);
+                              }}
+                              aria-label={`Set avatar color ${color.replace('bg-', '')}`}
+                              className={`w-7 h-7 rounded-full ${color} transition-transform hover:scale-105 ${localProfile.avatarColor === color ? 'ring-2 ring-offset-2 ring-gray-400 dark:ring-zinc-500' : ''}`}
+                            />
+                          ))}
+                        </div>
                      </div>
                      {avatarError && (
                        <p className="text-xs text-red-500 mt-2">{avatarError}</p>
                      )}
-                     <div className="flex justify-center md:justify-start gap-2 mt-2">
-                        {['bg-zinc-900', 'bg-blue-600', 'bg-green-600', 'bg-purple-600', 'bg-orange-500'].map(color => (
-                          <button 
-                            key={color}
-                            onClick={() => {
-                              const newProfile = { ...localProfile, avatarColor: color };
-                              setLocalProfile(newProfile);
-                              onUpdateProfile(newProfile);
-                            }}
-                            aria-label={`Set avatar color ${color.replace('bg-', '')}`}
-                            className={`w-6 h-6 rounded-full ${color} ${localProfile.avatarColor === color ? 'ring-2 ring-offset-2 ring-gray-400 dark:ring-zinc-600' : ''}`}
-                          />
-                        ))}
-                     </div>
                    </div>
                  </div>
                  </div>
