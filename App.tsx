@@ -731,9 +731,16 @@ const App: React.FC = () => {
   return (
     <div
       className={`flex flex-col h-dvh font-sans text-gray-900 dark:text-dark-text bg-white dark:bg-zinc-950 overflow-hidden transition-colors duration-300 selection:bg-black selection:text-white dark:selection:bg-white dark:selection:text-black ${
-        isDesktopMac ? 'pt-7' : ''
+        isDesktopMac ? 'pt-10' : ''
       }`}
     > 
+      {isDesktopMac && (
+        <div
+          className="fixed top-0 left-0 right-0 z-[120] h-10"
+          style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
+          aria-hidden="true"
+        />
+      )}
       
       {/* Mobile Header with Safe Area Padding */}
       <header className="md:hidden bg-white dark:bg-zinc-950 border-b border-transparent shrink-0 z-50 pt-safe transition-colors duration-300">
