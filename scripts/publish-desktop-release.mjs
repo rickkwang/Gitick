@@ -10,13 +10,17 @@ const repo = 'rickkwang/Gitick';
 
 const dmgName = `Gitick-${version}-arm64.dmg`;
 const blockmapName = `Gitick-${version}-arm64.dmg.blockmap`;
+const zipName = `Gitick-${version}-arm64.zip`;
+const zipBlockmapName = `Gitick-${version}-arm64.zip.blockmap`;
 const latestName = 'latest-mac.yml';
 
 const dmgPath = join(root, 'release', dmgName);
 const blockmapPath = join(root, 'release', blockmapName);
+const zipPath = join(root, 'release', zipName);
+const zipBlockmapPath = join(root, 'release', zipBlockmapName);
 const latestPath = join(root, 'release', latestName);
 
-const required = [dmgPath, blockmapPath, latestPath];
+const required = [dmgPath, blockmapPath, zipPath, zipBlockmapPath, latestPath];
 for (const file of required) {
   if (!existsSync(file)) {
     console.error(`Missing required release artifact: ${file}`);
@@ -41,6 +45,8 @@ if (!releaseExists) {
     tag,
     dmgPath,
     blockmapPath,
+    zipPath,
+    zipBlockmapPath,
     latestPath,
     '--repo',
     repo,
@@ -56,6 +62,8 @@ if (!releaseExists) {
     tag,
     dmgPath,
     blockmapPath,
+    zipPath,
+    zipBlockmapPath,
     latestPath,
     '--repo',
     repo,
