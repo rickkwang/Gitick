@@ -213,7 +213,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                <div className="space-y-7">
                  <div className="rounded-2xl border border-gray-200 dark:border-zinc-800 bg-gray-50/60 dark:bg-zinc-800/20 p-5 md:p-6">
                    <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-                   <div className={`w-20 h-20 rounded-full flex items-center justify-center text-3xl font-bold text-white shadow-lg overflow-hidden ${localProfile.avatarColor} shrink-0`}>
+                   <button
+                     type="button"
+                     onClick={() => avatarInputRef.current?.click()}
+                     aria-label={localProfile.avatarImage ? 'Replace avatar image' : 'Upload avatar image'}
+                     title={localProfile.avatarImage ? 'Click to replace avatar' : 'Click to upload avatar'}
+                     className={`group relative w-20 h-20 rounded-full flex items-center justify-center text-3xl font-bold text-white shadow-lg overflow-hidden ${localProfile.avatarColor} shrink-0 ring-1 ring-black/5 dark:ring-white/10 transition-all hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-black dark:focus-visible:ring-white`}
+                   >
                       {localProfile.avatarImage ? (
                         <img
                           src={localProfile.avatarImage}
@@ -223,23 +229,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       ) : (
                         localProfile.name.charAt(0).toUpperCase()
                       )}
-                   </div>
+                      <span className="pointer-events-none absolute inset-0 bg-black/0 group-hover:bg-black/10 group-focus-visible:bg-black/10 transition-colors" />
+                   </button>
                    <div className="space-y-1 pt-1 text-center md:text-left flex-1 min-w-0">
                      <p className="font-medium text-black dark:text-white">Profile Photo</p>
-                     <p className="text-xs text-gray-400 dark:text-zinc-500">Upload your avatar image, or keep initials with a background color.</p>
+                     <p className="text-xs text-gray-400 dark:text-zinc-500">Click your avatar to upload or replace image. You can also keep initials with a background color.</p>
                      <div className="mt-3 space-y-3">
-                        <button
-                          onClick={() => avatarInputRef.current?.click()}
-                          className="group w-full md:max-w-[360px] rounded-2xl border border-dashed border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-900/50 px-3.5 py-3 text-left hover:border-black dark:hover:border-zinc-500 hover:bg-gray-50 dark:hover:bg-zinc-900 transition-colors"
-                        >
-                          <span className="inline-flex w-8 h-8 items-center justify-center rounded-lg bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-zinc-300 group-hover:text-black dark:group-hover:text-white transition-colors">
-                            <Icons.Upload />
-                          </span>
-                          <p className="mt-2 text-xs font-semibold text-gray-700 dark:text-zinc-200">
-                            {localProfile.avatarImage ? 'Replace avatar image' : 'Choose avatar image'}
-                          </p>
-                          <p className="text-[11px] text-gray-400 dark:text-zinc-500">PNG / JPG / WebP, up to 2MB</p>
-                        </button>
                         <input
                           ref={avatarInputRef}
                           type="file"
