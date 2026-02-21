@@ -67,6 +67,11 @@ To run this project locally on your machine:
 - 原生壳增强：`StatusBar` / `SplashScreen` / `Keyboard` / Android 返回键行为
 - 运行环境识别（Browser / Installed PWA / Native）
 
+### 第三轮（已完成）
+- 接入 Electron 桌面壳（macOS 可打包安装）
+- 增加一键生成 macOS `.dmg` 的脚本
+- 保持原有 Web/PWA/Capacitor 能力不变
+
 1. **准备 Web 资源并同步到原生工程**
    ```bash
    npm run app:prepare
@@ -92,6 +97,26 @@ To run this project locally on your machine:
    npm run app:run:android
    npm run app:run:ios
    ```
+
+## 💽 macOS DMG 打包与安装
+
+1. **本地桌面模式开发**
+   ```bash
+   npm run desktop:dev
+   ```
+
+2. **生成 macOS 安装包（.dmg）**
+   ```bash
+   npm run desktop:dmg
+   ```
+
+3. **找到安装包**
+   - 输出目录：`release/`
+   - 文件示例：`Gitick-0.2.0-universal.dmg`
+
+4. **安装**
+   - 双击 `.dmg`
+   - 将 `Gitick.app` 拖入 `Applications`
 
 说明：
 - 电脑端可直接通过浏览器安装为桌面应用（PWA）。
