@@ -54,6 +54,7 @@ const NavItem: React.FC<{
   isCollapsed
 }) => {
   const isActive = activeFilter === id;
+  const isCompact = isCollapsed;
   
   const formatTimeMini = (seconds: number) => {
     const m = Math.floor(seconds / 60);
@@ -73,15 +74,46 @@ const NavItem: React.FC<{
           className={`
             flex items-center w-full text-[13px] font-medium rounded-xl outline-none select-none
             transition-all duration-200
-            h-11 px-0
-            ${isActive 
-              ? 'bg-gray-100 dark:bg-zinc-800/90 text-black dark:text-white font-bold border border-gray-200/80 dark:border-zinc-700' 
-              : 'text-gray-500 dark:text-zinc-400 border border-transparent hover:bg-gray-50 dark:hover:bg-zinc-800/50 hover:border-gray-200/80 dark:hover:border-zinc-800 hover:text-gray-900 dark:hover:text-gray-200'}
+            h-11 px-0 ${isCompact ? 'justify-center' : ''}
+            ${
+              isActive
+                ? isCompact
+                  ? 'text-black dark:text-white border border-transparent'
+                  : 'bg-gray-100 dark:bg-zinc-800/90 text-black dark:text-white font-bold border border-gray-200/80 dark:border-zinc-700'
+                : isCompact
+                  ? 'text-gray-500 dark:text-zinc-400 border border-transparent hover:text-gray-900 dark:hover:text-gray-200'
+                  : 'text-gray-500 dark:text-zinc-400 border border-transparent hover:bg-gray-50 dark:hover:bg-zinc-800/50 hover:border-gray-200/80 dark:hover:border-zinc-800 hover:text-gray-900 dark:hover:text-gray-200'
+            }
           `}
         >
           {/* Icon Container - Fixed Width 48px (w-12) */}
-          <span className="shrink-0 w-12 h-full flex items-center justify-center transform-gpu transition-transform duration-200 group-hover:scale-105">
-            <span className={`w-5 h-5 flex items-center justify-center ${isActive ? 'text-black dark:text-white' : 'text-gray-400 dark:text-zinc-500 group-hover:text-gray-600 dark:group-hover:text-gray-300'}`}>
+          <span
+            className={`
+              shrink-0 flex items-center justify-center transform-gpu transition-all duration-200
+              ${isCompact ? 'w-11 h-11' : 'w-12 h-full group-hover:scale-105'}
+            `}
+          >
+            <span
+              className={`
+                flex items-center justify-center transition-all duration-200
+                ${isCompact ? 'w-9 h-9 rounded-2xl' : 'w-5 h-5'}
+                ${
+                  isCompact && isActive
+                    ? 'bg-gray-100 dark:bg-zinc-800 ring-1 ring-gray-200 dark:ring-zinc-700 shadow-sm'
+                    : ''
+                }
+                ${
+                  isCompact && !isActive
+                    ? 'group-hover:bg-gray-100/80 dark:group-hover:bg-zinc-800/60'
+                    : ''
+                }
+                ${
+                  isActive
+                    ? 'text-black dark:text-white'
+                    : 'text-gray-400 dark:text-zinc-500 group-hover:text-gray-600 dark:group-hover:text-gray-300'
+                }
+              `}
+            >
               {icon}
             </span>
           </span>

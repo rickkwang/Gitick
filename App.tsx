@@ -164,6 +164,8 @@ const App: React.FC = () => {
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [undoAction, setUndoAction] = useState<(() => void) | undefined>(undefined);
   const toastTimeoutRef = useRef<number | null>(null);
+  const themeSwitchTimerRef = useRef<number | null>(null);
+  const themeSwitchRafRef = useRef<number | null>(null);
   const desktopUpdateUserFlowRef = useRef(false);
   const manualDesktopCheckRef = useRef(false);
   const desktopUpdaterSignalRef = useRef(false);
@@ -272,6 +274,33 @@ const App: React.FC = () => {
   const handleStartFocus = () => startTimer();
   const handlePauseFocus = () => pauseTimer();
   const handleResetFocus = () => resetTimer();
+  const toggleThemeMode = useCallback(() => {
+    if (typeof window === 'undefined') {
+      setIsDarkMode((prev) => !prev);
+      return;
+    }
+
+    const root = document.documentElement;
+    root.classList.add('theme-switching');
+
+    if (themeSwitchRafRef.current !== null) {
+      window.cancelAnimationFrame(themeSwitchRafRef.current);
+      themeSwitchRafRef.current = null;
+    }
+    if (themeSwitchTimerRef.current !== null) {
+      window.clearTimeout(themeSwitchTimerRef.current);
+      themeSwitchTimerRef.current = null;
+    }
+
+    themeSwitchRafRef.current = window.requestAnimationFrame(() => {
+      setIsDarkMode((prev) => !prev);
+      themeSwitchRafRef.current = null;
+      themeSwitchTimerRef.current = window.setTimeout(() => {
+        root.classList.remove('theme-switching');
+        themeSwitchTimerRef.current = null;
+      }, 180);
+    });
+  }, []);
 
   useEffect(() => {
     void initNativeAppShell();
@@ -335,6 +364,7 @@ const App: React.FC = () => {
     } else {
       document.documentElement.classList.remove('dark');
     }
+    document.documentElement.style.colorScheme = isDarkMode ? 'dark' : 'light';
     void syncStatusBarWithTheme(isDarkMode);
   }, [isDarkMode]);
 
@@ -368,6 +398,13 @@ const App: React.FC = () => {
       if (toastTimeoutRef.current) {
         clearTimeout(toastTimeoutRef.current);
       }
+      if (themeSwitchRafRef.current !== null) {
+        window.cancelAnimationFrame(themeSwitchRafRef.current);
+      }
+      if (themeSwitchTimerRef.current !== null) {
+        window.clearTimeout(themeSwitchTimerRef.current);
+      }
+      document.documentElement.classList.remove('theme-switching');
     },
     [],
   );
@@ -1063,7 +1100,7 @@ const App: React.FC = () => {
         {/* COL 2: Main Content */}
         <main className="flex-1 flex flex-col min-w-0 h-full bg-gradient-to-b from-gray-50 via-gray-50/95 to-white dark:from-zinc-900 dark:via-zinc-900 dark:to-zinc-950 relative z-0 transition-colors duration-300">
            
-           <div key={filter} className="h-full flex flex-col">
+           <div key={filter} className="h-full flex flex-col animate-view-breathe">
              
              {filter === 'focus' ? (
                <Suspense fallback={<div className="flex-1 animate-pulse bg-gray-50/80 dark:bg-zinc-900/80" />}>
@@ -1357,7 +1394,7 @@ const App: React.FC = () => {
           <SettingsModal
             onClose={() => setShowSettings(false)}
             isDarkMode={isDarkMode}
-            onToggleTheme={() => setIsDarkMode(!isDarkMode)}
+            onToggleTheme={toggleThemeMode}
             desktopFontSize={desktopFontSize}
             onChangeDesktopFontSize={setDesktopFontSize}
             userProfile={userProfile}
