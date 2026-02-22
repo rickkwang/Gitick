@@ -1,15 +1,11 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import React, { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { TaskInput } from './components/TaskInput';
 import { TaskItem } from './components/TaskItem';
 import { StagingPanel } from './components/StagingPanel';
-import { FocusMode } from './components/FocusMode';
-import { Heatmap } from './components/Heatmap';
-import { GitGraph } from './components/GitGraph';
 import { StatusBar } from './components/StatusBar';
-import { SettingsModal } from './components/SettingsModal';
 import { ConfirmDialog } from './components/ConfirmDialog';
-import { Task, FilterType, UserProfile, Priority } from './types';
+import { FilterType, Task, UserProfile } from './types';
 import { Icons, PROJECTS as DEFAULT_PROJECTS } from './constants';
 import {
   getRuntimePlatform,
@@ -18,8 +14,10 @@ import {
   registerAndroidBackButton,
   syncStatusBarWithTheme,
 } from './services/nativeApp';
-import { addDaysLocalIsoDate, todayLocalIsoDate } from './utils/date';
+import { playSuccessSound } from './utils/audio';
+import { createOnboardingTasks, DEFAULT_USER_PROFILE } from './utils/appDefaults';
 import { sanitizeTaskList } from './utils/taskSanitizer';
+import { getFilterBreadcrumb, getFilteredTasks, getTaskCounts, groupDashboardTasks, searchTasks } from './utils/taskView';
 import {
   LEGACY_STORAGE_KEYS,
   STORAGE_KEYS,
@@ -30,71 +28,12 @@ import {
   writeStoredValue,
 } from './utils/storage';
 
-// --- ONBOARDING DATA ---
-const ONBOARDING_TASKS: Task[] = [
-  {
-    id: 'welcome-1',
-    title: 'Welcome to Gitick! 👋 Start here.',
-    description: 'Gitick is a minimalist task manager inspired by Git and TickTick. \n\nFeatures:\n- Local-first (Privacy focused)\n- Smart text parsing\n- Focus timer\n- Git-style contribution graph',
-    completed: false,
-    priority: Priority.HIGH,
-    tags: ['welcome', 'guide'],
-    list: 'Inbox',
-    subtasks: [
-      { id: 'sub-1', title: 'Click this task to see details', completed: true },
-      { id: 'sub-2', title: 'Try completing this subtask', completed: false },
-    ],
-    createdAt: Date.now(),
-  },
-  {
-    id: 'welcome-2',
-    title: 'Try Smart Parsing: Type "!high #demo today"',
-    description: 'When adding a task, try typing:\n\n"Buy coffee !high #life today"\n\nIt will automatically set the priority, tag, and due date.',
-    completed: false,
-    priority: Priority.MEDIUM,
-    tags: ['feature', 'smart-syntax'],
-    list: 'Inbox',
-    subtasks: [],
-    createdAt: Date.now() - 1000,
-  },
-  {
-    id: 'welcome-3',
-    title: 'Explore Focus Mode 🍅',
-    description: 'Click the "Focus Mode" in the sidebar to start a Pomodoro timer.',
-    completed: false,
-    priority: Priority.LOW,
-    tags: ['productivity'],
-    list: 'Study',
-    subtasks: [],
-    createdAt: Date.now() - 2000,
-  }
-];
-
-// --- SOUND UTILS ---
-// Simple synthesized "Pop" sound to avoid external assets failing
-const playSuccessSound = () => {
-  try {
-    const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-    if (!AudioContext) return;
-    const ctx = new AudioContext();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
-    osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.1); // Slide up to A5
-    
-    gain.gain.setValueAtTime(0.1, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
-
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.start();
-    osc.stop(ctx.currentTime + 0.1);
-  } catch (e) {
-    console.error("Audio play failed", e);
-  }
-};
+const FocusMode = lazy(() => import('./components/FocusMode').then((module) => ({ default: module.FocusMode })));
+const Heatmap = lazy(() => import('./components/Heatmap').then((module) => ({ default: module.Heatmap })));
+const GitGraph = lazy(() => import('./components/GitGraph').then((module) => ({ default: module.GitGraph })));
+const SettingsModal = lazy(() =>
+  import('./components/SettingsModal').then((module) => ({ default: module.SettingsModal })),
+);
 
 interface DeferredInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -119,14 +58,6 @@ interface ConfirmDialogRequest {
   onCancel?: () => void | Promise<void>;
 }
 
-const DEFAULT_USER_PROFILE: UserProfile = {
-  name: 'User',
-  email: 'user@gitick.app',
-  jobTitle: 'Productivity Master',
-  avatarColor: 'bg-zinc-900',
-  avatarImage: '',
-};
-
 const App: React.FC = () => {
   // Initialize tasks with Onboarding data if localStorage is empty
   const [tasks, setTasks] = useState<Task[]>(() => {
@@ -135,7 +66,7 @@ const App: React.FC = () => {
       null,
       (value) => sanitizeTaskList(value),
     );
-     return saved !== null ? saved : ONBOARDING_TASKS;
+     return saved !== null ? saved : createOnboardingTasks();
   });
 
   const [filter, setFilter] = useState<FilterType>('next7days');
@@ -944,105 +875,14 @@ const App: React.FC = () => {
       showToast(`${importedTasks.length} tasks imported`);
   };
 
-  // --- Filter & Sorting Logic ---
-  const filteredTasks = useMemo(() => {
-    const todayStr = todayLocalIsoDate();
-    const next7daysStr = addDaysLocalIsoDate(7);
-    
-    // Base Filtering
-    let filtered = tasks;
+  const filteredTasks = useMemo(() => getFilteredTasks(tasks, filter, projects), [filter, projects, tasks]);
 
-    if (filter === 'completed') {
-       filtered = filtered.filter(t => t.completed);
-    } else if (filter === 'next7days') {
-       filtered = filtered.filter(t => !t.completed && Boolean(t.dueDate) && t.dueDate <= next7daysStr);
-    } else if (filter === 'today') {
-      filtered = filtered.filter(t => !t.completed && t.dueDate === todayStr);
-    } else if (filter === 'inbox') {
-      filtered = filtered.filter(t => !t.completed && (t.list === 'Inbox' || !t.list));
-    } else if (projects.includes(filter)) {
-       filtered = filtered.filter(t => t.list === filter && !t.completed);
-    } else {
-       filtered = filtered.filter(t => !t.completed);
-    }
+  const taskGroups = useMemo(
+    () => (filter === 'next7days' ? groupDashboardTasks(filteredTasks) : null),
+    [filteredTasks, filter],
+  );
 
-    // Advanced Sorting
-    return [...filtered].sort((a, b) => {
-        // 1. Completion check
-        if (a.completed !== b.completed) return a.completed ? 1 : -1;
-
-        // 2. Priority Logic (High = 3, Med = 2, Low = 1)
-        const pScore = { [Priority.HIGH]: 3, [Priority.MEDIUM]: 2, [Priority.LOW]: 1 };
-        const scoreA = pScore[a.priority];
-        const scoreB = pScore[b.priority];
-        if (scoreA !== scoreB) return scoreB - scoreA; // Descending priority
-
-        // 3. Due Date Logic (Overdue at top)
-        if (a.dueDate && b.dueDate) {
-            return a.dueDate.localeCompare(b.dueDate);
-        }
-        if (a.dueDate && !b.dueDate) return -1; // Date first
-        if (!a.dueDate && b.dueDate) return 1;
-
-        // 4. Creation Date
-        return b.createdAt - a.createdAt;
-    });
-  }, [filter, projects, tasks]);
-
-  // --- Grouping Logic for "TickTick" style Dashboard ---
-  const taskGroups = useMemo(() => {
-    if (filter !== 'next7days') return null;
-
-    const todayStr = todayLocalIsoDate();
-    const tmrStr = addDaysLocalIsoDate(1);
-
-    const groups: { [key: string]: Task[] } = {
-        'Overdue': [],
-        'Today': [],
-        'Tomorrow': [],
-        'Next 7 Days': [],
-    };
-
-    filteredTasks.forEach(t => {
-        if (t.dueDate && t.dueDate < todayStr) {
-            groups['Overdue'].push(t);
-        } else if (t.dueDate && t.dueDate === todayStr) {
-            groups['Today'].push(t);
-        } else if (t.dueDate && t.dueDate === tmrStr) {
-            groups['Tomorrow'].push(t);
-        } else {
-            groups['Next 7 Days'].push(t);
-        }
-    });
-
-    return groups;
-  }, [filteredTasks, filter]);
-
-
-  const taskCounts = useMemo(() => {
-    const counts: Record<string, number> = {};
-    const active = tasks.filter((t) => !t.completed);
-    counts['inbox'] = active.filter((t) => t.list === 'Inbox' || !t.list).length;
-    const todayStr = todayLocalIsoDate();
-    const next7daysStr = addDaysLocalIsoDate(7);
-    counts['today'] = active.filter((t) => t.dueDate === todayStr).length;
-    counts['next7days'] = active.filter((t) => t.dueDate && t.dueDate <= next7daysStr).length;
-    projects.forEach((projectName) => {
-      counts[projectName] = active.filter((t) => t.list === projectName).length;
-    });
-    return counts;
-  }, [projects, tasks]);
-
-  const getBreadcrumb = () => {
-    switch(filter) {
-      case 'next7days': return '~/dashboard';
-      case 'today': return '~/plan/today';
-      case 'completed': return '~/repository/history';
-      case 'inbox': return '~/inbox';
-      case 'focus': return '~/terminal/focus';
-      default: return `~/projects/${filter.toLowerCase()}`;
-    }
-  };
+  const taskCounts = useMemo(() => getTaskCounts(tasks, projects), [projects, tasks]);
   
   // Empty State Logic
   const getEmptyState = () => {
@@ -1061,15 +901,7 @@ const App: React.FC = () => {
 
   // Only show input on Dashboard, Today, Inbox, OR active projects
   const showTaskInput = ['next7days', 'today', 'inbox'].includes(filter) || projects.includes(filter);
-  const searchResults = useMemo(() => {
-    const keyword = searchQuery.trim().toLowerCase();
-    if (!keyword) return [];
-    return tasks.filter((task) => {
-      const inTitle = task.title.toLowerCase().includes(keyword);
-      const inTags = task.tags.some((tag) => tag.toLowerCase().includes(keyword));
-      return inTitle || inTags;
-    });
-  }, [searchQuery, tasks]);
+  const searchResults = useMemo(() => searchTasks(tasks, searchQuery), [searchQuery, tasks]);
 
   const renderEmptyState = () => (
     <div className="flex flex-col items-center justify-center pt-24 text-center select-none opacity-60">
@@ -1234,16 +1066,18 @@ const App: React.FC = () => {
            <div key={filter} className="h-full flex flex-col">
              
              {filter === 'focus' ? (
-               <FocusMode 
-                 timeLeft={focusTimeLeft}
-                 setTimeLeft={handleSetTimeLeft}
-                 isActive={isFocusActive}
-                 onStart={handleStartFocus}
-                 onPause={handlePauseFocus}
-                 onReset={handleResetFocus}
-                 mode={focusModeType}
-                 setMode={handleFocusModeChange}
-               />
+               <Suspense fallback={<div className="flex-1 animate-pulse bg-gray-50/80 dark:bg-zinc-900/80" />}>
+                 <FocusMode
+                   timeLeft={focusTimeLeft}
+                   setTimeLeft={handleSetTimeLeft}
+                   isActive={isFocusActive}
+                   onStart={handleStartFocus}
+                   onPause={handlePauseFocus}
+                   onReset={handleResetFocus}
+                   mode={focusModeType}
+                   setMode={handleFocusModeChange}
+                 />
+               </Suspense>
              ) : (
                <div className="flex-1 flex flex-col h-full relative">
                   
@@ -1251,7 +1085,9 @@ const App: React.FC = () => {
                   <div className="hidden md:flex h-16 items-center justify-between px-8 shrink-0 bg-gray-50/85 dark:bg-zinc-900/85 backdrop-blur-sm z-10 transition-colors duration-300">
                      <div className="flex items-center gap-2 text-sm font-mono text-gray-500 dark:text-zinc-500">
                         <Icons.Folder />
-                        <span className="truncate tracking-tight font-medium text-black dark:text-white opacity-70">{getBreadcrumb()}</span>
+                        <span className="truncate tracking-tight font-medium text-black dark:text-white opacity-70">
+                          {getFilterBreadcrumb(filter)}
+                        </span>
                      </div>
                      <div className="flex items-center gap-4">
                         {isFocusActive && (
@@ -1292,14 +1128,18 @@ const App: React.FC = () => {
                                          Activity Log
                                       </div>
                                    </div>
-                                   <Heatmap tasks={tasks} />
+                                   <Suspense fallback={<div className="h-44 animate-pulse rounded-xl bg-gray-100 dark:bg-zinc-800/60" />}>
+                                     <Heatmap tasks={tasks} />
+                                   </Suspense>
                                 </div>
                              </div>
                           )}
                           
                           {/* LIST RENDERING */}
                           {filter === 'completed' ? (
-                             <GitGraph tasks={filteredTasks} onDelete={deleteTask} />
+                             <Suspense fallback={<div className="h-40 animate-pulse rounded-xl bg-gray-100 dark:bg-zinc-800/60" />}>
+                               <GitGraph tasks={filteredTasks} onDelete={deleteTask} />
+                             </Suspense>
                           ) : (
                             <div className="pb-36">
                               {/* Grouped View for Dashboard (TickTick Style) */}
@@ -1513,28 +1353,30 @@ const App: React.FC = () => {
 
       {/* Settings Modal */}
       {showSettings && (
-        <SettingsModal 
-          onClose={() => setShowSettings(false)}
-          isDarkMode={isDarkMode}
-          onToggleTheme={() => setIsDarkMode(!isDarkMode)}
-          desktopFontSize={desktopFontSize}
-          onChangeDesktopFontSize={setDesktopFontSize}
-          userProfile={userProfile}
-          onUpdateProfile={setUserProfile}
-          tasks={tasks}
-          onImportData={handleImportData}
-          onClearData={clearAllLocalData}
-          isNativeApp={nativeApp}
-          runtimePlatform={runtimePlatform}
-          isStandaloneInstalled={isStandaloneInstalled}
-          canInstallApp={Boolean(deferredInstallPrompt)}
-          onRequestInstallApp={requestInstallApp}
-          desktopAppVersion={desktopAppVersion}
-          canCheckDesktopUpdate={isDesktopRuntime}
-          desktopUpdateStatus={desktopUpdateStatus}
-          isCheckingDesktopUpdate={isCheckingDesktopUpdate}
-          onCheckDesktopUpdate={requestDesktopUpdateCheck}
-        />
+        <Suspense fallback={<div className="fixed inset-0 z-[90] bg-black/20 backdrop-blur-sm" />}>
+          <SettingsModal
+            onClose={() => setShowSettings(false)}
+            isDarkMode={isDarkMode}
+            onToggleTheme={() => setIsDarkMode(!isDarkMode)}
+            desktopFontSize={desktopFontSize}
+            onChangeDesktopFontSize={setDesktopFontSize}
+            userProfile={userProfile}
+            onUpdateProfile={setUserProfile}
+            tasks={tasks}
+            onImportData={handleImportData}
+            onClearData={clearAllLocalData}
+            isNativeApp={nativeApp}
+            runtimePlatform={runtimePlatform}
+            isStandaloneInstalled={isStandaloneInstalled}
+            canInstallApp={Boolean(deferredInstallPrompt)}
+            onRequestInstallApp={requestInstallApp}
+            desktopAppVersion={desktopAppVersion}
+            canCheckDesktopUpdate={isDesktopRuntime}
+            desktopUpdateStatus={desktopUpdateStatus}
+            isCheckingDesktopUpdate={isCheckingDesktopUpdate}
+            onCheckDesktopUpdate={requestDesktopUpdateCheck}
+          />
+        </Suspense>
       )}
 
       <ConfirmDialog
