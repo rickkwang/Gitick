@@ -340,6 +340,14 @@ const App: React.FC = () => {
     };
   }, [nativeApp]);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const root = document.documentElement;
+    root.style.setProperty('--mac-traffic-safe-top', isDesktopMac ? '24px' : '0px');
+    root.style.setProperty('--mac-traffic-safe-left', isDesktopMac ? '74px' : '0px');
+  }, [isDesktopMac]);
+
   // Persistence Effects
   useEffect(() => {
     writeStoredJson(STORAGE_KEYS.tasks, tasks);
@@ -1047,7 +1055,7 @@ const App: React.FC = () => {
     >
       
       {/* Mobile Header with Safe Area Padding */}
-      <header className="md:hidden bg-white/95 dark:bg-zinc-950/95 border-b border-gray-100 dark:border-zinc-800 shrink-0 z-50 pt-safe backdrop-blur-sm transition-colors duration-300">
+      <header className="md:hidden bg-white/98 dark:bg-zinc-950/98 border-b border-gray-100 dark:border-zinc-800 shrink-0 z-50 pt-safe transition-colors duration-300">
          <div className="h-14 flex items-center px-4 justify-between">
             <div className="flex items-center gap-3">
                <button
@@ -1111,7 +1119,7 @@ const App: React.FC = () => {
                   
                   {/* Working Dir Header (Desktop Only) */}
                   <div
-                    className="hidden md:flex h-16 items-center justify-between px-8 shrink-0 bg-gray-50/85 dark:bg-zinc-900/85 backdrop-blur-sm z-10 transition-colors duration-300"
+                    className="hidden md:flex h-16 items-center justify-between px-8 shrink-0 bg-gray-50/96 dark:bg-zinc-900/96 z-10 transition-colors duration-300"
                     style={isDesktopMac ? ({ WebkitAppRegion: 'drag' } as React.CSSProperties) : undefined}
                   >
                      <div className="flex items-center gap-2 text-sm font-mono text-gray-500 dark:text-zinc-500">
@@ -1232,7 +1240,7 @@ const App: React.FC = () => {
         {/* COL 3: Staging Area */}
         <aside 
           className={`
-             hidden lg:flex flex-col h-full bg-white/95 dark:bg-zinc-950/95 backdrop-blur-sm overflow-hidden border-l border-gray-200/70 dark:border-zinc-800/80
+             hidden lg:flex flex-col h-full bg-white/98 dark:bg-zinc-950/98 overflow-hidden border-l border-gray-200/70 dark:border-zinc-800/80
              transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)] 
              ${isRightSidebarOpen && filter !== 'focus' ? 'w-96 translate-x-0 opacity-100' : 'w-0 translate-x-10 opacity-0'}
           `}

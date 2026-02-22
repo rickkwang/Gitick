@@ -96,7 +96,7 @@ const NavItem: React.FC<{
             <span
               className={`
                 flex items-center justify-center transition-all duration-200
-                ${isCompact ? 'w-9 h-9 rounded-2xl [&>svg]:w-[18px] [&>svg]:h-[18px]' : 'w-5 h-5 [&>svg]:w-5 [&>svg]:h-5'}
+                ${isCompact ? 'w-9 h-9 rounded-2xl [&>svg]:w-[var(--sidebar-nav-icon-size)] [&>svg]:h-[var(--sidebar-nav-icon-size)]' : 'w-5 h-5 [&>svg]:w-[var(--sidebar-nav-icon-size)] [&>svg]:h-[var(--sidebar-nav-icon-size)]'}
                 [&>svg]:block [&>svg]:shrink-0
                 ${
                   isCompact && isActive
@@ -237,7 +237,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   // Optimized for "Silky" feel (ChatGPT/Obsidian style)
   // Using a custom spring-like bezier for more natural movement
   const sidebarClasses = `
-    fixed inset-y-0 left-0 z-[60] bg-white/95 dark:bg-zinc-950/95 backdrop-blur-sm flex flex-col border-r border-gray-200/75 dark:border-zinc-800/85
+    fixed inset-y-0 left-0 z-[60] bg-white/98 dark:bg-zinc-950/98 flex flex-col border-r border-gray-200/75 dark:border-zinc-800/85
     
     /* MOBILE CONFIGURATION */
     w-[280px]
@@ -251,6 +251,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
     md:transition-all md:duration-300 md:ease-[cubic-bezier(0.2,0,0,1)]
     ${renderCollapsed ? 'md:w-[80px]' : 'md:w-[270px]'}
   `;
+  const desktopExpandedHeaderStyle = isDesktopMac
+    ? ({
+        paddingTop: 'var(--mac-traffic-safe-top)',
+        paddingLeft: 'var(--mac-traffic-safe-left)',
+        paddingRight: '24px',
+      } as React.CSSProperties)
+    : undefined;
+  const desktopCollapsedHeaderStyle = isDesktopMac
+    ? ({ paddingTop: 'var(--mac-traffic-safe-top)' } as React.CSSProperties)
+    : undefined;
 
   return (
     <>
@@ -266,11 +276,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
       />
       
       <aside className={sidebarClasses}>
-        <div className={`flex flex-col h-full overflow-hidden w-full pt-safe md:pt-0 ${isDesktopMac ? 'pt-5 md:pt-2' : ''}`}>
+        <div className={`flex flex-col h-full overflow-hidden w-full pt-safe md:pt-0 ${isDesktopMac ? 'pt-5 md:pt-0' : ''}`}>
           
           {/* Header - Completely Refactored for Zero-Flicker */}
           <div
-            className="h-[76px] md:h-[88px] relative flex items-center shrink-0 select-none w-full"
+            className={`h-[76px] relative flex items-center shrink-0 select-none w-full ${isDesktopMac ? 'md:h-[calc(88px+var(--mac-traffic-safe-top))]' : 'md:h-[88px]'}`}
             style={isDesktopMac ? ({ WebkitAppRegion: 'drag' } as React.CSSProperties) : undefined}
           >
              
@@ -299,10 +309,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
              {/* 2. DESKTOP HEADER - EXPANDED (hidden on mobile) */}
              <div className={`
-                hidden md:flex absolute inset-0 px-6 items-center justify-between
+                hidden md:flex absolute inset-0 items-center justify-between
                 transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)]
+                ${isDesktopMac ? '' : 'md:px-6'}
                 ${renderCollapsed ? 'opacity-0 -translate-x-4 pointer-events-none' : 'opacity-100 translate-x-0 delay-100'}
-             `}>
+             `}
+             style={desktopExpandedHeaderStyle}>
                <div className="flex items-center gap-3.5 text-black dark:text-white overflow-hidden">
                  <span className="shrink-0 flex items-center justify-center">
                    <Icons.GitickLogo />
@@ -328,7 +340,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 hidden md:flex absolute inset-0 items-center justify-center
                 transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)]
                 ${renderCollapsed ? 'opacity-100 scale-100 delay-100' : 'opacity-0 scale-90 pointer-events-none'}
-             `}>
+             `}
+             style={desktopCollapsedHeaderStyle}>
                 <button 
                   onClick={toggleCollapse} 
                   aria-label="Expand sidebar"
