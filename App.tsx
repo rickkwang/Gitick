@@ -1043,17 +1043,8 @@ const App: React.FC = () => {
 
   return (
     <div
-      className={`flex flex-col h-dvh font-sans text-gray-900 dark:text-dark-text bg-white dark:bg-zinc-950 overflow-hidden transition-colors duration-300 selection:bg-black selection:text-white dark:selection:bg-white dark:selection:text-black ${
-        isDesktopMac ? 'pt-10' : ''
-      } ${isStartupStatic ? 'startup-static' : ''}`}
-    > 
-      {isDesktopMac && (
-        <div
-          className="fixed top-0 left-0 right-0 z-[120] h-10"
-          style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
-          aria-hidden="true"
-        />
-      )}
+      className={`flex flex-col h-dvh font-sans text-gray-900 dark:text-dark-text bg-white dark:bg-zinc-950 overflow-hidden transition-colors duration-300 selection:bg-black selection:text-white dark:selection:bg-white dark:selection:text-black ${isStartupStatic ? 'startup-static' : ''}`}
+    >
       
       {/* Mobile Header with Safe Area Padding */}
       <header className="md:hidden bg-white/95 dark:bg-zinc-950/95 border-b border-gray-100 dark:border-zinc-800 shrink-0 z-50 pt-safe backdrop-blur-sm transition-colors duration-300">
@@ -1119,7 +1110,10 @@ const App: React.FC = () => {
                <div className="flex-1 flex flex-col h-full relative">
                   
                   {/* Working Dir Header (Desktop Only) */}
-                  <div className="hidden md:flex h-16 items-center justify-between px-8 shrink-0 bg-gray-50/85 dark:bg-zinc-900/85 backdrop-blur-sm z-10 transition-colors duration-300">
+                  <div
+                    className="hidden md:flex h-16 items-center justify-between px-8 shrink-0 bg-gray-50/85 dark:bg-zinc-900/85 backdrop-blur-sm z-10 transition-colors duration-300"
+                    style={isDesktopMac ? ({ WebkitAppRegion: 'drag' } as React.CSSProperties) : undefined}
+                  >
                      <div className="flex items-center gap-2 text-sm font-mono text-gray-500 dark:text-zinc-500">
                         <Icons.Folder />
                         <span className="truncate tracking-tight font-medium text-black dark:text-white opacity-70">
@@ -1140,6 +1134,7 @@ const App: React.FC = () => {
                           aria-label="Open quick search"
                           className="group flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-100/50 dark:bg-zinc-800/50 hover:bg-white dark:hover:bg-zinc-800 border border-transparent hover:border-gray-200 dark:hover:border-zinc-700 transition-all duration-200"
                           title="Quick Search (Cmd+K)"
+                          style={isDesktopMac ? ({ WebkitAppRegion: 'no-drag' } as React.CSSProperties) : undefined}
                         >
                            <Icons.Search />
                            <span className="text-xs text-gray-400 dark:text-zinc-500 font-medium group-hover:text-black dark:group-hover:text-white transition-colors">Search</span>

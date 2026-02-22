@@ -90,13 +90,14 @@ const NavItem: React.FC<{
           <span
             className={`
               shrink-0 flex items-center justify-center transform-gpu transition-all duration-200
-              ${isCompact ? 'w-11 h-11' : 'w-12 h-full group-hover:scale-105'}
+              ${isCompact ? 'w-11 h-11 mx-auto' : 'w-12 h-full group-hover:scale-105'}
             `}
           >
             <span
               className={`
                 flex items-center justify-center transition-all duration-200
-                ${isCompact ? 'w-9 h-9 rounded-2xl' : 'w-5 h-5'}
+                ${isCompact ? 'w-9 h-9 rounded-2xl [&>svg]:w-[18px] [&>svg]:h-[18px]' : 'w-5 h-5 [&>svg]:w-5 [&>svg]:h-5'}
+                [&>svg]:block [&>svg]:shrink-0
                 ${
                   isCompact && isActive
                     ? 'bg-gray-100 dark:bg-zinc-800 ring-1 ring-gray-200 dark:ring-zinc-700 shadow-sm'
@@ -124,7 +125,7 @@ const NavItem: React.FC<{
             flex items-center flex-1 min-w-0 overflow-hidden whitespace-nowrap pl-1
             transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)] transform-gpu
             opacity-100 translate-x-0
-            ${isCollapsed ? 'md:opacity-0 md:translate-x-2' : 'md:opacity-100 md:translate-x-0'}
+            ${isCollapsed ? 'md:hidden' : 'md:flex md:opacity-100 md:translate-x-0 md:w-auto md:flex-1 md:pl-1'}
           `}>
             <span className="truncate pr-2">{label}</span>
             
@@ -153,7 +154,7 @@ const NavItem: React.FC<{
 
         {/* Collapsed Indicator Dot - Desktop Only */}
         {!isFocusItem && taskCount > 0 && isCollapsed && (
-             <span className="hidden md:block absolute top-3 left-8 w-2 h-2 rounded-full bg-black dark:bg-white ring-2 ring-white dark:ring-zinc-950 pointer-events-none animate-in fade-in zoom-in duration-200" />
+             <span className="hidden md:block absolute top-2.5 left-1/2 translate-x-[8px] w-1.5 h-1.5 rounded-full bg-black dark:bg-white ring-2 ring-white dark:ring-zinc-950 pointer-events-none animate-in fade-in zoom-in duration-200" />
         )}
         
         {/* Delete Button */}
@@ -268,7 +269,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div className={`flex flex-col h-full overflow-hidden w-full pt-safe md:pt-0 ${isDesktopMac ? 'pt-5 md:pt-2' : ''}`}>
           
           {/* Header - Completely Refactored for Zero-Flicker */}
-          <div className="h-[76px] md:h-[88px] relative flex items-center shrink-0 select-none w-full">
+          <div
+            className="h-[76px] md:h-[88px] relative flex items-center shrink-0 select-none w-full"
+            style={isDesktopMac ? ({ WebkitAppRegion: 'drag' } as React.CSSProperties) : undefined}
+          >
              
              {/* 1. MOBILE HEADER: Static, Always Visible on Mobile (md:hidden) */}
              {/* This separates mobile logic from desktop state, preventing logo flicker during open */}
@@ -287,6 +291,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   aria-label="Close sidebar"
                   className="flex items-center justify-center p-2 -mr-2 rounded-lg text-gray-400 hover:text-black dark:hover:text-white transition-colors active:scale-95 transform"
                   title="Close Sidebar"
+                  style={isDesktopMac ? ({ WebkitAppRegion: 'no-drag' } as React.CSSProperties) : undefined}
                >
                   <Icons.SidebarLeft />
                </button>
@@ -312,6 +317,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   aria-label="Collapse sidebar"
                   className="flex items-center justify-center p-2 rounded-lg text-gray-400 hover:text-black dark:hover:text-white hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
                   title="Collapse Sidebar"
+                  style={isDesktopMac ? ({ WebkitAppRegion: 'no-drag' } as React.CSSProperties) : undefined}
                >
                   <Icons.SidebarLeft />
                </button>
@@ -328,6 +334,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   aria-label="Expand sidebar"
                   className="group relative flex items-center justify-center w-12 h-12 rounded-xl hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
                   title="Expand Sidebar"
+                  style={isDesktopMac ? ({ WebkitAppRegion: 'no-drag' } as React.CSSProperties) : undefined}
                 >
                    {/* Brand Logo - Visible by default */}
                    <span className="absolute inset-0 flex items-center justify-center text-black dark:text-white transition-all duration-300 transform group-hover:opacity-0 group-hover:scale-75 group-hover:rotate-12">
@@ -466,6 +473,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   className={`
                     group flex items-center w-full rounded-xl transition-all duration-200 outline-none
                     h-11 px-0
+                    ${renderCollapsed ? 'md:justify-center' : 'md:justify-start'}
                     hover:bg-gray-100 dark:hover:bg-zinc-800
                   `}
                   title="Settings & Profile"
@@ -486,7 +494,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       flex items-center justify-between flex-1 min-w-0 overflow-hidden pr-3 pl-1
                       transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)]
                       opacity-100 w-auto translate-x-0
-                      ${renderCollapsed ? 'md:opacity-0 md:w-0 md:translate-x-4' : 'md:opacity-100 md:w-auto md:translate-x-0'}
+                      ${renderCollapsed ? 'md:hidden' : 'md:flex md:opacity-100 md:w-auto md:translate-x-0 md:flex-1 md:pl-1 md:pr-3'}
                   `}>
                       <div className="flex flex-col items-start leading-tight">
                           <span className="text-[13px] font-bold text-gray-900 dark:text-white truncate max-w-[120px]">{userProfile.name}</span>
