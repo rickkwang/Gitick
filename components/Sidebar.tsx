@@ -237,7 +237,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   // Optimized for "Silky" feel (ChatGPT/Obsidian style)
   // Using a custom spring-like bezier for more natural movement
   const sidebarClasses = `
-    fixed inset-y-0 left-0 z-[60] bg-white/95 dark:bg-zinc-950/95 backdrop-blur-sm flex flex-col border-r border-gray-200/75 dark:border-zinc-800/85 md:border-r-0
+    fixed inset-y-0 left-0 z-[60] bg-white/95 dark:bg-zinc-950/95 backdrop-blur-sm flex flex-col border-r border-gray-200/75 dark:border-zinc-800/85 md:border-r-0 md:bg-transparent md:backdrop-blur-0
     
     /* MOBILE CONFIGURATION */
     w-[280px]
@@ -249,7 +249,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     /* DESKTOP CONFIGURATION (Overrides) */
     md:translate-x-0 md:shadow-none md:relative md:z-30 
     md:transition-all md:duration-300 md:ease-[cubic-bezier(0.2,0,0,1)]
-    ${renderCollapsed ? 'md:w-[80px] md:px-0 md:py-2 md:border-r-0 md:bg-gray-100/55 dark:md:bg-zinc-900/55 md:opacity-100 md:pointer-events-auto' : 'md:w-[270px] md:px-2 md:py-2 md:border-r-0 md:bg-gray-100/55 dark:md:bg-zinc-900/55 md:opacity-100'}
+    ${renderCollapsed ? 'md:w-[80px] md:px-0 md:py-2 md:border-r-0 md:opacity-100 md:pointer-events-auto' : 'md:w-[270px] md:px-2 md:py-2 md:border-r-0 md:opacity-100'}
   `;
 
   return (
