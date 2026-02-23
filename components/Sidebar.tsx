@@ -251,8 +251,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
     ${renderCollapsed ? 'md:w-[80px]' : 'md:w-[270px]'}
   `;
   const sectionHeaderMotionClass = renderCollapsed
-    ? 'md:invisible md:opacity-0 md:pointer-events-none'
-    : 'md:visible md:opacity-100';
+    ? 'md:max-w-0 md:px-0 md:pointer-events-none'
+    : 'md:max-w-[240px]';
 
   return (
     <>
@@ -299,52 +299,37 @@ export const Sidebar: React.FC<SidebarProps> = ({
                </button>
              </div>
 
-             {/* 2. DESKTOP HEADER - EXPANDED (hidden on mobile) */}
-             {!renderCollapsed && (
+             {/* 2. DESKTOP HEADER (hidden on mobile) */}
              <div className={`
-                hidden md:flex absolute inset-0 px-6 justify-between
+                hidden md:flex absolute inset-0
                 ${isDesktopMac ? 'items-end pb-4' : 'items-center'}
+                ${renderCollapsed ? 'justify-center px-0' : 'justify-between px-6'}
              `}>
-               <div className="flex items-center gap-3.5 text-black dark:text-white overflow-hidden">
+               <div
+                 className={`
+                   flex items-center text-black dark:text-white overflow-hidden
+                   transition-[max-width,margin] duration-200 ease-linear
+                   ${renderCollapsed ? 'max-w-0 mr-0' : 'max-w-[180px] mr-3'}
+                 `}
+               >
                  <span className="shrink-0 flex items-center justify-center">
                    <Icons.GitickLogo />
                  </span>
-                 <span className="text-base font-semibold tracking-tight whitespace-nowrap">
+                 <span className="ml-3.5 text-base font-semibold tracking-tight whitespace-nowrap">
                    Gitick
                  </span>
                </div>
-               
-               <button 
-                  onClick={toggleCollapse} 
-                  aria-label="Collapse sidebar"
-                  className="flex items-center justify-center p-2 rounded-lg text-gray-400 hover:text-black dark:hover:text-white hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
-                  title="Collapse Sidebar"
+
+               <button
+                  onClick={toggleCollapse}
+                  aria-label={renderCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+                  className="flex items-center justify-center w-12 h-12 rounded-xl text-gray-500 hover:text-black dark:hover:text-white hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
+                  title={renderCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
                   style={isDesktopMac ? ({ WebkitAppRegion: 'no-drag' } as React.CSSProperties) : undefined}
                >
-                  <Icons.SidebarLeft />
+                  {renderCollapsed ? <Icons.GitickLogo /> : <Icons.SidebarLeft />}
                </button>
              </div>
-             )}
-
-             {/* 3. DESKTOP HEADER - COLLAPSED (hidden on mobile) */}
-             {renderCollapsed && (
-             <div className={`
-                hidden md:flex absolute inset-0 justify-center
-                ${isDesktopMac ? 'items-end pb-4' : 'items-center'}
-             `}>
-                <button 
-                  onClick={toggleCollapse} 
-                  aria-label="Expand sidebar"
-                  className="group relative flex items-center justify-center w-12 h-12 rounded-xl hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
-                  title="Expand Sidebar"
-                  style={isDesktopMac ? ({ WebkitAppRegion: 'no-drag' } as React.CSSProperties) : undefined}
-                >
-                   <span className="absolute inset-0 flex items-center justify-center text-black dark:text-white">
-                     <Icons.GitickLogo />
-                   </span>
-                </button>
-             </div>
-             )}
           </div>
 
           <div className="flex-1 overflow-y-auto no-scrollbar py-3 space-y-7 px-3">
@@ -353,7 +338,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               {/* CRITICAL: md: prefix ensures collapse logic only affects desktop. Mobile is always visible (h-6) */}
               <div className={`
                  overflow-hidden px-3 h-6 mb-2 md:h-6 md:mb-2
-                 opacity-100
+                 transition-[max-width,padding] duration-200 ease-linear max-w-[240px]
                  ${sectionHeaderMotionClass}
               `}>
                 <h3 className="text-[10px] font-bold text-gray-400 dark:text-zinc-600 uppercase tracking-widest whitespace-nowrap pl-1">Overview</h3>
@@ -387,7 +372,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <div>
               <div className={`
                  flex items-center justify-between px-3 group overflow-hidden whitespace-nowrap h-6 mb-2 md:h-6 md:mb-2
-                 opacity-100
+                 transition-[max-width,padding] duration-200 ease-linear max-w-[240px]
                  ${sectionHeaderMotionClass}
               `}>
                   <h3 className="text-[10px] font-bold text-gray-400 dark:text-zinc-600 uppercase tracking-widest pl-1">Projects</h3>
@@ -444,7 +429,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <div>
                <div className={`
                   overflow-hidden px-3 h-6 mb-2 md:h-6 md:mb-2
-                  opacity-100
+                  transition-[max-width,padding] duration-200 ease-linear max-w-[240px]
                   ${sectionHeaderMotionClass}
                `}>
                  <h3 className="text-[10px] font-bold text-gray-400 dark:text-zinc-600 uppercase tracking-widest whitespace-nowrap pl-1">History</h3>
