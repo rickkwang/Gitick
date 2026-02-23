@@ -347,9 +347,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <div>
               {/* CRITICAL: md: prefix ensures collapse logic only affects desktop. Mobile is always visible (h-6) */}
               <div className={`
-                 overflow-hidden transition-all duration-200 px-3
-                 opacity-100 h-6 mb-2
-                 ${renderCollapsed ? 'md:opacity-0 md:h-0 md:mb-0' : 'md:opacity-100 md:h-6 md:mb-2'}
+                 overflow-hidden px-3 h-6 mb-2 flex items-center
+                 transition-[opacity,transform] duration-200
+                 opacity-100 translate-x-0
+                 ${renderCollapsed ? 'md:opacity-0 md:translate-x-1 md:pointer-events-none' : 'md:opacity-100 md:translate-x-0'}
               `}>
                 <h3 className="text-[10px] font-bold text-gray-400 dark:text-zinc-600 uppercase tracking-widest whitespace-nowrap pl-1">Overview</h3>
               </div>
@@ -381,10 +382,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
             {/* Section: Projects */}
             <div>
               <div className={`
-                 flex items-center justify-between px-3 group overflow-hidden whitespace-nowrap
-                 transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)]
-                 opacity-100 h-6 mb-2
-                 ${renderCollapsed ? 'md:opacity-0 md:h-0 md:mb-0' : 'md:opacity-100 md:h-6 md:mb-2'}
+                 flex items-center justify-between px-3 group overflow-hidden whitespace-nowrap h-6 mb-2
+                 transition-[opacity,transform] duration-200 ease-[cubic-bezier(0.2,0,0,1)]
+                 opacity-100 translate-x-0
+                 ${renderCollapsed ? 'md:opacity-0 md:translate-x-1 md:pointer-events-none' : 'md:opacity-100 md:translate-x-0'}
               `}>
                   <h3 className="text-[10px] font-bold text-gray-400 dark:text-zinc-600 uppercase tracking-widest pl-1">Projects</h3>
                   <button 
@@ -439,9 +440,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
             {/* Section: History */}
             <div>
                <div className={`
-                  overflow-hidden transition-all duration-200 px-3
-                  opacity-100 h-6 mb-2
-                  ${renderCollapsed ? 'md:opacity-0 md:h-0 md:mb-0' : 'md:opacity-100 md:h-6 md:mb-2'}
+                  overflow-hidden px-3 h-6 mb-2 flex items-center
+                  transition-[opacity,transform] duration-200
+                  opacity-100 translate-x-0
+                  ${renderCollapsed ? 'md:opacity-0 md:translate-x-1 md:pointer-events-none' : 'md:opacity-100 md:translate-x-0'}
                `}>
                  <h3 className="text-[10px] font-bold text-gray-400 dark:text-zinc-600 uppercase tracking-widest whitespace-nowrap pl-1">History</h3>
                </div>

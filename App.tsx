@@ -1,5 +1,6 @@
 import React, { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Sidebar } from './components/Sidebar';
+import { FocusMode } from './components/FocusMode';
 import { TaskInput } from './components/TaskInput';
 import { TaskItem } from './components/TaskItem';
 import { StagingPanel } from './components/StagingPanel';
@@ -28,12 +29,15 @@ import {
   writeStoredValue,
 } from './utils/storage';
 
-const FocusMode = lazy(() => import('./components/FocusMode').then((module) => ({ default: module.FocusMode })));
 const Heatmap = lazy(() => import('./components/Heatmap').then((module) => ({ default: module.Heatmap })));
 const GitGraph = lazy(() => import('./components/GitGraph').then((module) => ({ default: module.GitGraph })));
 const SettingsModal = lazy(() =>
   import('./components/SettingsModal').then((module) => ({ default: module.SettingsModal })),
 );
+const FOCUS_DEFAULT_SECONDS = 25 * 60;
+const BREAK_DEFAULT_SECONDS = 5 * 60;
+const getDefaultFocusSeconds = (mode: 'focus' | 'break') =>
+  mode === 'focus' ? FOCUS_DEFAULT_SECONDS : BREAK_DEFAULT_SECONDS;
 
 interface DeferredInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -176,11 +180,13 @@ const App: React.FC = () => {
   
   // --- GLOBAL FOCUS TIMER STATE ---
   const [focusEndTime, setFocusEndTime] = useState<number | null>(null);
-  const [focusTimeLeft, setFocusTimeLeft] = useState(25 * 60);
+  const [focusTimeLeft, setFocusTimeLeft] = useState(FOCUS_DEFAULT_SECONDS);
+  const [focusSessionDuration, setFocusSessionDuration] = useState(FOCUS_DEFAULT_SECONDS);
   const [isFocusActive, setIsFocusActive] = useState(false);
   const [focusModeType, setFocusModeType] = useState<'focus' | 'break'>('focus');
+  const [focusCompletedCount, setFocusCompletedCount] = useState(0);
+  const [autoAdvanceFocus, setAutoAdvanceFocus] = useState(true);
   const isFocusActiveRef = useRef(isFocusActive);
-  const getDefaultFocusSeconds = (mode: 'focus' | 'break') => (mode === 'focus' ? 25 * 60 : 5 * 60);
 
   useEffect(() => {
     isFocusActiveRef.current = isFocusActive;
@@ -194,10 +200,29 @@ const App: React.FC = () => {
   };
 
   // Start Timer Logic
+  const switchTimerMode = useCallback((nextMode: 'focus' | 'break', autoStart = false) => {
+    const nextDuration = getDefaultFocusSeconds(nextMode);
+    setFocusModeType(nextMode);
+    setFocusTimeLeft(nextDuration);
+    setFocusSessionDuration(nextDuration);
+
+    if (autoStart) {
+      setFocusEndTime(Date.now() + nextDuration * 1000);
+      setIsFocusActive(true);
+      return;
+    }
+
+    setFocusEndTime(null);
+    setIsFocusActive(false);
+  }, []);
+
   const startTimer = () => {
      if (isFocusActiveRef.current) return;
+     const startSeconds = Math.max(1, Math.floor(focusTimeLeft));
+     setFocusTimeLeft(startSeconds);
+     setFocusSessionDuration((prev) => Math.max(prev, startSeconds));
      const now = Date.now();
-     const end = now + (focusTimeLeft * 1000);
+     const end = now + startSeconds * 1000;
      setFocusEndTime(end);
      setIsFocusActive(true);
      if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'default') {
@@ -212,7 +237,9 @@ const App: React.FC = () => {
 
   const resetTimer = () => {
     pauseTimer();
-    setFocusTimeLeft(getDefaultFocusSeconds(focusModeType));
+    const defaultSeconds = getDefaultFocusSeconds(focusModeType);
+    setFocusTimeLeft(defaultSeconds);
+    setFocusSessionDuration(defaultSeconds);
   };
 
   // Timer Tick Effect (High Precision)
@@ -225,32 +252,38 @@ const App: React.FC = () => {
         const diff = Math.ceil((focusEndTime - now) / 1000);
         
         if (diff <= 0) {
-           // Finished
-           setFocusTimeLeft(0);
-           setIsFocusActive(false);
-           setFocusEndTime(null);
-           
-           document.title = "Gitick - Done!";
-           const msg = `${focusModeType === 'focus' ? 'Focus session' : 'Break'} finished!`;
+           const completedMode = focusModeType;
+           const nextMode = completedMode === 'focus' ? 'break' : 'focus';
+
+           if (completedMode === 'focus') {
+             setFocusCompletedCount((prev) => prev + 1);
+           }
+
+           document.title = 'Gitick - Done!';
+           const msg =
+             completedMode === 'focus'
+               ? 'Focus session finished. Time for a break.'
+               : 'Break finished. Back to focus.';
            showToast(msg);
            playSuccessSound();
            
            if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
-             new Notification("Gitick Timer", { body: msg, icon: '/favicon.ico' });
+             new Notification('Gitick Timer', { body: msg, icon: '/favicon.ico' });
            }
+           switchTimerMode(nextMode, autoAdvanceFocus);
         } else {
            setFocusTimeLeft(diff);
            document.title = `${formatTime(diff)} - ${focusModeType === 'focus' ? 'Focus' : 'Break'}`;
         }
       }, 500); 
     } else {
-      document.title = "Gitick - Minimalist Tasks";
+      document.title = 'Gitick - Minimalist Tasks';
     }
 
     return () => { 
       if (interval) clearInterval(interval); 
     };
-  }, [isFocusActive, focusEndTime, focusModeType]);
+  }, [isFocusActive, focusEndTime, focusModeType, autoAdvanceFocus, switchTimerMode]);
 
   // Handle Focus Mode UI Updates (Wrapping the logic for the component)
   const handleSetTimeLeft = (val: number | ((prev: number) => number)) => {
@@ -259,21 +292,24 @@ const App: React.FC = () => {
         const safeValue = Math.max(1, Math.floor(nextValue));
         if (isFocusActiveRef.current) {
           setFocusEndTime(Date.now() + safeValue * 1000);
+        } else {
+          setFocusSessionDuration(safeValue);
         }
         return safeValue;
       });
   };
 
   const handleFocusModeChange = (nextMode: 'focus' | 'break') => {
-    setFocusModeType(nextMode);
-    setIsFocusActive(false);
-    setFocusEndTime(null);
-    setFocusTimeLeft(getDefaultFocusSeconds(nextMode));
+    switchTimerMode(nextMode, false);
   };
 
   const handleStartFocus = () => startTimer();
   const handlePauseFocus = () => pauseTimer();
   const handleResetFocus = () => resetTimer();
+  const handleSkipFocusPhase = () => {
+    const nextMode = focusModeType === 'focus' ? 'break' : 'focus';
+    switchTimerMode(nextMode, isFocusActiveRef.current && autoAdvanceFocus);
+  };
   const toggleThemeMode = useCallback(() => {
     if (typeof window === 'undefined') {
       setIsDarkMode((prev) => !prev);
@@ -436,6 +472,13 @@ const App: React.FC = () => {
     setDesktopUpdateStatus('');
     setIsCheckingDesktopUpdate(false);
     setDesktopFontSize(13);
+    setFocusEndTime(null);
+    setFocusTimeLeft(FOCUS_DEFAULT_SECONDS);
+    setFocusSessionDuration(FOCUS_DEFAULT_SECONDS);
+    setIsFocusActive(false);
+    setFocusModeType('focus');
+    setFocusCompletedCount(0);
+    setAutoAdvanceFocus(true);
     const fallbackDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     setIsDarkMode(fallbackDark);
     showToast('All local data has been reset.');
@@ -1100,21 +1143,24 @@ const App: React.FC = () => {
         {/* COL 2: Main Content */}
         <main className="flex-1 flex flex-col min-w-0 h-full bg-gradient-to-b from-gray-50 via-gray-50/95 to-white dark:from-zinc-900 dark:via-zinc-900 dark:to-zinc-950 relative z-0 transition-colors duration-300">
            
-           <div key={filter} className="h-full flex flex-col animate-view-breathe">
+           <div className={`h-full flex flex-col ${filter === 'focus' ? '' : 'animate-view-breathe'}`}>
              
              {filter === 'focus' ? (
-               <Suspense fallback={<div className="flex-1 animate-pulse bg-gray-50/80 dark:bg-zinc-900/80" />}>
-                 <FocusMode
-                   timeLeft={focusTimeLeft}
-                   setTimeLeft={handleSetTimeLeft}
-                   isActive={isFocusActive}
-                   onStart={handleStartFocus}
-                   onPause={handlePauseFocus}
-                   onReset={handleResetFocus}
-                   mode={focusModeType}
-                   setMode={handleFocusModeChange}
-                 />
-               </Suspense>
+               <FocusMode
+                 timeLeft={focusTimeLeft}
+                 sessionDuration={focusSessionDuration}
+                 setTimeLeft={handleSetTimeLeft}
+                 isActive={isFocusActive}
+                 onStart={handleStartFocus}
+                 onPause={handlePauseFocus}
+                 onReset={handleResetFocus}
+                 onSkip={handleSkipFocusPhase}
+                 mode={focusModeType}
+                 setMode={handleFocusModeChange}
+                 completedFocusSessions={focusCompletedCount}
+                 autoAdvance={autoAdvanceFocus}
+                 onToggleAutoAdvance={setAutoAdvanceFocus}
+               />
              ) : (
                <div className="flex-1 flex flex-col h-full relative">
                   
