@@ -73,7 +73,7 @@ const NavItem: React.FC<{
           }}
           className={`
             flex items-center text-[13px] font-medium rounded-xl outline-none select-none
-            transition-colors duration-150
+            transition-[width,background-color,border-color,color,box-shadow] duration-200 ease-linear
             h-11 px-0
             ${isCompact ? 'w-11 mx-auto justify-center' : 'w-full justify-start'}
             ${
@@ -123,7 +123,8 @@ const NavItem: React.FC<{
           {/* Text Container */}
           <div className={`
             flex items-center flex-1 min-w-0 overflow-hidden whitespace-nowrap pl-1 max-w-[220px]
-            ${isCollapsed ? 'md:max-w-0 md:opacity-0 md:pl-0 pointer-events-none' : 'md:max-w-[220px] md:opacity-100 md:pl-1'}
+            transition-[max-width,padding] duration-200 ease-linear
+            ${isCollapsed ? 'md:max-w-0 md:pl-0 pointer-events-none' : 'md:max-w-[220px] md:pl-1'}
           `}>
             <span className="truncate pr-2">{label}</span>
             
@@ -246,7 +247,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     
     /* DESKTOP CONFIGURATION (Overrides) */
     md:translate-x-0 md:shadow-none md:relative md:z-30 
-    md:transition-none
+    md:transition-[width] md:duration-200 md:ease-linear
     ${renderCollapsed ? 'md:w-[80px]' : 'md:w-[270px]'}
   `;
   const sectionHeaderMotionClass = renderCollapsed
@@ -488,8 +489,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   {/* Text Container */}
                   <div className={`
                       flex items-center justify-between flex-1 min-w-0 overflow-hidden pr-3 pl-1
-                      opacity-100 w-auto
-                      ${renderCollapsed ? 'md:hidden' : 'md:flex md:opacity-100 md:w-auto md:translate-x-0 md:flex-1 md:pl-1 md:pr-3'}
+                      w-auto max-w-[160px] transition-[max-width,padding] duration-200 ease-linear
+                      ${renderCollapsed ? 'md:max-w-0 md:pl-0 md:pr-0 md:pointer-events-none' : 'md:max-w-[160px] md:flex-1 md:pl-1 md:pr-3'}
                   `}>
                       <div className="flex flex-col items-start leading-tight">
                           <span className="text-[13px] font-bold text-gray-900 dark:text-white truncate max-w-[120px]">{userProfile.name}</span>
