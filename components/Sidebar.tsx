@@ -490,7 +490,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       flex items-center justify-between flex-1 min-w-0 overflow-hidden pr-3 pl-1
                       transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)]
                       opacity-100 w-auto translate-x-0
-                      ${renderCollapsed ? 'md:opacity-0 md:w-0 md:translate-x-4' : 'md:opacity-100 md:w-auto md:translate-x-0'}
+                      ${renderCollapsed ? 'md:hidden' : 'md:opacity-100 md:w-auto md:translate-x-0'}
                   `}>
                       <div className="flex flex-col items-start leading-tight">
                           <span className="text-[13px] font-bold text-gray-900 dark:text-white truncate max-w-[120px]">{userProfile.name}</span>
