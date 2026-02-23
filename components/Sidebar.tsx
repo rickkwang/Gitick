@@ -55,6 +55,7 @@ const NavItem: React.FC<{
 }) => {
   const isActive = activeFilter === id;
   const isCompact = isCollapsed;
+  const rootClasses = isCompact ? 'px-0 flex justify-center' : 'px-2';
   
   const formatTimeMini = (seconds: number) => {
     const m = Math.floor(seconds / 60);
@@ -63,7 +64,7 @@ const NavItem: React.FC<{
   };
 
   return (
-    <div className="relative group px-2">
+    <div className={`relative group ${rootClasses}`}>
         <button
           type="button"
           title={isCollapsed ? label : undefined}
@@ -72,9 +73,9 @@ const NavItem: React.FC<{
             onCloseMobile();
           }}
           className={`
-            flex items-center w-full text-[13px] font-medium rounded-xl outline-none select-none
+            flex items-center text-[13px] font-medium rounded-xl outline-none select-none
             transition-all duration-200
-            h-11 px-0 ${isCompact ? 'justify-center' : ''}
+            h-11 px-0 ${isCompact ? 'justify-center w-12 mx-auto' : 'w-full'}
             ${
               isActive
                 ? isCompact
@@ -153,7 +154,7 @@ const NavItem: React.FC<{
 
         {/* Collapsed Indicator Dot - Desktop Only */}
         {!isFocusItem && taskCount > 0 && isCollapsed && (
-             <span className="hidden md:block absolute top-3 left-8 w-2 h-2 rounded-full bg-black dark:bg-white ring-2 ring-white dark:ring-zinc-950 pointer-events-none animate-in fade-in zoom-in duration-200" />
+             <span className="hidden md:block absolute top-3 left-1/2 translate-x-[10px] w-2 h-2 rounded-full bg-black dark:bg-white ring-2 ring-white dark:ring-zinc-950 pointer-events-none animate-in fade-in zoom-in duration-200" />
         )}
         
         {/* Delete Button */}
@@ -265,7 +266,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       />
       
       <aside className={sidebarClasses}>
-        <div className={`flex flex-col h-full overflow-hidden w-full pt-safe md:pt-0 ${isDesktopMac ? 'pt-5 md:pt-2' : ''}`}>
+        <div className={`flex flex-col h-full overflow-hidden w-full pt-safe md:pt-0 ${isDesktopMac ? 'pt-5 md:pt-5' : ''}`}>
           
           {/* Header - Completely Refactored for Zero-Flicker */}
           <div className="h-[76px] md:h-[88px] relative flex items-center shrink-0 select-none w-full">
@@ -462,18 +463,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
              {/* Subtle Divider */}
              <div className="mx-2 mb-2 h-px bg-gray-200/80 dark:bg-zinc-800/80" />
              
-             <div className="px-2"> {/* Wrapper to match NavItem padding */}
+             <div className={renderCollapsed ? 'md:px-0 px-2' : 'px-2'}> {/* Wrapper to match NavItem padding */}
                 <button 
                   onClick={onOpenSettings}
                   className={`
                     group flex items-center w-full rounded-xl transition-all duration-200 outline-none
                     h-11 px-0
+                    ${renderCollapsed ? 'md:justify-center' : ''}
                     hover:bg-gray-100 dark:hover:bg-zinc-800
                   `}
                   title="Settings & Profile"
                 >
                   {/* Icon Container - Perfectly aligned with NavItem w-12 */}
-                  <div className="shrink-0 w-12 h-full flex items-center justify-center transform-gpu transition-transform duration-200 group-hover:scale-105">
+                  <div className={`shrink-0 flex items-center justify-center transform-gpu transition-transform duration-200 group-hover:scale-105 ${renderCollapsed ? 'w-11 h-11' : 'w-12 h-full'}`}>
                       <div className={`w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-bold text-white shadow-sm ring-1 ring-white/10 dark:ring-black/10 overflow-hidden ${userProfile.avatarColor}`}>
                           {userProfile.avatarImage ? (
                             <img src={userProfile.avatarImage} alt="User avatar" className="w-full h-full object-cover" />
