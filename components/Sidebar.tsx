@@ -73,7 +73,7 @@ const NavItem: React.FC<{
           }}
           className={`
             flex items-center text-[13px] font-medium rounded-xl outline-none select-none
-            transition-[width,background-color,border-color,color,box-shadow] duration-200
+            transition-colors duration-150
             h-11 px-0
             ${isCompact ? 'w-11 mx-auto justify-center' : 'w-full justify-start'}
             ${
@@ -90,13 +90,13 @@ const NavItem: React.FC<{
           {/* Icon Container - Fixed Width 48px (w-12) */}
           <span
             className={`
-              shrink-0 flex items-center justify-center transition-all duration-200
+              shrink-0 flex items-center justify-center
               ${isCompact ? 'w-11 h-11 mx-auto' : 'w-11 h-11'}
             `}
           >
             <span
               className={`
-                flex items-center justify-center transition-all duration-200
+                flex items-center justify-center
                 w-9 h-9 rounded-2xl [&>svg]:w-[18px] [&>svg]:h-[18px]
                 [&>svg]:block [&>svg]:shrink-0
                 ${
@@ -123,9 +123,7 @@ const NavItem: React.FC<{
           {/* Text Container */}
           <div className={`
             flex items-center flex-1 min-w-0 overflow-hidden whitespace-nowrap pl-1 max-w-[220px]
-            transition-[max-width,opacity,transform,padding] duration-200 ease-[cubic-bezier(0.2,0,0,1)]
-            opacity-100 translate-x-0
-            ${isCollapsed ? 'md:max-w-0 md:opacity-0 md:translate-x-1 md:pl-0 pointer-events-none' : 'md:max-w-[220px] md:opacity-100 md:translate-x-0 md:pl-1'}
+            ${isCollapsed ? 'md:max-w-0 md:opacity-0 md:pl-0 pointer-events-none' : 'md:max-w-[220px] md:opacity-100 md:pl-1'}
           `}>
             <span className="truncate pr-2">{label}</span>
             
@@ -154,7 +152,7 @@ const NavItem: React.FC<{
 
         {/* Collapsed Indicator Dot - Desktop Only */}
         {!isFocusItem && taskCount > 0 && isCollapsed && (
-             <span className="hidden md:block absolute top-2.5 left-1/2 translate-x-[8px] w-1.5 h-1.5 rounded-full bg-black dark:bg-white ring-2 ring-white dark:ring-zinc-950 pointer-events-none animate-in fade-in zoom-in duration-200" />
+             <span className="hidden md:block absolute top-2.5 left-1/2 translate-x-[8px] w-1.5 h-1.5 rounded-full bg-black dark:bg-white ring-2 ring-white dark:ring-zinc-950 pointer-events-none" />
         )}
         
         {/* Delete Button */}
@@ -248,12 +246,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
     
     /* DESKTOP CONFIGURATION (Overrides) */
     md:translate-x-0 md:shadow-none md:relative md:z-30 
-    md:transition-all md:duration-300 md:ease-[cubic-bezier(0.2,0,0,1)]
+    md:transition-none
     ${renderCollapsed ? 'md:w-[80px]' : 'md:w-[270px]'}
   `;
   const sectionHeaderMotionClass = renderCollapsed
-    ? 'md:opacity-0 md:scale-95 md:pointer-events-none'
-    : 'md:opacity-100 md:scale-100';
+    ? 'md:invisible md:opacity-0 md:pointer-events-none'
+    : 'md:visible md:opacity-100';
 
   return (
     <>
@@ -301,11 +299,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
              </div>
 
              {/* 2. DESKTOP HEADER - EXPANDED (hidden on mobile) */}
+             {!renderCollapsed && (
              <div className={`
                 hidden md:flex absolute inset-0 px-6 justify-between
-                transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)]
                 ${isDesktopMac ? 'items-end pb-4' : 'items-center'}
-                ${renderCollapsed ? 'opacity-0 -translate-x-4 pointer-events-none' : 'opacity-100 translate-x-0 delay-100'}
              `}>
                <div className="flex items-center gap-3.5 text-black dark:text-white overflow-hidden">
                  <span className="shrink-0 flex items-center justify-center">
@@ -326,13 +323,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   <Icons.SidebarLeft />
                </button>
              </div>
+             )}
 
              {/* 3. DESKTOP HEADER - COLLAPSED (hidden on mobile) */}
+             {renderCollapsed && (
              <div className={`
                 hidden md:flex absolute inset-0 justify-center
-                transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)]
                 ${isDesktopMac ? 'items-end pb-4' : 'items-center'}
-                ${renderCollapsed ? 'opacity-100 scale-100 delay-100' : 'opacity-0 scale-90 pointer-events-none'}
              `}>
                 <button 
                   onClick={toggleCollapse} 
@@ -341,17 +338,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   title="Expand Sidebar"
                   style={isDesktopMac ? ({ WebkitAppRegion: 'no-drag' } as React.CSSProperties) : undefined}
                 >
-                   {/* Brand Logo - Visible by default */}
-                   <span className="absolute inset-0 flex items-center justify-center text-black dark:text-white transition-all duration-300 transform group-hover:opacity-0 group-hover:scale-75 group-hover:rotate-12">
+                   <span className="absolute inset-0 flex items-center justify-center text-black dark:text-white">
                      <Icons.GitickLogo />
-                   </span>
-                   
-                   {/* Expand Icon - Visible on Hover */}
-                   <span className="absolute inset-0 flex items-center justify-center text-gray-500 hover:text-black dark:hover:text-white transition-all duration-300 transform opacity-0 scale-75 -rotate-12 group-hover:opacity-100 group-hover:scale-100 group-hover:rotate-0">
-                     <Icons.SidebarRight />
                    </span>
                 </button>
              </div>
+             )}
           </div>
 
           <div className="flex-1 overflow-y-auto no-scrollbar py-3 space-y-7 px-3">
@@ -360,8 +352,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               {/* CRITICAL: md: prefix ensures collapse logic only affects desktop. Mobile is always visible (h-6) */}
               <div className={`
                  overflow-hidden px-3 h-6 mb-2 md:h-6 md:mb-2
-                 transition-[opacity,transform] duration-200 ease-[cubic-bezier(0.2,0,0,1)]
-                 origin-left opacity-100 scale-100
+                 opacity-100
                  ${sectionHeaderMotionClass}
               `}>
                 <h3 className="text-[10px] font-bold text-gray-400 dark:text-zinc-600 uppercase tracking-widest whitespace-nowrap pl-1">Overview</h3>
@@ -395,8 +386,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <div>
               <div className={`
                  flex items-center justify-between px-3 group overflow-hidden whitespace-nowrap h-6 mb-2 md:h-6 md:mb-2
-                 transition-[opacity,transform] duration-200 ease-[cubic-bezier(0.2,0,0,1)]
-                 origin-left opacity-100 scale-100
+                 opacity-100
                  ${sectionHeaderMotionClass}
               `}>
                   <h3 className="text-[10px] font-bold text-gray-400 dark:text-zinc-600 uppercase tracking-widest pl-1">Projects</h3>
@@ -453,8 +443,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <div>
                <div className={`
                   overflow-hidden px-3 h-6 mb-2 md:h-6 md:mb-2
-                  transition-[opacity,transform] duration-200 ease-[cubic-bezier(0.2,0,0,1)]
-                  origin-left opacity-100 scale-100
+                  opacity-100
                   ${sectionHeaderMotionClass}
                `}>
                  <h3 className="text-[10px] font-bold text-gray-400 dark:text-zinc-600 uppercase tracking-widest whitespace-nowrap pl-1">History</h3>
@@ -478,7 +467,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <button 
                   onClick={onOpenSettings}
                   className={`
-                    group flex items-center w-full rounded-xl transition-all duration-200 outline-none
+                    group flex items-center w-full rounded-xl transition-colors duration-150 outline-none
                     h-11 px-0
                     ${renderCollapsed ? 'md:justify-center' : 'md:justify-start'}
                     hover:bg-gray-100 dark:hover:bg-zinc-800
@@ -486,7 +475,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   title="Settings & Profile"
                 >
                   {/* Icon Container - Perfectly aligned with NavItem w-12 */}
-                  <div className="shrink-0 w-12 h-full flex items-center justify-center transform-gpu transition-transform duration-200 group-hover:scale-105">
+                  <div className="shrink-0 w-12 h-full flex items-center justify-center">
                       <div className={`w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-bold text-white shadow-sm ring-1 ring-white/10 dark:ring-black/10 overflow-hidden ${userProfile.avatarColor}`}>
                           {userProfile.avatarImage ? (
                             <img src={userProfile.avatarImage} alt="User avatar" className="w-full h-full object-cover" />
@@ -499,8 +488,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   {/* Text Container */}
                   <div className={`
                       flex items-center justify-between flex-1 min-w-0 overflow-hidden pr-3 pl-1
-                      transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)]
-                      opacity-100 w-auto translate-x-0
+                      opacity-100 w-auto
                       ${renderCollapsed ? 'md:hidden' : 'md:flex md:opacity-100 md:w-auto md:translate-x-0 md:flex-1 md:pl-1 md:pr-3'}
                   `}>
                       <div className="flex flex-col items-start leading-tight">
