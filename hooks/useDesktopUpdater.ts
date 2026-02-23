@@ -65,6 +65,8 @@ export const useDesktopUpdater = ({
   const desktopUpdateUserFlowRef = useRef(false);
   const manualDesktopCheckRef = useRef(false);
   const desktopUpdaterSignalRef = useRef(false);
+  const promptedAvailableVersionRef = useRef<string | null>(null);
+  const promptedDownloadedVersionRef = useRef<string | null>(null);
 
   const [desktopAppVersion, setDesktopAppVersion] = useState('');
   const [desktopUpdateStatus, setDesktopUpdateStatus] = useState('');
@@ -185,9 +187,14 @@ export const useDesktopUpdater = ({
       }
 
       if (payload.type === 'available') {
-        setDesktopUpdateStatus(`Update ${payload.version ?? ''} is available.`.trim());
+        const nextVersion = payload.version ?? '';
+        setDesktopUpdateStatus(`Update ${nextVersion} is available.`.trim());
+        if (promptedAvailableVersionRef.current === nextVersion) {
+          return;
+        }
+        promptedAvailableVersionRef.current = nextVersion;
         setConfirmDialog({
-          title: `Download update ${payload.version ?? ''}?`.trim(),
+          title: `Download update ${nextVersion}?`.trim(),
           description: 'A new desktop version is available. Download now and install after restart.',
           confirmLabel: 'Download',
           cancelLabel: 'Later',
@@ -223,10 +230,15 @@ export const useDesktopUpdater = ({
       }
 
       if (payload.type === 'downloaded') {
-        setDesktopUpdateStatus(`Update ${payload.version ?? ''} downloaded. Restart to install.`.trim());
+        const downloadedVersion = payload.version ?? '';
+        setDesktopUpdateStatus(`Update ${downloadedVersion} downloaded. Restart to install.`.trim());
+        if (promptedDownloadedVersionRef.current === downloadedVersion) {
+          return;
+        }
+        promptedDownloadedVersionRef.current = downloadedVersion;
         setConfirmDialog({
           title: 'Install downloaded update now?',
-          description: `Version ${payload.version ?? ''} has been downloaded and needs an app restart to finish installation.`.trim(),
+          description: `Version ${downloadedVersion} has been downloaded and needs an app restart to finish installation.`.trim(),
           confirmLabel: 'Restart & Install',
           cancelLabel: 'Install Later',
           onConfirm: async () => {
@@ -264,6 +276,8 @@ export const useDesktopUpdater = ({
 
       if (payload.type === 'not-available') {
         setDesktopUpdateStatus('You are using the latest version.');
+        promptedAvailableVersionRef.current = null;
+        promptedDownloadedVersionRef.current = null;
         if (manualDesktopCheckRef.current) {
           showToast('You are already on the latest version.');
         }
