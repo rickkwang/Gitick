@@ -6,19 +6,8 @@ export const PROJECTS = ['Work', 'Study', 'Travel', 'Life'];
 // Modern UI Icons (Soft, Rounded, Linear Style)
 export const Icons = {
   // Brand
-  GitickLogo: ({ className, ...props }: React.SVGProps<SVGSVGElement>) => (
-    <svg
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={`block ${className ?? ''}`.trim()}
-      {...props}
-    >
+  GitickLogo: () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="5" cy="19" r="2" />
       <path d="M5 17v-5a6 6 0 0 1 6-6h0" />
       <polyline points="13 4 16 7 21 2" /> 

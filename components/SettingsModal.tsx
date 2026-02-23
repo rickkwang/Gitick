@@ -409,12 +409,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
              {/* --- ABOUT TAB --- */}
              {activeTab === 'about' && (
                <div className="space-y-7">
-                 <div className="flex flex-col items-center text-center space-y-4 pb-7 border-b border-gray-100 dark:border-zinc-800">
-                    <div className="w-16 h-16 rounded-2xl bg-black dark:bg-white text-white dark:text-black flex items-center justify-center shadow-sm">
-                       <Icons.GitickLogo className="w-8 h-8" />
+                 <div className="flex flex-col items-center text-center space-y-3 pb-6 border-b border-gray-100 dark:border-zinc-800">
+                    <div className="p-4 bg-black dark:bg-white rounded-2xl text-white dark:text-black mb-2">
+                       <Icons.GitickLogo />
                     </div>
                     <h2 className="text-xl font-bold text-black dark:text-white">Gitick</h2>
-                    <p className="text-sm leading-relaxed text-gray-500 dark:text-zinc-400 max-w-md">
+                    <p className="text-sm text-gray-500 dark:text-zinc-400 max-w-sm">
                        A minimalist, privacy-first task manager inspired by developer workflows. No tracking, no servers, just productivity.
                     </p>
                  </div>

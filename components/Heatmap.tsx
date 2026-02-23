@@ -5,8 +5,6 @@ import { toLocalIsoDate } from '../utils/date';
 const DAYS_PER_WEEK = 7;
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 const MIN_MONTH_LABEL_GAP = 3;
-const CELL_PX = 10;
-const CELL_GAP_PX = 2;
 
 interface HeatmapProps {
   tasks: Task[];
@@ -30,11 +28,6 @@ const dayNumberToIsoDate = (dayNumber: number): string => {
   return `${year}-${month}-${day}`;
 };
 
-const isoDateToLocalDate = (isoDate: string): Date => {
-  const [year, month, day] = isoDate.split('-').map(Number);
-  return new Date(year, month - 1, day);
-};
-
 export const Heatmap: React.FC<HeatmapProps> = ({ tasks }) => {
   const [weeksToShow, setWeeksToShow] = useState(24);
 
@@ -52,19 +45,22 @@ export const Heatmap: React.FC<HeatmapProps> = ({ tasks }) => {
   }, []);
 
   const weeks = useMemo<DayCell[][]>(() => {
-    const now = new Date();
-    const todayKey = toLocalIsoDate(now);
-    const todayDayNumber = isoDateToDayNumber(todayKey);
-    const currentWeekSundayDayNumber = todayDayNumber - now.getDay();
-    const firstVisibleWeekSundayDayNumber = currentWeekSundayDayNumber - (weeksToShow - 1) * DAYS_PER_WEEK;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-    return Array.from({ length: weeksToShow }, (_, weekOffset) =>
-      Array.from({ length: DAYS_PER_WEEK }, (_, dayOffset) => {
-        const dayNumber = firstVisibleWeekSundayDayNumber + weekOffset * DAYS_PER_WEEK + dayOffset;
-        const key = dayNumberToIsoDate(dayNumber);
-        return { date: isoDateToLocalDate(key), key };
-      }),
-    );
+    const currentWeekSunday = new Date(today);
+    currentWeekSunday.setDate(today.getDate() - today.getDay());
+
+    return Array.from({ length: weeksToShow }, (_, weekOffset) => {
+      const weekStart = new Date(currentWeekSunday);
+      weekStart.setDate(currentWeekSunday.getDate() - (weeksToShow - 1 - weekOffset) * DAYS_PER_WEEK);
+
+      return Array.from({ length: DAYS_PER_WEEK }, (_, dayOffset) => {
+        const date = new Date(weekStart);
+        date.setDate(weekStart.getDate() + dayOffset);
+        return { date, key: toLocalIsoDate(date) };
+      });
+    });
   }, [weeksToShow]);
 
   const { completionMap, visibleContributions, allTimeContributions, maxStreak, currentStreak, intensityCeiling } =
@@ -172,9 +168,9 @@ export const Heatmap: React.FC<HeatmapProps> = ({ tasks }) => {
     return 'bg-green-800 dark:bg-green-400 border-transparent';
   };
 
-  const CELL_SIZE = `w-[${CELL_PX}px] h-[${CELL_PX}px]`;
+  const CELL_SIZE = 'w-2.5 h-2.5';
   const GAP = 'gap-[2px]';
-  const COL_WIDTH = CELL_PX + CELL_GAP_PX;
+  const COL_WIDTH = 12;
   const todayKey = toLocalIsoDate(new Date());
 
   return (
