@@ -72,9 +72,10 @@ const NavItem: React.FC<{
             onCloseMobile();
           }}
           className={`
-            flex items-center w-full text-[13px] font-medium rounded-xl outline-none select-none
-            transition-all duration-200
-            h-11 px-0 ${isCompact ? 'justify-center' : ''}
+            flex items-center text-[13px] font-medium rounded-xl outline-none select-none
+            transition-[width,background-color,border-color,color,box-shadow] duration-200
+            h-11 px-0
+            ${isCompact ? 'w-11 mx-auto justify-center' : 'w-full justify-start'}
             ${
               isActive
                 ? isCompact
@@ -89,14 +90,14 @@ const NavItem: React.FC<{
           {/* Icon Container - Fixed Width 48px (w-12) */}
           <span
             className={`
-              shrink-0 flex items-center justify-center transform-gpu transition-all duration-200
-              ${isCompact ? 'w-11 h-11 mx-auto' : 'w-12 h-full group-hover:scale-105'}
+              shrink-0 flex items-center justify-center transition-all duration-200
+              ${isCompact ? 'w-11 h-11 mx-auto' : 'w-11 h-11'}
             `}
           >
             <span
               className={`
                 flex items-center justify-center transition-all duration-200
-                ${isCompact ? 'w-9 h-9 rounded-2xl [&>svg]:w-[18px] [&>svg]:h-[18px]' : 'w-5 h-5 [&>svg]:w-5 [&>svg]:h-5'}
+                w-9 h-9 rounded-2xl [&>svg]:w-[18px] [&>svg]:h-[18px]
                 [&>svg]:block [&>svg]:shrink-0
                 ${
                   isCompact && isActive
@@ -120,12 +121,11 @@ const NavItem: React.FC<{
           </span>
           
           {/* Text Container */}
-          {/* CRITICAL FIX: Always visible on Mobile (default classes), only conditionally hidden on Desktop (md: prefix) */}
           <div className={`
-            flex items-center flex-1 min-w-0 overflow-hidden whitespace-nowrap pl-1
-            transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)] transform-gpu
+            flex items-center flex-1 min-w-0 overflow-hidden whitespace-nowrap pl-1 max-w-[220px]
+            transition-[max-width,opacity,transform,padding] duration-200 ease-[cubic-bezier(0.2,0,0,1)]
             opacity-100 translate-x-0
-            ${isCollapsed ? 'md:hidden' : 'md:flex md:opacity-100 md:translate-x-0 md:w-auto md:flex-1 md:pl-1'}
+            ${isCollapsed ? 'md:max-w-0 md:opacity-0 md:translate-x-1 md:pl-0 pointer-events-none' : 'md:max-w-[220px] md:opacity-100 md:translate-x-0 md:pl-1'}
           `}>
             <span className="truncate pr-2">{label}</span>
             
@@ -266,11 +266,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
       />
       
       <aside className={sidebarClasses}>
-        <div className={`flex flex-col h-full overflow-hidden w-full pt-safe md:pt-0 ${isDesktopMac ? 'pt-5 md:pt-2' : ''}`}>
+        <div className={`flex flex-col h-full overflow-hidden w-full pt-safe md:pt-0 ${isDesktopMac ? 'pt-5 md:pt-6' : ''}`}>
           
           {/* Header - Completely Refactored for Zero-Flicker */}
           <div
-            className="h-[76px] md:h-[88px] relative flex items-center shrink-0 select-none w-full"
+            className={`h-[76px] md:h-[88px] relative flex items-center shrink-0 select-none w-full ${isDesktopMac ? 'md:h-[104px]' : ''}`}
             style={isDesktopMac ? ({ WebkitAppRegion: 'drag' } as React.CSSProperties) : undefined}
           >
              
@@ -299,8 +299,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
              {/* 2. DESKTOP HEADER - EXPANDED (hidden on mobile) */}
              <div className={`
-                hidden md:flex absolute inset-0 px-6 items-center justify-between
+                hidden md:flex absolute inset-0 px-6 justify-between
                 transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)]
+                ${isDesktopMac ? 'items-end pb-4' : 'items-center'}
                 ${renderCollapsed ? 'opacity-0 -translate-x-4 pointer-events-none' : 'opacity-100 translate-x-0 delay-100'}
              `}>
                <div className="flex items-center gap-3.5 text-black dark:text-white overflow-hidden">
@@ -325,8 +326,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
              {/* 3. DESKTOP HEADER - COLLAPSED (hidden on mobile) */}
              <div className={`
-                hidden md:flex absolute inset-0 items-center justify-center
+                hidden md:flex absolute inset-0 justify-center
                 transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)]
+                ${isDesktopMac ? 'items-end pb-4' : 'items-center'}
                 ${renderCollapsed ? 'opacity-100 scale-100 delay-100' : 'opacity-0 scale-90 pointer-events-none'}
              `}>
                 <button 
