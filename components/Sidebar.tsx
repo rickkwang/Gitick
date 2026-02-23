@@ -75,7 +75,7 @@ const NavItem: React.FC<{
             flex items-center text-[13px] font-medium rounded-xl outline-none select-none
             transition-[width,background-color,border-color,color,box-shadow] duration-200 ease-linear
             h-11 px-0
-            ${isCompact ? 'w-11 mx-auto justify-center' : 'w-full justify-start'}
+            w-full justify-start
             ${
               isActive
                 ? isCompact
@@ -90,8 +90,8 @@ const NavItem: React.FC<{
           {/* Icon Container - Fixed Width 48px (w-12) */}
           <span
             className={`
-              shrink-0 flex items-center justify-center
-              ${isCompact ? 'w-11 h-11 mx-auto' : 'w-11 h-11'}
+              shrink-0 h-11 flex items-center justify-center
+              w-12 md:w-16
             `}
           >
             <span
@@ -455,13 +455,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   className={`
                     group flex items-center w-full rounded-xl transition-colors duration-150 outline-none
                     h-11 px-0
-                    ${renderCollapsed ? 'md:justify-center' : 'md:justify-start'}
+                    justify-start
                     hover:bg-gray-100 dark:hover:bg-zinc-800
                   `}
                   title="Settings & Profile"
                 >
                   {/* Icon Container - Perfectly aligned with NavItem w-12 */}
-                  <div className="shrink-0 w-12 h-full flex items-center justify-center">
+                  <div className="shrink-0 w-12 md:w-16 h-full flex items-center justify-center">
                       <div className={`w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-bold text-white shadow-sm ring-1 ring-white/10 dark:ring-black/10 overflow-hidden ${userProfile.avatarColor}`}>
                           {userProfile.avatarImage ? (
                             <img src={userProfile.avatarImage} alt="User avatar" className="w-full h-full object-cover" />
