@@ -16,6 +16,9 @@ interface UseDesktopUpdaterOptions {
   setConfirmDialog: (dialog: DesktopConfirmDialogRequest | null) => void;
 }
 
+const UPDATE_AUTO_CHECK_COOLDOWN_MS = 6 * 60 * 60 * 1000;
+const UPDATE_LAST_CHECK_TS_KEY = 'gitick.desktopUpdater.lastAutoCheckTs';
+
 const getFriendlyUpdateError = (raw: string, reason?: string) => {
   const message = raw.replace(/\s+/g, ' ').trim().toLowerCase();
   const normalizedReason = (reason ?? '').trim().toLowerCase();
@@ -65,6 +68,8 @@ export const useDesktopUpdater = ({
   const desktopUpdateUserFlowRef = useRef(false);
   const manualDesktopCheckRef = useRef(false);
   const desktopUpdaterSignalRef = useRef(false);
+  const hasAutoCheckedThisSessionRef = useRef(false);
+  const lastPromptedAvailableVersionRef = useRef<string | null>(null);
 
   const [desktopAppVersion, setDesktopAppVersion] = useState('');
   const [desktopUpdateStatus, setDesktopUpdateStatus] = useState('');
@@ -186,6 +191,10 @@ export const useDesktopUpdater = ({
 
       if (payload.type === 'available') {
         setDesktopUpdateStatus(`Update ${payload.version ?? ''} is available.`.trim());
+        if (payload.version && payload.version === lastPromptedAvailableVersionRef.current) {
+          return;
+        }
+        lastPromptedAvailableVersionRef.current = payload.version ?? 'unknown';
         setConfirmDialog({
           title: `Download update ${payload.version ?? ''}?`.trim(),
           description: 'A new desktop version is available. Download now and install after restart.',
@@ -285,6 +294,8 @@ export const useDesktopUpdater = ({
 
     const runCheck = async () => {
       try {
+        hasAutoCheckedThisSessionRef.current = true;
+        localStorage.setItem(UPDATE_LAST_CHECK_TS_KEY, String(Date.now()));
         const result = await updater.checkForUpdates();
         if (result.reason === 'in-progress') {
           setDesktopUpdateStatus('Checking for updates...');
@@ -300,21 +311,19 @@ export const useDesktopUpdater = ({
       }
     };
 
-    const initialTimer = window.setTimeout(() => {
-      setIsCheckingDesktopUpdate(true);
-      void runCheck();
-    }, 1200);
+    const lastCheckTs = Number(localStorage.getItem(UPDATE_LAST_CHECK_TS_KEY) || 0);
+    const shouldAutoCheck =
+      !hasAutoCheckedThisSessionRef.current && (!Number.isFinite(lastCheckTs) || Date.now() - lastCheckTs >= UPDATE_AUTO_CHECK_COOLDOWN_MS);
 
-    const retryTimer = window.setTimeout(() => {
-      if (!desktopUpdaterSignalRef.current) {
+    const initialTimer = window.setTimeout(() => {
+      if (shouldAutoCheck) {
         setIsCheckingDesktopUpdate(true);
         void runCheck();
       }
-    }, 10000);
+    }, 1200);
 
     return () => {
       window.clearTimeout(initialTimer);
-      window.clearTimeout(retryTimer);
       removeListener();
     };
   }, [enabled, finishDesktopUpdateFlow, openMoveToApplicationsDialog, setConfirmDialog, showToast]);

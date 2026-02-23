@@ -333,7 +333,7 @@ const App: React.FC = () => {
 
   // --- Actions ---
 
-  const showToast = (message: string, action?: () => void) => {
+  const showToast = useCallback((message: string, action?: () => void) => {
     if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
     setStatusMessage(message);
     setUndoAction(() => action);
@@ -341,7 +341,7 @@ const App: React.FC = () => {
       setStatusMessage(null);
       setUndoAction(undefined);
     }, 4000);
-  };
+  }, []);
 
   useEffect(
     () => () => {
