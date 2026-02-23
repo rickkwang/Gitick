@@ -237,7 +237,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   // Optimized for "Silky" feel (ChatGPT/Obsidian style)
   // Using a custom spring-like bezier for more natural movement
   const sidebarClasses = `
-    fixed inset-y-0 left-0 z-[60] bg-white/95 dark:bg-zinc-950/95 backdrop-blur-sm flex flex-col border-r border-gray-200/75 dark:border-zinc-800/85 md:border-r-0
+    fixed inset-y-0 left-0 z-[60] bg-white/95 dark:bg-zinc-950/95 backdrop-blur-sm flex flex-col border-r border-gray-200/75 dark:border-zinc-800/85 md:border-r-0 md:bg-transparent md:backdrop-blur-0
     
     /* MOBILE CONFIGURATION */
     w-[280px]
@@ -247,13 +247,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
     ${isOpen ? 'translate-x-0 shadow-[20px_0_50px_-10px_rgba(0,0,0,0.15)]' : '-translate-x-full'}
     
     /* DESKTOP CONFIGURATION (Overrides) */
-    md:translate-x-0 md:relative md:z-30 
+    md:translate-x-0 md:relative md:z-30
     md:transition-all md:duration-300 md:ease-[cubic-bezier(0.2,0,0,1)]
-    md:backdrop-blur-xl md:border-r-0 md:opacity-100 md:pointer-events-auto
-    md:shadow-[0_12px_34px_rgba(17,24,39,0.10)] dark:md:shadow-[0_20px_44px_rgba(0,0,0,0.42)]
+    md:border-r-0 md:opacity-100 md:pointer-events-auto md:shadow-none
     ${renderCollapsed
-      ? 'md:w-[80px] md:px-1 md:py-2 md:rounded-[22px] md:bg-white/58 dark:md:bg-zinc-950/56'
-      : 'md:w-[270px] md:px-2 md:py-2 md:rounded-[26px] md:bg-white/62 dark:md:bg-zinc-950/58'}
+      ? 'md:w-[80px] md:px-0 md:py-2'
+      : 'md:w-[270px] md:px-2 md:py-2'}
   `;
 
   return (
@@ -273,6 +272,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div
           className={`flex flex-col h-full overflow-hidden w-full pt-safe md:pt-0 ${
             isDesktopMac ? 'pt-5 md:pt-5' : ''
+          } ${
+            !renderCollapsed
+              ? 'md:rounded-[26px] md:bg-white/62 dark:md:bg-zinc-950/56 md:backdrop-blur-xl'
+              : 'md:rounded-[22px] md:bg-white/58 dark:md:bg-zinc-950/54 md:backdrop-blur-xl'
           }`}
         >
           
@@ -307,13 +310,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
                  onClick={toggleCollapse}
                  aria-label={renderCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
                  className={`
-                   absolute w-9 h-9 rounded-xl top-[14px]
+                   absolute w-9 h-9 rounded-xl
                    flex items-center justify-center text-gray-400 dark:text-zinc-500
                    hover:bg-gray-100 dark:hover:bg-zinc-800 hover:text-gray-700 dark:hover:text-zinc-200
                    transform-gpu transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)]
                    ${isDesktopMac
-                     ? `${renderCollapsed ? 'left-[58px] translate-x-0 scale-95' : 'left-[84px] translate-x-0 scale-100'}`
-                     : `${renderCollapsed ? 'left-4 scale-95' : 'left-10 scale-100'}`}
+                     ? `${renderCollapsed ? 'left-[66px] top-[4px]' : 'left-[98px] top-[4px]'}`
+                     : `${renderCollapsed ? 'left-4 top-[14px]' : 'left-10 top-[14px]'}`}
                  `}
                  title={renderCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
                >
