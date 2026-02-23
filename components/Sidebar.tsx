@@ -301,18 +301,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
                </button>
              </div>
 
-             {/* 2. DESKTOP HEADER CONTROL (same Y-axis, horizontal slide only) */}
+             {/* 2. DESKTOP HEADER CONTROL */}
              <div className="hidden md:block absolute inset-0">
                {!renderCollapsed && <div className="absolute inset-x-0 top-0 h-[76px] border-b border-gray-200/75 dark:border-zinc-800/80" />}
                <button
                  onClick={toggleCollapse}
                  aria-label={renderCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
                  className={`
-                   absolute top-1/2 -translate-y-1/2 w-9 h-9 rounded-xl
+                   absolute w-9 h-9 rounded-xl top-[14px]
                    flex items-center justify-center text-gray-400 dark:text-zinc-500
                    hover:bg-gray-100 dark:hover:bg-zinc-800 hover:text-gray-700 dark:hover:text-zinc-200
-                   transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)]
-                   ${renderCollapsed ? 'left-1/2 -translate-x-1/2' : `${isDesktopMac ? 'right-4' : 'right-3'} translate-x-0`}
+                   transform-gpu transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)]
+                   ${isDesktopMac
+                     ? `${renderCollapsed ? 'left-[58px] translate-x-0 scale-95' : 'left-[84px] translate-x-0 scale-100'}`
+                     : `${renderCollapsed ? 'left-4 scale-95' : 'left-10 scale-100'}`}
                  `}
                  title={renderCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
                >

@@ -891,7 +891,7 @@ const App: React.FC = () => {
       </div>
 
       {/* --- BOTTOM STATUS BAR (Desktop Only) --- */}
-      <div className="hidden md:block">
+      <div className="hidden md:block relative z-[70]">
         <StatusBar 
           message={statusMessage}
           onUndo={undoAction}
