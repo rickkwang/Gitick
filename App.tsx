@@ -691,7 +691,7 @@ const App: React.FC = () => {
         />
 
         {/* COL 2: Main Content */}
-        <main className="flex-1 flex flex-col min-w-0 h-full bg-[#f5f6f8] dark:bg-zinc-900 relative z-0 transition-colors duration-300">
+        <main className="flex-1 flex flex-col min-w-0 h-full bg-gradient-to-b from-gray-50 via-gray-50/95 to-white dark:from-zinc-900 dark:via-zinc-900 dark:to-zinc-950 relative z-0 transition-colors duration-300">
            
            <div className={`h-full flex flex-col ${filter === 'focus' ? '' : 'animate-view-breathe'}`}>
              
@@ -716,7 +716,7 @@ const App: React.FC = () => {
                   
                   {/* Working Dir Header (Desktop Only) */}
                   <div
-                    className={`hidden md:flex h-16 items-center justify-between shrink-0 bg-[#f5f6f8]/88 dark:bg-zinc-900/85 backdrop-blur-md border-b border-white/70 dark:border-zinc-800/75 z-10 transition-colors duration-300 ${
+                    className={`hidden md:flex h-16 items-center justify-between shrink-0 bg-gray-50/85 dark:bg-zinc-900/85 backdrop-blur-sm z-10 transition-colors duration-300 ${
                       isDesktopMac ? 'pl-24 pr-8' : 'px-8'
                     }`}
                     style={isDesktopMac ? ({ WebkitAppRegion: 'drag' } as React.CSSProperties) : undefined}
@@ -820,15 +820,17 @@ const App: React.FC = () => {
 
                   {/* GLOBAL COMMAND BAR (Floating Bottom with Gradient Mask) */}
                   {showTaskInput && (
-                    <div className="absolute bottom-0 left-0 right-0 z-20 pointer-events-none">
-                      <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-[#f5f6f8] via-[#f5f6f8]/85 to-transparent dark:from-zinc-900 dark:via-zinc-900/80" />
+                     <div className="absolute bottom-0 left-0 right-0 z-20 pointer-events-none">
+                        {/* Gradient Mask to catch scrolling text - Taller and solid at bottom */}
+                        <div className="absolute bottom-0 left-0 right-0 h-56 bg-gradient-to-t from-gray-50/95 via-gray-50/80 to-transparent dark:from-zinc-900 dark:via-zinc-900/80" />
 
-                      <div className="relative z-10 w-full flex justify-center px-4 md:px-6 pt-6 pb-safe">
-                        <div className="max-w-[900px] w-full pointer-events-auto mb-2">
-                          <TaskInput onAddTask={addTask} activeList={filter} projects={projects} />
+                        {/* Input Container - Padded from bottom including Safe Area */}
+                        <div className="relative z-10 w-full flex justify-center px-4 pt-10 pb-safe">
+                           <div className="max-w-3xl w-full pointer-events-auto mb-3">
+                              <TaskInput onAddTask={addTask} activeList={filter} projects={projects} />
+                           </div>
                         </div>
-                      </div>
-                    </div>
+                     </div>
                   )}
 
                </div>
