@@ -476,12 +476,14 @@ ipcMain.handle('updater:check', async () => {
     const directVersion = result?.updateInfo?.version;
     if (directVersion && compareSemver(directVersion, app.getVersion()) > 0) {
       latestAvailableVersion = directVersion;
+      sendUpdaterStatus({ type: 'available', version: directVersion });
     }
     if (!directVersion) {
       const latestYml = await fetchText(RELEASE_METADATA_URL);
       const metadataVersion = parseVersionFromLatestMacYml(latestYml);
       if (metadataVersion && compareSemver(metadataVersion, app.getVersion()) > 0) {
         latestAvailableVersion = metadataVersion;
+        sendUpdaterStatus({ type: 'available', version: metadataVersion });
       }
     }
     return { ok: true };

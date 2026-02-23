@@ -291,10 +291,6 @@ const App: React.FC = () => {
     });
   }, []);
 
-  const toggleSidebarCollapse = useCallback(() => {
-    setIsSidebarCollapsed((prev) => !prev);
-  }, []);
-
   // Persistence Effects
   useEffect(() => {
     writeStoredJson(STORAGE_KEYS.tasks, tasks);
@@ -337,7 +333,7 @@ const App: React.FC = () => {
 
   // --- Actions ---
 
-  const showToast = useCallback((message: string, action?: () => void) => {
+  const showToast = (message: string, action?: () => void) => {
     if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
     setStatusMessage(message);
     setUndoAction(() => action);
@@ -345,7 +341,7 @@ const App: React.FC = () => {
       setStatusMessage(null);
       setUndoAction(undefined);
     }, 4000);
-  }, []);
+  };
 
   useEffect(
     () => () => {
@@ -681,7 +677,7 @@ const App: React.FC = () => {
           onFilterChange={(f) => { setFilter(f); setSelectedTask(null); }} 
           isOpen={isSidebarOpen}
           isCollapsed={isSidebarCollapsed}
-          toggleCollapse={toggleSidebarCollapse}
+          toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
           onCloseMobile={() => setIsSidebarOpen(false)}
           taskCounts={taskCounts}
           onOpenSettings={() => setShowSettings(true)}
@@ -725,7 +721,7 @@ const App: React.FC = () => {
                     }`}
                     style={isDesktopMac ? ({ WebkitAppRegion: 'drag' } as React.CSSProperties) : undefined}
                   >
-                     <div className="flex items-center gap-3 text-sm font-mono text-gray-500 dark:text-zinc-500">
+                     <div className="flex items-center gap-2 text-sm font-mono text-gray-500 dark:text-zinc-500">
                         <Icons.Folder />
                         <span className="truncate tracking-tight font-medium text-black dark:text-white opacity-70">
                           {getFilterBreadcrumb(filter)}
@@ -891,7 +887,7 @@ const App: React.FC = () => {
       </div>
 
       {/* --- BOTTOM STATUS BAR (Desktop Only) --- */}
-      <div className="hidden md:block relative z-[70]">
+      <div className="hidden md:block">
         <StatusBar 
           message={statusMessage}
           onUndo={undoAction}
