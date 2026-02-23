@@ -271,8 +271,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
             isDesktopMac ? 'pt-5 md:pt-5' : ''
           } ${
             !renderCollapsed
-              ? 'md:rounded-[26px] md:bg-white/96 dark:md:bg-zinc-950/88 md:shadow-[0_10px_28px_rgba(24,24,27,0.06)] dark:md:shadow-[0_14px_30px_rgba(0,0,0,0.32)]'
-              : 'md:rounded-[22px] md:bg-white/88 dark:md:bg-zinc-950/82'
+              ? 'md:rounded-[26px] md:bg-white/62 dark:md:bg-zinc-950/56 md:backdrop-blur-xl md:ring-1 md:ring-gray-200/60 dark:md:ring-zinc-700/55'
+              : 'md:rounded-[22px] md:bg-white/58 dark:md:bg-zinc-950/54 md:backdrop-blur-xl md:ring-1 md:ring-gray-200/55 dark:md:ring-zinc-700/50'
           }`}
         >
           
@@ -303,7 +303,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
              {/* 2. DESKTOP HEADER CONTROL */}
              <div className="hidden md:block absolute inset-0">
-               {!renderCollapsed && <div className="absolute inset-x-0 top-0 h-[76px] border-b border-gray-200/75 dark:border-zinc-800/80" />}
                <button
                  onClick={toggleCollapse}
                  aria-label={renderCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
