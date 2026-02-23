@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Task, Priority } from '../types';
 import { Icons } from '../constants';
 import { addDaysLocalIsoDate, todayLocalIsoDate } from '../utils/date';
@@ -10,26 +10,12 @@ interface TaskInputProps {
 }
 
 const RANDOM_PROMPTS = [
-  "Buy coffee !high #life today",
-  "Save the world... !high",
-  "Debug the universe #coding",
-  "Call mom tomorrow #family",
-  "Design the future !medium",
-  "Go for a run 🏃‍♂️ #health",
-  "Read a book 📚 #relax",
-  "Ship it! 🚀 #work",
-  "Plan weekend trip next week #travel",
-  "Water the plants 🌱",
-  "Learn TypeScript #dev",
-  "Pay bills !high #finance",
-  "Review goals 🎯",
-  "Take a deep breath... #focus",
-  "Deploy to production !high",
-  "Invent time travel tomorrow",
-  "Feed the cat 🐱 #chores",
-  "Write a song #creative",
-  "Fix that bug !medium",
-  "Coffee break ☕️"
+  'Plan sprint !high #work today',
+  'Review lecture notes #study tomorrow',
+  'Book tickets #travel next week',
+  'Buy coffee beans #life',
+  'Finalize report !high #work',
+  'Read 20 pages #study',
 ];
 
 export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, projects }) => {
@@ -39,21 +25,18 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
   const [placeholderHint, setPlaceholderHint] = useState(RANDOM_PROMPTS[0]);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  
-  // Parsed state for visual feedback
+
   const [parsedPreview, setParsedPreview] = useState<{
-     priority?: Priority;
-     tags: string[];
-     dueDate?: string;
-     cleanTitle: string;
+    priority?: Priority;
+    tags: string[];
+    dueDate?: string;
+    cleanTitle: string;
   }>({ tags: [], cleanTitle: '' });
 
-  // Initialize random placeholder on mount
   useEffect(() => {
     setPlaceholderHint(RANDOM_PROMPTS[Math.floor(Math.random() * RANDOM_PROMPTS.length)]);
   }, []);
 
-  // Sync selectedProject with activeList when context changes
   useEffect(() => {
     if (activeList && projects.includes(activeList)) {
       setSelectedProject(activeList);
@@ -62,7 +45,6 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
     }
   }, [activeList, projects]);
 
-  // Click outside listener
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -74,40 +56,32 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
   }, []);
 
   const parseTaskInput = (text: string) => {
-    let title = text;
-    let priority: Priority | undefined = undefined;
+    let priority: Priority | undefined;
     let tags: string[] = [];
-    let dueDate: string | undefined = undefined;
+    let dueDate: string | undefined;
 
-    // 1. Priority Parsing (!high)
     const priorityRegex = /!(high|medium|low)/i;
     const priorityMatch = text.match(priorityRegex);
     if (priorityMatch) {
       priority = priorityMatch[1].toLowerCase() as Priority;
     }
 
-    // 2. Tags Parsing (#tag)
     const tagRegex = /#([^\s#@!]+)/gu;
     const tagMatches = Array.from(text.matchAll(tagRegex));
     if (tagMatches.length > 0) {
       tags = Array.from(new Set(tagMatches.map((match) => match[1].trim()).filter(Boolean)));
     }
 
-    // 3. Project Parsing (@Project)
     const projectRegex = /@([^\s#@!]+)/iu;
     const projectMatch = text.match(projectRegex);
-    let projectFound = null;
+    let projectFound: string | null = null;
     if (projectMatch) {
-       const pName = projectMatch[1];
-       projectFound = projects.find(p => p.toLowerCase() === pName.toLowerCase());
+      const projectName = projectMatch[1];
+      projectFound = projects.find((project) => project.toLowerCase() === projectName.toLowerCase()) || null;
     }
 
-    // 4. Date Parsing (Local Time robust)
-    const today = new Date();
     const lowerText = text.toLowerCase();
     let dateLabel = '';
-
-    // Regex ensures we match whole words to avoid false positives inside words
     if (/\b(today|tod)\b/.test(lowerText)) {
       dueDate = todayLocalIsoDate();
       dateLabel = 'Today';
@@ -115,6 +89,7 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
       dueDate = addDaysLocalIsoDate(1);
       dateLabel = 'Tomorrow';
     } else if (/\b(next week)\b/.test(lowerText)) {
+      const today = new Date();
       const nextMon = new Date(today);
       nextMon.setDate(today.getDate() + ((1 + 7 - today.getDay()) % 7 || 7));
       const diffDays = Math.round((nextMon.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
@@ -122,226 +97,208 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
       dateLabel = 'Next Week';
     }
 
-    // Generate Clean Title for Preview
-    const projectTokenRegex = /@([^\s#@!]+)/gu;
-    let cleanTitle = title
-        .replace(priorityRegex, '')
-        .replace(tagRegex, '')
-        .replace(projectTokenRegex, '')
-        .replace(/\b(today|tod|tomorrow|tmr|tom|next week)\b/gi, '')
-        .replace(/\s+/g, ' ').trim();
+    const cleanTitle = text
+      .replace(priorityRegex, '')
+      .replace(tagRegex, '')
+      .replace(/@([^\s#@!]+)/gu, '')
+      .replace(/\b(today|tod|tomorrow|tmr|tom|next week)\b/gi, '')
+      .replace(/\s+/g, ' ')
+      .trim();
 
-    return { title, priority, tags, dueDate, cleanTitle, dateLabel, projectFound };
+    return { priority, tags, dueDate, cleanTitle, dateLabel, projectFound };
   };
 
-  // Real-time parsing effect
   useEffect(() => {
-     const result = parseTaskInput(input);
-     setParsedPreview({
-         priority: result.priority,
-         tags: result.tags,
-         dueDate: result.dateLabel, // Use label for preview
-         cleanTitle: result.cleanTitle
-     });
-     if (result.projectFound) {
-         setSelectedProject(result.projectFound);
-     }
+    const result = parseTaskInput(input);
+    setParsedPreview({
+      priority: result.priority,
+      tags: result.tags,
+      dueDate: result.dateLabel,
+      cleanTitle: result.cleanTitle,
+    });
+    if (result.projectFound) {
+      setSelectedProject(result.projectFound);
+    }
   }, [input, projects]);
 
   const submit = () => {
     if (!input.trim()) return;
 
     const parsedData = parseTaskInput(input);
-    
-    // Determine Date
-    // MODIFIED: Default to Today globally if no date was specifically parsed.
-    // This ensures tasks appear in "Today" view by default.
     const date = parsedData.dueDate || todayLocalIsoDate();
 
     onAddTask({
-      title: parsedData.cleanTitle || input, // Fallback to input if regex strips everything
-      description: "",
+      title: parsedData.cleanTitle || input,
+      description: '',
       completed: false,
       priority: parsedData.priority || Priority.MEDIUM,
       tags: parsedData.tags,
       subtasks: [],
       dueDate: date,
-      list: selectedProject // Use the UI state
+      list: selectedProject,
     });
-    
+
     setInput('');
     setParsedPreview({ tags: [], cleanTitle: '' });
-    
-    // Randomize hint for next task
     setPlaceholderHint(RANDOM_PROMPTS[Math.floor(Math.random() * RANDOM_PROMPTS.length)]);
 
-    // Reset project selection only if we are not in a specific project view
     if (!activeList || !projects.includes(activeList)) {
-        setSelectedProject('Inbox');
+      setSelectedProject('Inbox');
     }
-    
-    // Re-focus on desktop only
-    if (window.innerWidth > 768) {
-        inputRef.current?.focus();
-    }
-  }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+    if (typeof window !== 'undefined' && window.innerWidth > 768) {
+      inputRef.current?.focus();
+    }
+  };
+
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
     submit();
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-        e.preventDefault();
-        submit();
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      submit();
     }
-  }
+  };
 
-  // Helper for placeholder
   const getPlaceholder = () => {
-      if (activeList === 'today') return `For today... (e.g. ${placeholderHint})`;
-      if (activeList && projects.includes(activeList) && activeList !== 'Inbox') return `Add to ${activeList}... (e.g. ${placeholderHint})`;
-      return `I need to... (e.g. ${placeholderHint})`;
-  }
-  
-  // Auto-focus logic: Only on desktop
+    if (activeList === 'today') return `For today... e.g. ${placeholderHint}`;
+    if (activeList && projects.includes(activeList) && activeList !== 'Inbox') return `Add to ${activeList}... e.g. ${placeholderHint}`;
+    return `Add a task... e.g. ${placeholderHint}`;
+  };
+
   const shouldAutoFocus = typeof window !== 'undefined' && window.innerWidth > 768;
 
   return (
-    <div className="w-full relative z-30 max-w-3xl mx-auto">
-      <form onSubmit={handleSubmit} className="flex items-end gap-2 md:gap-3 group transition-all duration-300">
-        
-        {/* LEFT: Main Input Container */}
-        {/* OPTICAL ALIGNMENT FIX: 
-            For a rounded-[28px] container, pl-4 is too tight. 
-            Increased to pl-6 (mobile) and pl-8 (desktop) to align visually with the curve. 
-        */}
-        <div className="flex-1 relative bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-[28px] shadow-[0_2px_12px_rgba(0,0,0,0.04)] dark:shadow-none overflow-hidden transition-all duration-200 ease-out flex flex-col justify-center min-h-[3.5rem] hover:border-gray-200 dark:hover:border-zinc-700 focus-within:shadow-[0_8px_30px_rgba(0,0,0,0.08)] dark:focus-within:shadow-none focus-within:border-gray-300 dark:focus-within:border-zinc-600">
-            
-            {/* Input Field Row - Fixed Height 3.5rem (h-14) to match button */}
-            <div className="flex items-center pl-6 md:pl-8 pr-12 md:pr-16 h-14 shrink-0">
-                <div className="text-gray-400 shrink-0">
-                   <Icons.Plus />
-                </div>
-                <input
-                    ref={inputRef}
-                    type="text"
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    placeholder={getPlaceholder()}
-                    className="w-full h-full pl-4 pr-4 bg-transparent text-black dark:text-white placeholder:text-gray-400 dark:placeholder:text-zinc-600 outline-none font-medium text-base" 
-                    autoFocus={shouldAutoFocus}
-                />
-            </div>
-
-            {/* Smart Parsed Attributes (Pills) Row */}
-            {(parsedPreview.priority || parsedPreview.tags.length > 0 || parsedPreview.dueDate) && (
-                <div className="flex items-center gap-2 px-8 md:px-10 pb-3 pt-0 animate-in fade-in slide-in-from-top-1 duration-200 overflow-x-auto no-scrollbar">
-                    <div className="h-px w-4 bg-gray-200 dark:bg-zinc-800 mr-1 shrink-0"></div>
-                    
-                    {parsedPreview.dueDate && (
-                        <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-900/20 text-[10px] font-bold text-blue-600 dark:text-blue-300 border border-blue-100 dark:border-blue-900/30 whitespace-nowrap">
-                            <Icons.Calendar /> {parsedPreview.dueDate}
-                        </span>
-                    )}
-                    
-                    {parsedPreview.priority && (
-                        <span className={`flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase border whitespace-nowrap
-                            ${parsedPreview.priority === Priority.HIGH ? 'bg-red-50 dark:bg-red-900/20 text-red-600 border-red-100 dark:border-red-900/30' : 
-                              parsedPreview.priority === Priority.LOW ? 'bg-green-50 dark:bg-green-900/20 text-green-600 border-green-100 dark:border-green-900/30' : 
-                              'bg-orange-50 dark:bg-orange-900/20 text-orange-600 border-orange-100 dark:border-orange-900/30'}
-                        `}>
-                            !{parsedPreview.priority}
-                        </span>
-                    )}
-                    
-                    {parsedPreview.tags.map(tag => (
-                        <span key={tag} className="flex items-center gap-1 px-1.5 py-0.5 rounded-[5px] bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-[10px] font-mono font-medium text-zinc-600 dark:text-zinc-400 whitespace-nowrap">
-                            <Icons.Tag />
-                            {tag}
-                        </span>
-                    ))}
-                </div>
-            )}
-
-            {/* Enter Button (Always visible on mobile to provide a submit action if keyboard is tricky) */}
-            <div className="absolute right-2 top-0 h-14 flex items-center pr-1 md:pr-2">
-                <button
-                    onClick={submit} 
-                    type="button"
-                    aria-label="Add task"
-                    className={`flex items-center justify-center w-9 h-9 rounded-full bg-black dark:bg-white text-white dark:text-black transition-all duration-200 hover:scale-110 active:scale-95 ${input.length > 0 ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}
-                >
-                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 10 4 15 9 20"></polyline><path d="M20 4v7a4 4 0 0 1-4 4H4"></path></svg>
-                </button>
-            </div>
+    <div className="w-full relative z-30 max-w-[860px] mx-auto">
+      <form
+        onSubmit={handleSubmit}
+        className="relative rounded-[24px] border border-gray-200/90 dark:border-zinc-700/90 bg-[#f4f5f7]/96 dark:bg-zinc-900/95 backdrop-blur-xl shadow-[0_14px_40px_rgba(15,23,42,0.08)] dark:shadow-[0_10px_30px_rgba(0,0,0,0.35)] transition-all duration-200"
+      >
+        <div className="px-4 md:px-6 pt-4 pb-2">
+          <input
+            ref={inputRef}
+            type="text"
+            value={input}
+            onChange={(event) => setInput(event.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder={getPlaceholder()}
+            className="w-full h-10 bg-transparent text-[18px] leading-6 font-medium text-gray-900 dark:text-zinc-100 placeholder:text-gray-400 dark:placeholder:text-zinc-500 outline-none"
+            autoFocus={shouldAutoFocus}
+          />
         </div>
 
-        {/* RIGHT: Independent Project Selector Pill */}
-        <div className="relative shrink-0 z-40" ref={dropdownRef}>
+        {(parsedPreview.priority || parsedPreview.tags.length > 0 || parsedPreview.dueDate) && (
+          <div className="px-4 md:px-6 pb-3 flex items-center gap-2 overflow-x-auto no-scrollbar">
+            {parsedPreview.dueDate && (
+              <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold bg-blue-50 text-blue-700 border border-blue-100 dark:bg-blue-900/25 dark:text-blue-300 dark:border-blue-900/45 whitespace-nowrap">
+                <Icons.Calendar />
+                {parsedPreview.dueDate}
+              </span>
+            )}
+            {parsedPreview.priority && (
+              <span
+                className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold uppercase whitespace-nowrap ${
+                  parsedPreview.priority === Priority.HIGH
+                    ? 'bg-red-50 text-red-700 border border-red-100 dark:bg-red-900/25 dark:text-red-300 dark:border-red-900/45'
+                    : parsedPreview.priority === Priority.LOW
+                      ? 'bg-green-50 text-green-700 border border-green-100 dark:bg-green-900/25 dark:text-green-300 dark:border-green-900/45'
+                      : 'bg-amber-50 text-amber-700 border border-amber-100 dark:bg-amber-900/25 dark:text-amber-300 dark:border-amber-900/45'
+                }`}
+              >
+                !{parsedPreview.priority}
+              </span>
+            )}
+            {parsedPreview.tags.map((tag) => (
+              <span
+                key={tag}
+                className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-medium border border-gray-200 bg-white/70 text-gray-600 dark:border-zinc-700 dark:bg-zinc-800/70 dark:text-zinc-300 whitespace-nowrap"
+              >
+                <Icons.Tag />
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+
+        <div className="h-11 border-t border-gray-200/80 dark:border-zinc-700/80 px-3 md:px-4 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2 min-w-0">
             <button
               type="button"
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              aria-label="Select project"
-              className={`
-                 h-14 px-4 md:px-6 flex items-center gap-2 rounded-[28px] border transition-all duration-200
-                 bg-white dark:bg-zinc-900 
-                 ${isDropdownOpen 
-                    ? 'border-gray-400 dark:border-zinc-500 shadow-md' 
-                    : 'border-gray-100 dark:border-zinc-800 shadow-[0_2px_8px_rgba(0,0,0,0.04)] dark:shadow-none hover:border-gray-200 dark:hover:border-zinc-700 hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)] dark:hover:shadow-none'}
-              `}
-              title="Select Project"
+              aria-label="Quick add hints"
+              className="w-8 h-8 rounded-full text-gray-500 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-zinc-100 hover:bg-white/75 dark:hover:bg-zinc-800/75 transition-colors"
+              title="Input supports !priority #tags today"
             >
-                <div className="flex flex-col items-start justify-center">
-                    {/* Hide label on mobile to save space */}
-                    <span className="hidden md:block text-[9px] font-bold uppercase text-gray-400 dark:text-zinc-500 leading-none mb-0.5">Project</span>
-                    <div className="flex items-center gap-1.5">
-                       <span className="md:hidden text-gray-500 dark:text-zinc-400"><Icons.Folder /></span>
-                       <span className="text-xs font-bold text-black dark:text-white leading-none max-w-[80px] md:max-w-[100px] truncate">{selectedProject}</span>
-                    </div>
-                </div>
-                <div className={`hidden md:block text-gray-400 dark:text-zinc-500 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`}>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                </div>
+              <Icons.Plus />
             </button>
 
-            {/* Dropdown Menu (Anchored Right) */}
-            {isDropdownOpen && (
-              <div className="absolute bottom-full right-0 mb-3 w-48 bg-white dark:bg-zinc-900 rounded-3xl border border-gray-200 dark:border-zinc-700 shadow-xl overflow-hidden py-1.5 animate-in fade-in zoom-in-95 slide-in-from-bottom-2 duration-200">
-                  <div className="px-4 py-2 text-[10px] font-bold uppercase text-gray-400 dark:text-zinc-600 tracking-wider">
-                      Select Destination
-                  </div>
-                  
+            <div className="relative" ref={dropdownRef}>
+              <button
+                type="button"
+                onClick={() => setIsDropdownOpen((prev) => !prev)}
+                className="h-8 px-3 rounded-full border border-gray-200 dark:border-zinc-700 bg-white/80 dark:bg-zinc-800/80 text-[12px] font-semibold text-gray-700 dark:text-zinc-200 inline-flex items-center gap-1.5 hover:border-gray-300 dark:hover:border-zinc-600 transition-colors"
+                title="Select project"
+              >
+                <Icons.Folder />
+                <span className="max-w-[112px] truncate">{selectedProject}</span>
+              </button>
+
+              {isDropdownOpen && (
+                <div className="absolute bottom-[calc(100%+8px)] left-0 w-52 rounded-2xl border border-gray-200 dark:border-zinc-700 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-xl shadow-xl overflow-hidden py-1.5 z-50">
                   <button
-                      type="button"
-                      onClick={() => { setSelectedProject('Inbox'); setIsDropdownOpen(false); }}
-                      className={`w-full text-left px-4 py-2.5 text-xs font-medium flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors ${selectedProject === 'Inbox' ? 'text-black dark:text-white bg-gray-50 dark:bg-zinc-800' : 'text-gray-500 dark:text-gray-400'}`}
+                    type="button"
+                    onClick={() => {
+                      setSelectedProject('Inbox');
+                      setIsDropdownOpen(false);
+                    }}
+                    className={`w-full px-3 py-2 text-left text-xs inline-flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors ${selectedProject === 'Inbox' ? 'text-gray-900 dark:text-zinc-100 bg-gray-50/70 dark:bg-zinc-800/70' : 'text-gray-600 dark:text-zinc-300'}`}
                   >
-                      <Icons.Inbox /> Inbox
-                      {selectedProject === 'Inbox' && <span className="ml-auto text-black dark:text-white"><Icons.Checked /></span>}
+                    <Icons.Inbox />
+                    Inbox
                   </button>
-                  
-                  <div className="h-px bg-gray-100 dark:bg-zinc-800 my-1 mx-3"></div>
-                  
-                  <div className="max-h-48 overflow-y-auto custom-scroll">
-                    {projects.map(p => (
-                        <button
-                            key={p}
-                            type="button"
-                            onClick={() => { setSelectedProject(p); setIsDropdownOpen(false); }}
-                            className={`w-full text-left px-4 py-2.5 text-xs font-medium flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors ${selectedProject === p ? 'text-black dark:text-white bg-gray-50 dark:bg-zinc-800' : 'text-gray-500 dark:text-gray-400'}`}
-                        >
-                            <Icons.Folder /> {p}
-                            {selectedProject === p && <span className="ml-auto text-black dark:text-white"><Icons.Checked /></span>}
-                        </button>
+
+                  <div className="my-1 mx-2 h-px bg-gray-100 dark:bg-zinc-800" />
+
+                  <div className="max-h-48 overflow-y-auto">
+                    {projects.map((project) => (
+                      <button
+                        key={project}
+                        type="button"
+                        onClick={() => {
+                          setSelectedProject(project);
+                          setIsDropdownOpen(false);
+                        }}
+                        className={`w-full px-3 py-2 text-left text-xs inline-flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors ${selectedProject === project ? 'text-gray-900 dark:text-zinc-100 bg-gray-50/70 dark:bg-zinc-800/70' : 'text-gray-600 dark:text-zinc-300'}`}
+                      >
+                        <Icons.Folder />
+                        {project}
+                      </button>
                     ))}
                   </div>
-              </div>
-            )}
-        </div>
+                </div>
+              )}
+            </div>
+          </div>
 
+          <button
+            onClick={submit}
+            type="button"
+            aria-label="Add task"
+            className={`w-8 h-8 rounded-full inline-flex items-center justify-center transition-all duration-200 ${
+              input.trim().length > 0
+                ? 'bg-gray-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:scale-105'
+                : 'bg-gray-200 text-gray-400 dark:bg-zinc-800 dark:text-zinc-600 cursor-not-allowed'
+            }`}
+            disabled={input.trim().length === 0}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M5 12h14" />
+              <path d="m13 6 6 6-6 6" />
+            </svg>
+          </button>
+        </div>
       </form>
     </div>
   );
