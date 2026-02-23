@@ -431,9 +431,8 @@ function createMainWindow() {
     title: isMac ? '' : 'Gitick',
     backgroundColor: nativeTheme.shouldUseDarkColors ? '#09090b' : '#ffffff',
     autoHideMenuBar: true,
-    titleBarStyle: isMac ? 'hidden' : 'default',
+    titleBarStyle: isMac ? 'hiddenInset' : 'default',
     titleBarOverlay: false,
-    trafficLightPosition: isMac ? { x: 14, y: 12 } : undefined,
     webPreferences: {
       preload: path.join(__dirname, 'preload.cjs'),
       contextIsolation: true,

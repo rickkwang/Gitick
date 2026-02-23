@@ -1087,17 +1087,9 @@ const App: React.FC = () => {
   return (
     <div
       className={`flex flex-col h-dvh font-sans text-gray-900 dark:text-dark-text bg-white dark:bg-zinc-950 overflow-hidden transition-colors duration-300 selection:bg-black selection:text-white dark:selection:bg-white dark:selection:text-black ${
-        isDesktopMac ? 'pt-10' : ''
-      } ${isStartupStatic ? 'startup-static' : ''}`}
+        isStartupStatic ? 'startup-static' : ''
+      }`}
     > 
-      {isDesktopMac && (
-        <div
-          className="fixed top-0 left-0 right-0 z-[120] h-10"
-          style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
-          aria-hidden="true"
-        />
-      )}
-      
       {/* Mobile Header with Safe Area Padding */}
       <header className="md:hidden bg-white/95 dark:bg-zinc-950/95 border-b border-gray-100 dark:border-zinc-800 shrink-0 z-50 pt-safe backdrop-blur-sm transition-colors duration-300">
          <div className="h-14 flex items-center px-4 justify-between">
@@ -1165,14 +1157,22 @@ const App: React.FC = () => {
                <div className="flex-1 flex flex-col h-full relative">
                   
                   {/* Working Dir Header (Desktop Only) */}
-                  <div className="hidden md:flex h-16 items-center justify-between px-8 shrink-0 bg-gray-50/85 dark:bg-zinc-900/85 backdrop-blur-sm z-10 transition-colors duration-300">
+                  <div
+                    className={`hidden md:flex h-16 items-center justify-between shrink-0 bg-gray-50/85 dark:bg-zinc-900/85 backdrop-blur-sm z-10 transition-colors duration-300 ${
+                      isDesktopMac ? 'pl-24 pr-8' : 'px-8'
+                    }`}
+                    style={isDesktopMac ? ({ WebkitAppRegion: 'drag' } as React.CSSProperties) : undefined}
+                  >
                      <div className="flex items-center gap-2 text-sm font-mono text-gray-500 dark:text-zinc-500">
                         <Icons.Folder />
                         <span className="truncate tracking-tight font-medium text-black dark:text-white opacity-70">
                           {getFilterBreadcrumb(filter)}
                         </span>
                      </div>
-                     <div className="flex items-center gap-4">
+                     <div
+                       className="flex items-center gap-4"
+                       style={isDesktopMac ? ({ WebkitAppRegion: 'no-drag' } as React.CSSProperties) : undefined}
+                     >
                         {isFocusActive && (
                             <div className="flex items-center gap-2 px-3 py-1 bg-black dark:bg-white rounded-full text-white dark:text-black shadow-lg shadow-black/10 animate-pulse">
                                 <span className="text-[10px] font-bold uppercase tracking-wider">Focus</span>
