@@ -280,8 +280,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
              {/* This separates mobile logic from desktop state, preventing logo flicker during open */}
              <div className="md:hidden absolute inset-0 px-6 flex items-center justify-between">
                 <div className="flex items-center gap-3.5 text-black dark:text-white">
-                    <span className="shrink-0 flex items-center justify-center">
-                        <Icons.GitickLogo />
+                    <span className="shrink-0 w-8 h-8 rounded-xl border border-gray-200/80 dark:border-zinc-700/80 bg-white dark:bg-zinc-900 flex items-center justify-center">
+                        <Icons.GitickLogo className="w-5 h-5" />
                     </span>
                     <span className="text-base font-semibold tracking-tight whitespace-nowrap">
                         Gitick
@@ -312,8 +312,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                    ${renderCollapsed ? 'max-w-0 mr-0' : 'max-w-[180px] mr-3'}
                  `}
                >
-                 <span className="shrink-0 flex items-center justify-center">
-                   <Icons.GitickLogo />
+                 <span className="shrink-0 w-8 h-8 rounded-xl border border-gray-200/80 dark:border-zinc-700/80 bg-white dark:bg-zinc-900 flex items-center justify-center">
+                   <Icons.GitickLogo className="w-5 h-5" />
                  </span>
                  <span className="ml-3.5 text-base font-semibold tracking-tight whitespace-nowrap">
                    Gitick
@@ -327,7 +327,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   title={renderCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
                   style={isDesktopMac ? ({ WebkitAppRegion: 'no-drag' } as React.CSSProperties) : undefined}
                >
-                  {renderCollapsed ? <Icons.GitickLogo /> : <Icons.SidebarLeft />}
+                  {renderCollapsed ? <Icons.GitickLogo className="w-5 h-5" /> : <Icons.SidebarLeft />}
                </button>
              </div>
           </div>
