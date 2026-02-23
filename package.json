@@ -1,8 +1,8 @@
 {
   "name": "gitick---task-manager",
   "private": true,
-  "version": "0.2.50",
-  "description": "Gitick desktop and mobile task manager",
+  "version": "0.2.51",
+  "description": "Gitick desktop task manager",
   "author": "Myrick Wang",
   "repository": {
     "type": "git",
@@ -15,27 +15,12 @@
     "build": "vite build",
     "typecheck": "tsc --noEmit",
     "preview": "vite preview",
-    "cap:sync": "npx cap sync",
-    "app:doctor": "npx cap doctor",
-    "app:prepare": "npm run build && npx cap sync",
-    "app:android": "npx cap open android",
-    "app:ios": "npx cap open ios",
-    "app:run:android": "npm run app:prepare && npx cap run android",
-    "app:run:ios": "npm run app:prepare && npx cap run ios",
     "desktop:dev": "concurrently -k \"vite --host 127.0.0.1 --port 3000\" \"wait-on tcp:3000 && VITE_DEV_SERVER_URL=http://127.0.0.1:3000 electron .\"",
     "desktop:pack": "npm run build && electron-builder --dir",
     "desktop:dmg": "npm run build && electron-builder --mac",
     "desktop:release": "npm run desktop:dmg && node scripts/verify-mac-signatures.mjs && node scripts/publish-desktop-release.mjs"
   },
   "dependencies": {
-    "@capacitor/android": "^8.1.0",
-    "@capacitor/app": "^8.0.1",
-    "@capacitor/cli": "^8.1.0",
-    "@capacitor/core": "^8.1.0",
-    "@capacitor/ios": "^8.1.0",
-    "@capacitor/keyboard": "^8.0.0",
-    "@capacitor/splash-screen": "^8.0.1",
-    "@capacitor/status-bar": "^8.0.1",
     "electron-updater": "^6.6.2",
     "react": "^19.2.1",
     "react-dom": "^19.2.1"
@@ -48,7 +33,6 @@
     "electron-builder": "^26.0.12",
     "typescript": "~5.8.2",
     "vite": "^6.2.0",
-    "vite-plugin-pwa": "^1.2.0",
     "wait-on": "^9.0.1"
   },
   "build": {

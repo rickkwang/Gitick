@@ -8,13 +8,6 @@ import { StatusBar } from './components/StatusBar';
 import { ConfirmDialog } from './components/ConfirmDialog';
 import { FilterType, Task, UserProfile } from './types';
 import { Icons, PROJECTS as DEFAULT_PROJECTS } from './constants';
-import {
-  getRuntimePlatform,
-  initNativeAppShell,
-  isNativePlatform,
-  registerAndroidBackButton,
-  syncStatusBarWithTheme,
-} from './services/nativeApp';
 import { playSuccessSound } from './utils/audio';
 import { createOnboardingTasks, DEFAULT_USER_PROFILE } from './utils/appDefaults';
 import { sanitizeTaskList } from './utils/taskSanitizer';
@@ -38,19 +31,6 @@ const FOCUS_DEFAULT_SECONDS = 25 * 60;
 const BREAK_DEFAULT_SECONDS = 5 * 60;
 const getDefaultFocusSeconds = (mode: 'focus' | 'break') =>
   mode === 'focus' ? FOCUS_DEFAULT_SECONDS : BREAK_DEFAULT_SECONDS;
-
-interface DeferredInstallPromptEvent extends Event {
-  prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>;
-}
-
-type StandaloneNavigator = Navigator & {
-  standalone?: boolean;
-};
-
-interface ServiceWorkerUpdateEventDetail {
-  applyUpdate: () => void;
-}
 
 interface ConfirmDialogRequest {
   title: string;
@@ -105,22 +85,10 @@ const App: React.FC = () => {
   });
   
   const [showSettings, setShowSettings] = useState(false);
-  const nativeApp = isNativePlatform();
-  const runtimePlatform = getRuntimePlatform();
   const desktopPlatform = typeof window !== 'undefined' ? window.gitickDesktop?.platform : undefined;
   const isDesktopMac = desktopPlatform === 'darwin';
   const isDesktopRuntime = typeof window !== 'undefined' && Boolean(window.gitickDesktop?.updater);
-  const [deferredInstallPrompt, setDeferredInstallPrompt] = useState<DeferredInstallPromptEvent | null>(null);
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogRequest | null>(null);
-  const [isStandaloneInstalled, setIsStandaloneInstalled] = useState(() => {
-    if (typeof window === 'undefined') return nativeApp;
-    const standaloneNavigator = window.navigator as StandaloneNavigator;
-    return (
-      nativeApp ||
-      window.matchMedia('(display-mode: standalone)').matches ||
-      standaloneNavigator.standalone === true
-    );
-  });
   
   // Projects State
   const [projects, setProjects] = useState<string[]>(() =>
@@ -338,44 +306,6 @@ const App: React.FC = () => {
     });
   }, []);
 
-  useEffect(() => {
-    void initNativeAppShell();
-  }, []);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-
-    const standaloneNavigator = window.navigator as StandaloneNavigator;
-    const media = window.matchMedia('(display-mode: standalone)');
-    const updateStandalone = () => {
-      setIsStandaloneInstalled(
-        nativeApp || media.matches || standaloneNavigator.standalone === true,
-      );
-    };
-
-    const handleBeforeInstallPrompt = (event: Event) => {
-      const installPromptEvent = event as DeferredInstallPromptEvent;
-      installPromptEvent.preventDefault();
-      setDeferredInstallPrompt(installPromptEvent);
-    };
-
-    const handleInstalled = () => {
-      setDeferredInstallPrompt(null);
-      updateStandalone();
-    };
-
-    updateStandalone();
-    media.addEventListener?.('change', updateStandalone);
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt as EventListener);
-    window.addEventListener('appinstalled', handleInstalled);
-
-    return () => {
-      media.removeEventListener?.('change', updateStandalone);
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt as EventListener);
-      window.removeEventListener('appinstalled', handleInstalled);
-    };
-  }, [nativeApp]);
-
   // Persistence Effects
   useEffect(() => {
     writeStoredJson(STORAGE_KEYS.tasks, tasks);
@@ -401,7 +331,6 @@ const App: React.FC = () => {
       document.documentElement.classList.remove('dark');
     }
     document.documentElement.style.colorScheme = isDarkMode ? 'dark' : 'light';
-    void syncStatusBarWithTheme(isDarkMode);
   }, [isDarkMode]);
 
   useEffect(() => {
@@ -508,26 +437,6 @@ const App: React.FC = () => {
     },
     [confirmDialog],
   );
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-
-    const handleSWUpdateReady = (event: Event) => {
-      const detail = (event as CustomEvent<ServiceWorkerUpdateEventDetail>).detail;
-      if (!detail?.applyUpdate) return;
-      setConfirmDialog({
-        title: 'New version is ready',
-        description: 'A new Gitick version has been downloaded. Reload now to apply the update?',
-        confirmLabel: 'Reload Now',
-        cancelLabel: 'Later',
-        onConfirm: () => detail.applyUpdate(),
-        onCancel: () => showToast('Update ready. You can reload later.'),
-      });
-    };
-
-    window.addEventListener('gitick:sw-update-ready', handleSWUpdateReady);
-    return () => window.removeEventListener('gitick:sw-update-ready', handleSWUpdateReady);
-  }, []);
 
   const getFriendlyUpdateError = (raw: string, reason?: string) => {
     const message = raw.replace(/\s+/g, ' ').trim().toLowerCase();
@@ -643,40 +552,6 @@ const App: React.FC = () => {
       showToast('Unable to check updates right now.');
       manualDesktopCheckRef.current = false;
       setIsCheckingDesktopUpdate(false);
-    }
-  };
-
-  const requestInstallApp = async () => {
-    if (nativeApp) {
-      showToast('Running as native app');
-      return true;
-    }
-
-    if (isStandaloneInstalled) {
-      showToast('App already installed');
-      return true;
-    }
-
-    if (!deferredInstallPrompt) {
-      showToast('Install entry unavailable. Use browser menu.');
-      return false;
-    }
-
-    try {
-      await deferredInstallPrompt.prompt();
-      const { outcome } = await deferredInstallPrompt.userChoice;
-      if (outcome === 'accepted') {
-        showToast('Install started');
-      } else {
-        showToast('Install canceled');
-      }
-      return outcome === 'accepted';
-    } catch (error) {
-      console.error('Install prompt failed', error);
-      showToast('Install failed');
-      return false;
-    } finally {
-      setDeferredInstallPrompt(null);
     }
   };
 
@@ -1020,36 +895,6 @@ const App: React.FC = () => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [showSettings, selectedTask, isSidebarOpen, isRightSidebarOpen, showSearch]);
-
-  const handleAndroidBack = useCallback(
-    (_canGoBack: boolean) => {
-      if (showSearch) {
-        setShowSearch(false);
-        setSearchQuery('');
-        return true;
-      }
-      if (showSettings) {
-        setShowSettings(false);
-        return true;
-      }
-      if (selectedTask) {
-        setSelectedTask(null);
-        return true;
-      }
-      if (isRightSidebarOpen) {
-        setIsRightSidebarOpen(false);
-        return true;
-      }
-      if (isSidebarOpen) {
-        setIsSidebarOpen(false);
-        return true;
-      }
-      return false;
-    },
-    [isRightSidebarOpen, isSidebarOpen, selectedTask, showSearch, showSettings],
-  );
-
-  useEffect(() => registerAndroidBackButton(handleAndroidBack), [handleAndroidBack]);
 
   const renderTaskList = (taskList: Task[], groupName?: string) => {
      if (taskList.length === 0) return null;
@@ -1448,11 +1293,6 @@ const App: React.FC = () => {
             tasks={tasks}
             onImportData={handleImportData}
             onClearData={clearAllLocalData}
-            isNativeApp={nativeApp}
-            runtimePlatform={runtimePlatform}
-            isStandaloneInstalled={isStandaloneInstalled}
-            canInstallApp={Boolean(deferredInstallPrompt)}
-            onRequestInstallApp={requestInstallApp}
             desktopAppVersion={desktopAppVersion}
             canCheckDesktopUpdate={isDesktopRuntime}
             desktopUpdateStatus={desktopUpdateStatus}

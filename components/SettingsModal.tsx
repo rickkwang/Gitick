@@ -15,11 +15,6 @@ interface SettingsModalProps {
   tasks: Task[];
   onImportData: (tasks: Task[]) => void;
   onClearData: () => void;
-  isNativeApp: boolean;
-  runtimePlatform: string;
-  isStandaloneInstalled: boolean;
-  canInstallApp: boolean;
-  onRequestInstallApp: () => Promise<boolean>;
   desktopAppVersion: string;
   canCheckDesktopUpdate: boolean;
   desktopUpdateStatus: string;
@@ -40,11 +35,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   tasks,
   onImportData,
   onClearData,
-  isNativeApp,
-  runtimePlatform,
-  isStandaloneInstalled,
-  canInstallApp,
-  onRequestInstallApp,
   desktopAppVersion,
   canCheckDesktopUpdate,
   desktopUpdateStatus,
@@ -148,14 +138,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     { id: 'profile', label: 'My Account', icon: <Icons.User /> },
     { id: 'general', label: 'Appearance', icon: <Icons.Monitor /> },
     { id: 'data', label: 'Data & Sync', icon: <Icons.Briefcase /> },
-    { id: 'about', label: 'About & Install', icon: <Icons.GitCommit /> },
+    { id: 'about', label: 'About', icon: <Icons.GitCommit /> },
   ];
-
-  const runtimeLabel = isNativeApp
-    ? `Native (${runtimePlatform})`
-    : isStandaloneInstalled
-      ? 'Installed PWA'
-      : 'Browser';
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-2 md:p-6">
@@ -420,38 +404,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                  </div>
 
                 <div className="space-y-5">
-                   <h4 className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-zinc-600">Install & Updates</h4>
+                   <h4 className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-zinc-600">Desktop Updates</h4>
 
                     <div className="rounded-2xl border border-gray-200 dark:border-zinc-700 p-5 bg-white dark:bg-zinc-800/40 space-y-4">
-                      <div className="flex items-center justify-between">
-                        <p className="text-xs uppercase tracking-wider text-gray-400 dark:text-zinc-500">Current Runtime</p>
-                        <span className="text-xs font-mono text-black dark:text-white">{runtimeLabel}</span>
-                      </div>
-                      {!isNativeApp && !isStandaloneInstalled && (
-                        <button
-                          onClick={() => { void onRequestInstallApp(); }}
-                          disabled={!canInstallApp}
-                          className={`w-full rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
-                            canInstallApp
-                              ? 'bg-black text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200'
-                              : 'bg-gray-200 text-gray-500 dark:bg-zinc-700 dark:text-zinc-400 cursor-not-allowed'
-                          }`}
-                        >
-                          {canInstallApp ? 'Install Gitick App' : 'Open in Chrome/Safari to install'}
-                        </button>
-                      )}
-                      {!isNativeApp && isStandaloneInstalled && (
-                        <p className="text-xs text-green-600 dark:text-green-400 font-medium">
-                          Gitick is already installed on this device.
-                        </p>
-                      )}
-                      {isNativeApp && (
-                        <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">
-                          You are using the native Capacitor shell.
-                        </p>
-                      )}
                       {canCheckDesktopUpdate && (
-                        <div className="pt-3 border-t border-gray-100 dark:border-zinc-700 space-y-3">
+                        <div className="space-y-3">
                           <div className="flex items-center justify-between">
                             <p className="text-xs uppercase tracking-wider text-gray-400 dark:text-zinc-500">Desktop Version</p>
                             <span className="text-xs font-mono text-black dark:text-white">{desktopAppVersion || 'Unknown'}</span>
@@ -472,29 +429,17 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                           )}
                         </div>
                       )}
-                    </div>
-                    
-                    <div className="bg-gray-50 dark:bg-zinc-800/30 rounded-2xl p-5 space-y-4 border border-gray-100 dark:border-zinc-800/50">
-                        <div className="flex gap-3 items-start">
-                            <span className="flex items-center justify-center w-6 h-6 rounded-full bg-black dark:bg-white text-white dark:text-black text-xs font-bold shrink-0">1</span>
-                            <div>
-                               <p className="text-sm font-bold text-black dark:text-white">On Mobile (iOS/Android)</p>
-                               <p className="text-xs text-gray-500 dark:text-zinc-400 mt-1">Tap the <span className="font-bold">Share</span> or <span className="font-bold">Menu</span> button in your browser, then select <span className="font-bold">"Add to Home Screen"</span>.</p>
-                            </div>
-                        </div>
-                        <div className="flex gap-3 items-start">
-                            <span className="flex items-center justify-center w-6 h-6 rounded-full bg-black dark:bg-white text-white dark:text-black text-xs font-bold shrink-0">2</span>
-                            <div>
-                               <p className="text-sm font-bold text-black dark:text-white">On Desktop (Chrome/Edge)</p>
-                               <p className="text-xs text-gray-500 dark:text-zinc-400 mt-1">Click the <span className="font-bold">Install icon</span> in the right side of the URL bar.</p>
-                            </div>
-                        </div>
+                      {!canCheckDesktopUpdate && (
+                        <p className="text-xs text-gray-500 dark:text-zinc-400">
+                          Update checks are available in the desktop app runtime.
+                        </p>
+                      )}
                     </div>
                  </div>
 
                  <div className="p-5 rounded-2xl bg-green-50 dark:bg-green-900/10 border border-green-100 dark:border-green-900/30">
                     <p className="text-xs text-green-700 dark:text-green-400 font-medium">
-                       🔒 <span className="font-bold">Local First:</span> Your data is stored locally on your current device (browser or app). We don't see your tasks. Export backup before switching devices.
+                       🔒 <span className="font-bold">Local First:</span> Your data is stored locally on your current device. We don't see your tasks. Export backup before switching devices.
                     </p>
                  </div>
                </div>

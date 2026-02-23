@@ -1,6 +1,5 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { registerSW } from 'virtual:pwa-register';
 import App from './App';
 
 const rootElement = document.getElementById('root');
@@ -14,23 +13,3 @@ root.render(
     <App />
   </React.StrictMode>
 );
-
-if (typeof window !== 'undefined') {
-  const updateSW = registerSW({
-    immediate: true,
-    onNeedRefresh() {
-      window.dispatchEvent(
-        new CustomEvent('gitick:sw-update-ready', {
-          detail: {
-            applyUpdate: () => {
-              void updateSW(true);
-            },
-          },
-        }),
-      );
-    },
-    onOfflineReady() {
-      console.info('Gitick is ready to work offline.');
-    },
-  });
-}
