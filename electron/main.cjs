@@ -91,6 +91,27 @@ const getMacBundlePath = () => {
   return executablePath;
 };
 
+const isBundleInApplicationsByPath = (bundlePath) => {
+  if (!bundlePath) return false;
+  const candidates = new Set([bundlePath]);
+  try {
+    candidates.add(fs.realpathSync(bundlePath));
+  } catch (_) {
+    // Ignore realpath failures and rely on raw path.
+  }
+
+  for (const candidate of candidates) {
+    const normalized = String(candidate).replace(/\/+$/, '');
+    if (
+      normalized.startsWith('/Applications/') ||
+      normalized.startsWith('/System/Volumes/Data/Applications/')
+    ) {
+      return true;
+    }
+  }
+  return false;
+};
+
 const readMacCodeSignature = (targetPath) => {
   const result = spawnSync('codesign', ['-dv', '--verbose=4', targetPath], {
     encoding: 'utf8',
@@ -142,7 +163,10 @@ const diagnoseUpdaterInstall = () => {
 
   const bundlePath = getMacBundlePath();
   details.bundlePath = bundlePath;
-  details.inApplicationsFolder = typeof app.isInApplicationsFolder === 'function' ? app.isInApplicationsFolder() : null;
+  const electronInApplications =
+    typeof app.isInApplicationsFolder === 'function' ? app.isInApplicationsFolder() : null;
+  const pathInApplications = isBundleInApplicationsByPath(bundlePath);
+  details.inApplicationsFolder = electronInApplications === true || pathInApplications;
   details.isTranslocated =
     details.executablePath.includes('/AppTranslocation/') || bundlePath.includes('/AppTranslocation/');
 
@@ -499,6 +523,31 @@ ipcMain.handle('updater:check', async () => {
 ipcMain.handle('updater:download', async () => {
   if (isDev) {
     return { ok: false, reason: 'dev-mode' };
+  }
+  if (isMac) {
+    if (!latestAvailableVersion) {
+      try {
+        const latestYml = await fetchText(RELEASE_METADATA_URL);
+        const metadataVersion = parseVersionFromLatestMacYml(latestYml);
+        if (metadataVersion && compareSemver(metadataVersion, app.getVersion()) > 0) {
+          latestAvailableVersion = metadataVersion;
+        }
+      } catch (error) {
+        return {
+          ok: false,
+          reason: classifyUpdaterReason(error?.message, 'download-failed'),
+          message: error?.message || 'Unable to prepare update right now.',
+        };
+      }
+    }
+
+    if (!latestAvailableVersion || compareSemver(latestAvailableVersion, app.getVersion()) <= 0) {
+      return { ok: false, reason: 'no-update' };
+    }
+
+    latestDownloadedVersion = latestAvailableVersion;
+    sendUpdaterStatus({ type: 'downloaded', version: latestDownloadedVersion });
+    return { ok: true, reason: 'external-installer-ready' };
   }
   if (updaterDownloadTask) {
     return { ok: true, reason: 'in-progress' };
