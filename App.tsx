@@ -4,7 +4,6 @@ import { FocusMode } from './components/FocusMode';
 import { TaskInput } from './components/TaskInput';
 import { TaskItem } from './components/TaskItem';
 import { StagingPanel } from './components/StagingPanel';
-import { StatusBar } from './components/StatusBar';
 import { ConfirmDialog } from './components/ConfirmDialog';
 import { FilterType, Task, UserProfile } from './types';
 import { Icons, PROJECTS as DEFAULT_PROJECTS } from './constants';
@@ -622,7 +621,7 @@ const App: React.FC = () => {
            {groupName && (
               // OPTICAL FIX: Added px-5 md:px-6 to align header text with TaskItem content (checkbox)
               // This fixes the "floating header" look relative to the rounded cards
-              <div className={`sticky top-0 bg-gray-50/92 dark:bg-zinc-900/92 backdrop-blur-md z-10 py-3 mb-2 border-b border-gray-200/60 dark:border-zinc-800/80 flex items-center gap-3 transition-colors ${headerClass} px-5 md:px-6`}>
+              <div className={`sticky top-0 bg-gray-50 dark:bg-zinc-950 z-10 py-3 mb-2 border-b border-gray-200/60 dark:border-zinc-800/80 flex items-center gap-3 transition-colors ${headerClass} px-5 md:px-6`}>
                   <span className="text-[11px] font-black uppercase tracking-widest opacity-90 transform translate-y-[1px]">{groupName}</span>
                   <span className="text-[9px] font-bold font-mono opacity-60 bg-gray-200/50 dark:bg-zinc-800 px-2 py-0.5 rounded-full text-black dark:text-white min-w-[1.5rem] text-center">{taskList.length}</span>
               </div>
@@ -649,7 +648,7 @@ const App: React.FC = () => {
       }`}
     > 
       {/* Mobile Header with Safe Area Padding */}
-      <header className="md:hidden bg-white/95 dark:bg-zinc-950/95 border-b border-gray-100 dark:border-zinc-800 shrink-0 z-50 pt-safe backdrop-blur-sm transition-colors duration-300">
+      <header className="md:hidden bg-gray-50 dark:bg-zinc-950 border-b border-gray-100 dark:border-zinc-800 shrink-0 z-50 pt-safe transition-colors duration-300">
          <div className="h-14 flex items-center px-4 justify-between">
             <div className="flex items-center gap-3">
                <button
@@ -691,7 +690,7 @@ const App: React.FC = () => {
         />
 
         {/* COL 2: Main Content */}
-        <main className="flex-1 flex flex-col min-w-0 h-full bg-gradient-to-b from-gray-50 via-gray-50/95 to-white dark:from-zinc-900 dark:via-zinc-900 dark:to-zinc-950 relative z-0 transition-colors duration-300">
+        <main className="flex-1 flex flex-col min-w-0 h-full bg-gray-50 dark:bg-zinc-950 relative z-0 transition-colors duration-300">
            
            <div className={`h-full flex flex-col ${filter === 'focus' ? '' : 'animate-view-breathe'}`}>
              
@@ -716,7 +715,7 @@ const App: React.FC = () => {
                   
                   {/* Working Dir Header (Desktop Only) */}
                   <div
-                    className={`hidden md:flex h-16 items-center justify-between shrink-0 bg-gray-50/85 dark:bg-zinc-900/85 backdrop-blur-sm z-10 transition-colors duration-300 ${
+                    className={`hidden md:flex h-16 items-center justify-between shrink-0 bg-gray-50 dark:bg-zinc-950 z-10 transition-colors duration-300 ${
                       isDesktopMac ? 'pl-24 pr-8' : 'px-8'
                     }`}
                     style={isDesktopMac ? ({ WebkitAppRegion: 'drag' } as React.CSSProperties) : undefined}
@@ -822,11 +821,11 @@ const App: React.FC = () => {
                   {showTaskInput && (
                      <div className="absolute bottom-0 left-0 right-0 z-20 pointer-events-none">
                         {/* Gradient Mask to catch scrolling text - Taller and solid at bottom */}
-                        <div className="absolute bottom-0 left-0 right-0 h-56 bg-gradient-to-t from-gray-50/95 via-gray-50/80 to-transparent dark:from-zinc-900 dark:via-zinc-900/80" />
+                        <div className="absolute bottom-0 left-0 right-0 h-56 bg-gray-50/92 dark:bg-zinc-950/88" />
 
                         {/* Input Container - Padded from bottom including Safe Area */}
                         <div className="relative z-10 w-full flex justify-center px-4 pt-10 pb-safe">
-                           <div className="max-w-3xl w-full pointer-events-auto mb-3">
+                           <div className="max-w-3xl w-full pointer-events-auto mb-8 md:mb-9">
                               <TaskInput onAddTask={addTask} activeList={filter} projects={projects} />
                            </div>
                         </div>
@@ -884,18 +883,6 @@ const App: React.FC = () => {
            </div>
         )}
 
-      </div>
-
-      {/* --- BOTTOM STATUS BAR (Desktop Only) --- */}
-      <div className="hidden md:block">
-        <StatusBar 
-          message={statusMessage}
-          onUndo={undoAction}
-          activeFilter={filter}
-          taskCount={tasks.length}
-          isFocusActive={isFocusActive}
-          focusTimeLeft={focusTimeLeft}
-        />
       </div>
 
       {/* --- OVERLAYS --- */}

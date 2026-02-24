@@ -10,26 +10,11 @@ interface TaskInputProps {
 }
 
 const RANDOM_PROMPTS = [
-  "Buy coffee !high #life today",
-  "Save the world... !high",
-  "Debug the universe #coding",
-  "Call mom tomorrow #family",
-  "Design the future !medium",
-  "Go for a run 🏃‍♂️ #health",
-  "Read a book 📚 #relax",
-  "Ship it! 🚀 #work",
-  "Plan weekend trip next week #travel",
-  "Water the plants 🌱",
-  "Learn TypeScript #dev",
-  "Pay bills !high #finance",
-  "Review goals 🎯",
-  "Take a deep breath... #focus",
-  "Deploy to production !high",
-  "Invent time travel tomorrow",
-  "Feed the cat 🐱 #chores",
-  "Write a song #creative",
-  "Fix that bug !medium",
-  "Coffee break ☕️"
+  'Finish report !high',
+  'Call mom tomorrow',
+  'Buy coffee #life',
+  'Read 20 mins',
+  'Workout today',
 ];
 
 export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, projects }) => {
@@ -200,9 +185,9 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
 
   // Helper for placeholder
   const getPlaceholder = () => {
-      if (activeList === 'today') return `For today... (e.g. ${placeholderHint})`;
-      if (activeList && projects.includes(activeList) && activeList !== 'Inbox') return `Add to ${activeList}... (e.g. ${placeholderHint})`;
-      return `I need to... (e.g. ${placeholderHint})`;
+      if (activeList === 'today') return 'For today...';
+      if (activeList && projects.includes(activeList) && activeList !== 'Inbox') return `${activeList}...`;
+      return 'Add task...';
   }
   
   // Auto-focus logic: Only on desktop
@@ -210,17 +195,9 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
 
   return (
     <div className="w-full relative z-30 max-w-3xl mx-auto">
-      <form onSubmit={handleSubmit} className="flex items-end gap-2 md:gap-3 group transition-all duration-300">
-        
-        {/* LEFT: Main Input Container */}
-        {/* OPTICAL ALIGNMENT FIX: 
-            For a rounded-[28px] container, pl-4 is too tight. 
-            Increased to pl-6 (mobile) and pl-8 (desktop) to align visually with the curve. 
-        */}
-        <div className="flex-1 relative bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-[28px] shadow-[0_2px_12px_rgba(0,0,0,0.04)] dark:shadow-none overflow-hidden transition-all duration-200 ease-out flex flex-col justify-center min-h-[3.5rem] hover:border-gray-200 dark:hover:border-zinc-700 focus-within:shadow-[0_8px_30px_rgba(0,0,0,0.08)] dark:focus-within:shadow-none focus-within:border-gray-300 dark:focus-within:border-zinc-600">
-            
-            {/* Input Field Row - Fixed Height 3.5rem (h-14) to match button */}
-            <div className="flex items-center pl-6 md:pl-8 pr-12 md:pr-16 h-14 shrink-0">
+      <form onSubmit={handleSubmit} className="group transition-all duration-300">
+        <div className="relative bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-[24px] shadow-[0_2px_12px_rgba(0,0,0,0.04)] dark:shadow-none overflow-visible transition-all duration-200 ease-out flex flex-col justify-center min-h-[3.25rem] hover:border-gray-200 dark:hover:border-zinc-700 focus-within:shadow-[0_8px_30px_rgba(0,0,0,0.08)] dark:focus-within:shadow-none focus-within:border-gray-300 dark:focus-within:border-zinc-600">
+            <div className="flex items-center pl-5 md:pl-6 pr-2.5 h-[52px] shrink-0">
                 <div className="text-gray-400 shrink-0">
                    <Icons.Plus />
                 </div>
@@ -231,14 +208,63 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={handleKeyDown}
                     placeholder={getPlaceholder()}
-                    className="w-full h-full pl-4 pr-4 bg-transparent text-black dark:text-white placeholder:text-gray-400 dark:placeholder:text-zinc-600 outline-none font-medium text-base" 
+                    className="w-full h-full pl-3 pr-3 bg-transparent text-black dark:text-white placeholder:text-gray-400 dark:placeholder:text-zinc-600 outline-none font-medium text-[15px]"
                     autoFocus={shouldAutoFocus}
                 />
+                <div className="h-5 w-px bg-gray-200/70 dark:bg-zinc-700/60 mx-1.5" />
+                <div className="relative shrink-0 z-40" ref={dropdownRef}>
+                    <button
+                      type="button"
+                      onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                      aria-label="Select project"
+                      className={`
+                        h-9 px-4 md:px-4.5 flex items-center gap-2 rounded-full transition-all duration-200
+                        bg-gray-100/75 dark:bg-white/5
+                        ${isDropdownOpen
+                          ? 'bg-gray-100 dark:bg-white/10'
+                          : 'hover:bg-gray-100 dark:hover:bg-white/[0.08]'}
+                      `}
+                      title="Select Project"
+                    >
+                        <span className="text-[11px] font-bold uppercase tracking-wide text-gray-400 dark:text-zinc-500">Project</span>
+                        <span className="text-xs font-bold text-black dark:text-white max-w-[96px] truncate">{selectedProject}</span>
+                        <span className={`text-gray-400 dark:text-zinc-500 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`}>
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </span>
+                    </button>
+
+                    {isDropdownOpen && (
+                      <div className="absolute bottom-full right-0 mb-2 w-44 rounded-2xl border border-white/35 dark:border-white/10 bg-white/72 dark:bg-zinc-900/62 backdrop-blur-xl shadow-[0_16px_32px_-20px_rgba(0,0,0,0.45)] overflow-hidden py-1.5 animate-in fade-in zoom-in-95 slide-in-from-bottom-2 duration-200">
+                          <button
+                              type="button"
+                              onClick={() => { setSelectedProject('Inbox'); setIsDropdownOpen(false); }}
+                              className={`mx-1 w-[calc(100%-0.5rem)] text-left px-2.5 py-2 rounded-xl text-xs font-medium flex items-center gap-2.5 transition-colors ${selectedProject === 'Inbox' ? 'text-black dark:text-white bg-gray-100/85 dark:bg-white/10' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100/60 dark:hover:bg-white/6'}`}
+                          >
+                              <Icons.Inbox /> Inbox
+                              {selectedProject === 'Inbox' && <span className="ml-auto text-black dark:text-white"><Icons.Checked /></span>}
+                          </button>
+                          <div className="h-px bg-gray-200/70 dark:bg-white/10 my-1 mx-2"></div>
+                          <div className="max-h-44 overflow-y-auto custom-scroll">
+                            {projects.map(p => (
+                                <button
+                                    key={p}
+                                    type="button"
+                                    onClick={() => { setSelectedProject(p); setIsDropdownOpen(false); }}
+                                    className={`mx-1 w-[calc(100%-0.5rem)] text-left px-2.5 py-2 rounded-xl text-xs font-medium flex items-center gap-2.5 transition-colors ${selectedProject === p ? 'text-black dark:text-white bg-gray-100/85 dark:bg-white/10' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100/60 dark:hover:bg-white/6'}`}
+                                >
+                                    <Icons.Folder /> {p}
+                                    {selectedProject === p && <span className="ml-auto text-black dark:text-white"><Icons.Checked /></span>}
+                                </button>
+                            ))}
+                          </div>
+                      </div>
+                    )}
+                </div>
             </div>
 
             {/* Smart Parsed Attributes (Pills) Row */}
             {(parsedPreview.priority || parsedPreview.tags.length > 0 || parsedPreview.dueDate) && (
-                <div className="flex items-center gap-2 px-8 md:px-10 pb-3 pt-0 animate-in fade-in slide-in-from-top-1 duration-200 overflow-x-auto no-scrollbar">
+                <div className="flex items-center gap-2 px-6 md:px-8 pb-2.5 pt-0 animate-in fade-in slide-in-from-top-1 duration-200 overflow-x-auto no-scrollbar">
                     <div className="h-px w-4 bg-gray-200 dark:bg-zinc-800 mr-1 shrink-0"></div>
                     
                     {parsedPreview.dueDate && (
@@ -266,8 +292,8 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
                 </div>
             )}
 
-            {/* Enter Button (Always visible on mobile to provide a submit action if keyboard is tricky) */}
-            <div className="absolute right-2 top-0 h-14 flex items-center pr-1 md:pr-2">
+            {/* Enter Button */}
+            <div className="absolute right-[8rem] md:right-[8.6rem] top-0 h-[52px] flex items-center pr-1">
                 <button
                     onClick={submit} 
                     type="button"
@@ -278,70 +304,6 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
                 </button>
             </div>
         </div>
-
-        {/* RIGHT: Independent Project Selector Pill */}
-        <div className="relative shrink-0 z-40" ref={dropdownRef}>
-            <button
-              type="button"
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              aria-label="Select project"
-              className={`
-                 h-14 px-4 md:px-6 flex items-center gap-2 rounded-[28px] border transition-all duration-200
-                 bg-white dark:bg-zinc-900 
-                 ${isDropdownOpen 
-                    ? 'border-gray-400 dark:border-zinc-500 shadow-md' 
-                    : 'border-gray-100 dark:border-zinc-800 shadow-[0_2px_8px_rgba(0,0,0,0.04)] dark:shadow-none hover:border-gray-200 dark:hover:border-zinc-700 hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)] dark:hover:shadow-none'}
-              `}
-              title="Select Project"
-            >
-                <div className="flex flex-col items-start justify-center">
-                    {/* Hide label on mobile to save space */}
-                    <span className="hidden md:block text-[9px] font-bold uppercase text-gray-400 dark:text-zinc-500 leading-none mb-0.5">Project</span>
-                    <div className="flex items-center gap-1.5">
-                       <span className="md:hidden text-gray-500 dark:text-zinc-400"><Icons.Folder /></span>
-                       <span className="text-xs font-bold text-black dark:text-white leading-none max-w-[80px] md:max-w-[100px] truncate">{selectedProject}</span>
-                    </div>
-                </div>
-                <div className={`hidden md:block text-gray-400 dark:text-zinc-500 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`}>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                </div>
-            </button>
-
-            {/* Dropdown Menu (Anchored Right) */}
-            {isDropdownOpen && (
-              <div className="absolute bottom-full right-0 mb-3 w-48 bg-white dark:bg-zinc-900 rounded-3xl border border-gray-200 dark:border-zinc-700 shadow-xl overflow-hidden py-1.5 animate-in fade-in zoom-in-95 slide-in-from-bottom-2 duration-200">
-                  <div className="px-4 py-2 text-[10px] font-bold uppercase text-gray-400 dark:text-zinc-600 tracking-wider">
-                      Select Destination
-                  </div>
-                  
-                  <button
-                      type="button"
-                      onClick={() => { setSelectedProject('Inbox'); setIsDropdownOpen(false); }}
-                      className={`w-full text-left px-4 py-2.5 text-xs font-medium flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors ${selectedProject === 'Inbox' ? 'text-black dark:text-white bg-gray-50 dark:bg-zinc-800' : 'text-gray-500 dark:text-gray-400'}`}
-                  >
-                      <Icons.Inbox /> Inbox
-                      {selectedProject === 'Inbox' && <span className="ml-auto text-black dark:text-white"><Icons.Checked /></span>}
-                  </button>
-                  
-                  <div className="h-px bg-gray-100 dark:bg-zinc-800 my-1 mx-3"></div>
-                  
-                  <div className="max-h-48 overflow-y-auto custom-scroll">
-                    {projects.map(p => (
-                        <button
-                            key={p}
-                            type="button"
-                            onClick={() => { setSelectedProject(p); setIsDropdownOpen(false); }}
-                            className={`w-full text-left px-4 py-2.5 text-xs font-medium flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors ${selectedProject === p ? 'text-black dark:text-white bg-gray-50 dark:bg-zinc-800' : 'text-gray-500 dark:text-gray-400'}`}
-                        >
-                            <Icons.Folder /> {p}
-                            {selectedProject === p && <span className="ml-auto text-black dark:text-white"><Icons.Checked /></span>}
-                        </button>
-                    ))}
-                  </div>
-              </div>
-            )}
-        </div>
-
       </form>
     </div>
   );

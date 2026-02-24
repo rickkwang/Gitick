@@ -237,7 +237,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   // Optimized for "Silky" feel (ChatGPT/Obsidian style)
   // Using a custom spring-like bezier for more natural movement
   const sidebarClasses = `
-    fixed inset-y-0 left-0 z-[60] bg-white/95 dark:bg-zinc-950/95 backdrop-blur-sm flex flex-col border-r border-gray-200/75 dark:border-zinc-800/85
+    fixed inset-y-0 left-0 z-[60] bg-gray-50 dark:bg-zinc-950 flex flex-col
     
     /* MOBILE CONFIGURATION */
     w-[280px]
@@ -266,7 +266,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
       />
       
       <aside className={sidebarClasses}>
-        <div className={`flex flex-col h-full overflow-hidden w-full pt-safe md:pt-0 ${isDesktopMac ? 'pt-5 md:pt-5' : ''}`}>
+        <div className={`flex flex-col h-full w-full p-2 md:p-3 ${isDesktopMac ? 'pt-7 md:pt-7' : 'pt-safe md:pt-3'}`}>
+          <div className="relative flex flex-col h-full overflow-hidden rounded-[26px] border border-white/65 dark:border-white/[0.04] bg-white/24 dark:bg-zinc-900/30 backdrop-blur-[28px] backdrop-saturate-200 shadow-[0_12px_28px_-20px_rgba(0,0,0,0.2)] dark:shadow-[0_8px_18px_-18px_rgba(0,0,0,0.14)] ring-1 ring-white/25 dark:ring-0">
           
           {/* Header - Completely Refactored for Zero-Flicker */}
           <div className="h-[76px] md:h-[88px] relative flex items-center shrink-0 select-none w-full">
@@ -505,6 +506,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
              </div>
           </div>
 
+          </div>
         </div>
       </aside>
     </>
