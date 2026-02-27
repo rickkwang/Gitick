@@ -267,7 +267,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       
       <aside className={sidebarClasses}>
         <div className="flex flex-col h-full w-full p-2 md:p-3 pt-safe md:pt-3">
-          <div className="relative flex flex-col h-full overflow-hidden rounded-[var(--app-radius)] border border-white/65 dark:border-white/[0.04] bg-white/24 dark:bg-zinc-900/30 backdrop-blur-[28px] backdrop-saturate-200 shadow-[0_12px_28px_-20px_rgba(0,0,0,0.2)] dark:shadow-[0_8px_18px_-18px_rgba(0,0,0,0.14)] ring-1 ring-white/25 dark:ring-0">
+          <div className="relative flex flex-col h-full overflow-hidden rounded-[calc(var(--app-radius)-12px)] border border-white/65 dark:border-white/[0.04] bg-white/24 dark:bg-zinc-900/30 backdrop-blur-[28px] backdrop-saturate-200 shadow-[0_12px_28px_-20px_rgba(0,0,0,0.2)] dark:shadow-[0_8px_18px_-18px_rgba(0,0,0,0.14)] ring-1 ring-white/25 dark:ring-0">
           {/* Header - Completely Refactored for Zero-Flicker */}
           <div className={`h-[76px] md:h-[88px] relative flex items-center shrink-0 select-none w-full ${isDesktopMac ? 'md:pt-7' : ''}`}>
              
