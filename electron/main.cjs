@@ -457,6 +457,7 @@ function createMainWindow() {
     autoHideMenuBar: true,
     titleBarStyle: isMac ? 'hiddenInset' : 'default',
     titleBarOverlay: false,
+    ...(isMac ? { trafficLightPosition: { x: 18, y: 16 } } : {}),
     webPreferences: {
       preload: path.join(__dirname, 'preload.cjs'),
       contextIsolation: true,
