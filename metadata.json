@@ -1,5 +1,0 @@
-{
-  "name": "Gitick - Task Manager",
-  "description": "A minimalist, aesthetically pleasing todo app inspired by TickTick and Git. Features smart text parsing, focus mode, and git-based task organization.",
-  "requestFramePermissions": []
-}

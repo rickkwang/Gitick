@@ -56,9 +56,6 @@ const App: React.FC = () => {
     ),
   ); // Desktop collapse
 
-  // Right Sidebar Toggle State - Default to closed
-  const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
-  
   const [isDarkMode, setIsDarkMode] = useState(() => {
      if (typeof window === 'undefined') return false;
      const saved = readStoredValue(STORAGE_KEYS.theme) ?? readStoredValue(LEGACY_STORAGE_KEYS.theme);
@@ -133,11 +130,8 @@ const App: React.FC = () => {
   // --- GLOBAL FOCUS TIMER STATE ---
   const [focusEndTime, setFocusEndTime] = useState<number | null>(null);
   const [focusTimeLeft, setFocusTimeLeft] = useState(FOCUS_DEFAULT_SECONDS);
-  const [focusSessionDuration, setFocusSessionDuration] = useState(FOCUS_DEFAULT_SECONDS);
   const [isFocusActive, setIsFocusActive] = useState(false);
   const [focusModeType, setFocusModeType] = useState<'focus' | 'break'>('focus');
-  const [focusCompletedCount, setFocusCompletedCount] = useState(0);
-  const [autoAdvanceFocus, setAutoAdvanceFocus] = useState(true);
   const isFocusActiveRef = useRef(isFocusActive);
 
   useEffect(() => {
@@ -156,8 +150,6 @@ const App: React.FC = () => {
     const nextDuration = getDefaultFocusSeconds(nextMode);
     setFocusModeType(nextMode);
     setFocusTimeLeft(nextDuration);
-    setFocusSessionDuration(nextDuration);
-
     if (autoStart) {
       setFocusEndTime(Date.now() + nextDuration * 1000);
       setIsFocusActive(true);
@@ -172,7 +164,6 @@ const App: React.FC = () => {
      if (isFocusActiveRef.current) return;
      const startSeconds = Math.max(1, Math.floor(focusTimeLeft));
      setFocusTimeLeft(startSeconds);
-     setFocusSessionDuration((prev) => Math.max(prev, startSeconds));
      const now = Date.now();
      const end = now + startSeconds * 1000;
      setFocusEndTime(end);
@@ -191,7 +182,6 @@ const App: React.FC = () => {
     pauseTimer();
     const defaultSeconds = getDefaultFocusSeconds(focusModeType);
     setFocusTimeLeft(defaultSeconds);
-    setFocusSessionDuration(defaultSeconds);
   };
 
   // Timer Tick Effect (High Precision)
@@ -207,10 +197,6 @@ const App: React.FC = () => {
            const completedMode = focusModeType;
            const nextMode = completedMode === 'focus' ? 'break' : 'focus';
 
-           if (completedMode === 'focus') {
-             setFocusCompletedCount((prev) => prev + 1);
-           }
-
            document.title = 'Gitick - Done!';
            const msg =
              completedMode === 'focus'
@@ -222,7 +208,7 @@ const App: React.FC = () => {
            if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
              new Notification('Gitick Timer', { body: msg, icon: '/favicon.ico' });
            }
-           switchTimerMode(nextMode, autoAdvanceFocus);
+           switchTimerMode(nextMode, true);
         } else {
            setFocusTimeLeft(diff);
            document.title = `${formatTime(diff)} - ${focusModeType === 'focus' ? 'Focus' : 'Break'}`;
@@ -235,7 +221,7 @@ const App: React.FC = () => {
     return () => { 
       if (interval) clearInterval(interval); 
     };
-  }, [isFocusActive, focusEndTime, focusModeType, autoAdvanceFocus, switchTimerMode]);
+  }, [isFocusActive, focusEndTime, focusModeType, switchTimerMode]);
 
   // Handle Focus Mode UI Updates (Wrapping the logic for the component)
   const handleSetTimeLeft = (val: number | ((prev: number) => number)) => {
@@ -244,8 +230,6 @@ const App: React.FC = () => {
         const safeValue = Math.max(1, Math.floor(nextValue));
         if (isFocusActiveRef.current) {
           setFocusEndTime(Date.now() + safeValue * 1000);
-        } else {
-          setFocusSessionDuration(safeValue);
         }
         return safeValue;
       });
@@ -255,13 +239,6 @@ const App: React.FC = () => {
     switchTimerMode(nextMode, false);
   };
 
-  const handleStartFocus = () => startTimer();
-  const handlePauseFocus = () => pauseTimer();
-  const handleResetFocus = () => resetTimer();
-  const handleSkipFocusPhase = () => {
-    const nextMode = focusModeType === 'focus' ? 'break' : 'focus';
-    switchTimerMode(nextMode, isFocusActiveRef.current && autoAdvanceFocus);
-  };
   const toggleThemeMode = useCallback(() => {
     if (typeof window === 'undefined') {
       setIsDarkMode((prev) => !prev);
@@ -322,14 +299,6 @@ const App: React.FC = () => {
     document.documentElement.style.setProperty('--desktop-font-size', `${desktopFontSize}px`);
   }, [desktopFontSize]);
 
-  useEffect(() => {
-    if (selectedTask) {
-      setIsRightSidebarOpen(true);
-    } else {
-      setIsRightSidebarOpen(false);
-    }
-  }, [selectedTask]);
-
   // --- Actions ---
 
   const showToast = useCallback((message: string, action?: () => void) => {
@@ -389,7 +358,6 @@ const App: React.FC = () => {
     setProjects(DEFAULT_PROJECTS);
     setUserProfile(DEFAULT_USER_PROFILE);
     setSelectedTask(null);
-    setIsRightSidebarOpen(false);
     setFilter('next7days');
     setSearchQuery('');
     setShowSearch(false);
@@ -398,11 +366,8 @@ const App: React.FC = () => {
     setDesktopFontSize(13);
     setFocusEndTime(null);
     setFocusTimeLeft(FOCUS_DEFAULT_SECONDS);
-    setFocusSessionDuration(FOCUS_DEFAULT_SECONDS);
     setIsFocusActive(false);
     setFocusModeType('focus');
-    setFocusCompletedCount(0);
-    setAutoAdvanceFocus(true);
     const fallbackDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     setIsDarkMode(fallbackDark);
     showToast('All local data has been reset.');
@@ -460,19 +425,16 @@ const App: React.FC = () => {
       setProjects(prev => prev.filter(p => p !== projectToDelete));
       
       const tasksToMove = tasks.filter(t => t.list === projectToDelete);
+      const tasksToMoveIds = new Set(tasksToMove.map((task) => task.id));
       if (tasksToMove.length > 0) {
         setTasks(prev => prev.map(t => t.list === projectToDelete ? { ...t, list: 'Inbox' } : t));
         showToast(`Deleted "${projectToDelete}". ${tasksToMove.length} tasks moved to Inbox.`, () => {
            setProjects(prevProjects);
-           setTasks(prev => prev.map(t => tasksToMove.find(tm => tm.id === t.id) ? { ...t, list: projectToDelete } : t));
-           setStatusMessage(null);
-           setUndoAction(undefined);
+           setTasks(prev => prev.map(t => tasksToMoveIds.has(t.id) ? { ...t, list: projectToDelete } : t));
         });
       } else {
          showToast(`Project "${projectToDelete}" deleted`, () => {
              setProjects(prevProjects);
-             setStatusMessage(null);
-             setUndoAction(undefined);
          });
       }
 
@@ -513,11 +475,12 @@ const App: React.FC = () => {
   };
 
   const updateTask = (updatedTask: Task) => {
-     if (updatedTask.completed && !updatedTask.completedAt) {
-       updatedTask.completedAt = Date.now();
-     }
-     setTasks(prev => prev.map(t => t.id === updatedTask.id ? updatedTask : t));
-     setSelectedTask(updatedTask);
+     const normalizedTask =
+       updatedTask.completed && !updatedTask.completedAt
+         ? { ...updatedTask, completedAt: Date.now() }
+         : updatedTask;
+     setTasks(prev => prev.map(t => t.id === normalizedTask.id ? normalizedTask : t));
+     setSelectedTask(normalizedTask);
   };
 
   const deleteTask = (id: string) => {
@@ -529,8 +492,6 @@ const App: React.FC = () => {
 
     showToast(`Deleted "${taskToDelete.title}"`, () => {
        setTasks(prev => [taskToDelete, ...prev]);
-       setStatusMessage(null);
-       setUndoAction(undefined);
     });
   };
 
@@ -570,6 +531,8 @@ const App: React.FC = () => {
   const showTaskInput = ['next7days', 'today', 'inbox'].includes(filter) || projects.includes(filter);
   const searchResults = useMemo(() => searchTasks(tasks, searchQuery), [searchQuery, tasks]);
 
+  const isRightSidebarOpen = selectedTask !== null;
+
   const renderEmptyState = () => (
     <div className="flex flex-col items-center justify-center pt-24 text-center select-none opacity-60">
       <div className="w-20 h-20 rounded-3xl bg-white dark:bg-zinc-900 border border-gray-200/80 dark:border-zinc-800/80 flex items-center justify-center text-gray-300 dark:text-zinc-600 mb-6 shadow-sm">
@@ -599,14 +562,13 @@ const App: React.FC = () => {
         if (showSearch) { setShowSearch(false); setSearchQuery(''); }
         else if (showSettings) setShowSettings(false);
         else if (selectedTask) setSelectedTask(null);
-        else if (isRightSidebarOpen) setIsRightSidebarOpen(false);
         else if (isSidebarOpen) setIsSidebarOpen(false);
         return;
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [showSettings, selectedTask, isSidebarOpen, isRightSidebarOpen, showSearch]);
+  }, [showSettings, selectedTask, isSidebarOpen, showSearch]);
 
   const renderTaskList = (taskList: Task[], groupName?: string) => {
      if (taskList.length === 0) return null;
@@ -697,18 +659,13 @@ const App: React.FC = () => {
              {filter === 'focus' ? (
                <FocusMode
                  timeLeft={focusTimeLeft}
-                 sessionDuration={focusSessionDuration}
                  setTimeLeft={handleSetTimeLeft}
                  isActive={isFocusActive}
-                 onStart={handleStartFocus}
-                 onPause={handlePauseFocus}
-                 onReset={handleResetFocus}
-                 onSkip={handleSkipFocusPhase}
+                 onStart={startTimer}
+                 onPause={pauseTimer}
+                 onReset={resetTimer}
                  mode={focusModeType}
                  setMode={handleFocusModeChange}
-                 completedFocusSessions={focusCompletedCount}
-                 autoAdvance={autoAdvanceFocus}
-                 onToggleAutoAdvance={setAutoAdvanceFocus}
                />
              ) : (
                <div className="flex-1 flex flex-col h-full relative">
@@ -852,7 +809,6 @@ const App: React.FC = () => {
                   task={selectedTask}
                   onClose={() => {
                     setSelectedTask(null);
-                    setIsRightSidebarOpen(false);
                   }}
                   onUpdate={updateTask}
                   onDelete={deleteTask}
