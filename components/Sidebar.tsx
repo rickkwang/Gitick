@@ -58,7 +58,7 @@ const NavItemComponent: React.FC<NavItemProps> = ({
   isCollapsed
 }) => {
   const isActive = activeFilter === id;
-  const rootClasses = 'px-2';
+  const rootClasses = 'px-[8px] md:px-0';
   
   const formatTimeMini = (seconds: number) => {
     const m = Math.floor(seconds / 60);
@@ -76,9 +76,10 @@ const NavItemComponent: React.FC<NavItemProps> = ({
             onCloseMobile();
           }}
           className={`
-            flex items-center text-[13px] font-medium rounded-xl outline-none select-none
+            relative flex items-center text-[13px] font-medium rounded-xl outline-none select-none
             transition-colors duration-200
-            h-11 px-0 w-full justify-start
+            h-[44px] px-0
+            w-full justify-start
               ${
                 isActive
                   ? isCollapsed
@@ -94,13 +95,14 @@ const NavItemComponent: React.FC<NavItemProps> = ({
           <span
             className={`
               shrink-0 flex items-center justify-center transition-colors duration-200
-              w-12 h-11
+              w-[48px] h-[44px] md:absolute md:top-0
+              ${isCollapsed ? 'md:left-1/2 md:-translate-x-1/2' : 'md:left-0'}
             `}
           >
             <span
               className={`
                 flex items-center justify-center transition-colors duration-200
-                w-5 h-5
+                w-[20px] h-[20px]
                 ${
                   isActive
                     ? 'text-black dark:text-white'
@@ -118,6 +120,7 @@ const NavItemComponent: React.FC<NavItemProps> = ({
             flex items-center flex-1 min-w-0 overflow-hidden whitespace-nowrap pl-1
             transition-opacity duration-150 ease-linear
             opacity-100
+            md:pl-[72px]
             ${isCollapsed ? 'md:opacity-0 md:pointer-events-none' : 'md:opacity-100'}
           `}>
             <span className="truncate pr-2">{label}</span>
@@ -279,7 +282,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div className="flex flex-col h-full w-full p-2 md:p-3 pt-safe md:pt-3">
           <div className="relative flex flex-col h-full overflow-hidden rounded-[calc(var(--app-radius)-12px)] border border-white/65 dark:border-white/[0.04] bg-white/24 dark:bg-zinc-900/30 backdrop-blur-[28px] backdrop-saturate-200 shadow-[0_12px_28px_-20px_rgba(0,0,0,0.2)] dark:shadow-[0_8px_18px_-18px_rgba(0,0,0,0.14)] ring-1 ring-white/25 dark:ring-0">
           {/* Header - Completely Refactored for Zero-Flicker */}
-          <div className={`h-[76px] md:h-[96px] relative flex items-center shrink-0 select-none w-full ${isDesktopMac ? 'md:pt-10' : ''}`}>
+          <div className={`h-[76px] md:h-[110px] relative flex items-center shrink-0 select-none w-full ${isDesktopMac ? 'md:pt-[58px]' : ''}`}>
              
              {/* 1. MOBILE HEADER: Static, Always Visible on Mobile (md:hidden) */}
              {/* This separates mobile logic from desktop state, preventing logo flicker during open */}
@@ -309,8 +312,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 transition-opacity duration-200 ease-linear
                 ${renderCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}
              `}>
-               <div className="flex items-center gap-3.5 text-black dark:text-white overflow-hidden">
-                 <span className="shrink-0 w-7 h-7 flex items-center justify-center [&>svg]:w-6 [&>svg]:h-6">
+               <div className="flex items-center gap-2.5 text-black dark:text-white overflow-hidden">
+                 <span className="shrink-0 w-12 h-12 flex items-center justify-center [&>svg]:w-6 [&>svg]:h-6">
                    <Icons.GitickLogo />
                  </span>
                  <span className="text-lg leading-none font-semibold tracking-tight whitespace-nowrap font-display text-black dark:text-white">
@@ -330,7 +333,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
              {/* 3. DESKTOP HEADER - COLLAPSED (hidden on mobile) */}
              <div className={`
-                hidden md:flex absolute inset-0 items-center justify-start px-6
+                hidden md:flex absolute inset-0 items-center justify-center
                 transition-opacity duration-200 ease-linear
                 ${renderCollapsed ? 'opacity-100' : 'opacity-0 pointer-events-none'}
              `}>
