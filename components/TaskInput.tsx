@@ -24,6 +24,7 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
   const [placeholderHint, setPlaceholderHint] = useState(RANDOM_PROMPTS[0]);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const isComposingRef = useRef(false);
   
   // Parsed state for visual feedback
   const [parsedPreview, setParsedPreview] = useState<{
@@ -173,10 +174,12 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (isComposingRef.current) return;
     submit();
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (isComposingRef.current || (e.nativeEvent as KeyboardEvent).isComposing) return;
     if (e.key === 'Enter') {
         e.preventDefault();
         submit();
@@ -206,11 +209,21 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
                     type="text"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
+                    onCompositionStart={() => { isComposingRef.current = true; }}
+                    onCompositionEnd={() => { isComposingRef.current = false; }}
                     onKeyDown={handleKeyDown}
                     placeholder={getPlaceholder()}
-                    className="w-full h-full pl-3 pr-3 bg-transparent text-black dark:text-white placeholder:text-gray-400 dark:placeholder:text-zinc-600 outline-none font-medium text-[15px]"
+                    className="w-full h-full pl-3 pr-3 bg-transparent text-black dark:text-white placeholder:text-gray-400 dark:placeholder:text-zinc-600 outline-none font-medium text-[15px] min-w-0"
                     autoFocus={shouldAutoFocus}
                 />
+                <button
+                    onClick={submit}
+                    type="button"
+                    aria-label="Add task"
+                    className={`mr-1 flex shrink-0 items-center justify-center w-9 h-9 rounded-full bg-black dark:bg-white text-white dark:text-black transition-all duration-200 hover:scale-110 active:scale-95 ${input.length > 0 ? 'opacity-100 scale-100' : 'opacity-0 scale-90 pointer-events-none'}`}
+                >
+                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 10 4 15 9 20"></polyline><path d="M20 4v7a4 4 0 0 1-4 4H4"></path></svg>
+                </button>
                 <div className="h-5 w-px bg-gray-200/70 dark:bg-zinc-700/60 mx-1.5" />
                 <div className="relative shrink-0 z-40" ref={dropdownRef}>
                     <button
@@ -292,17 +305,6 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
                 </div>
             )}
 
-            {/* Enter Button */}
-            <div className="absolute right-[8rem] md:right-[8.6rem] top-0 h-[52px] flex items-center pr-1">
-                <button
-                    onClick={submit} 
-                    type="button"
-                    aria-label="Add task"
-                    className={`flex items-center justify-center w-9 h-9 rounded-full bg-black dark:bg-white text-white dark:text-black transition-all duration-200 hover:scale-110 active:scale-95 ${input.length > 0 ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}
-                >
-                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 10 4 15 9 20"></polyline><path d="M20 4v7a4 4 0 0 1-4 4H4"></path></svg>
-                </button>
-            </div>
         </div>
       </form>
     </div>
