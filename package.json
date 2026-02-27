@@ -1,7 +1,7 @@
 {
   "name": "gitick---task-manager",
   "private": true,
-  "version": "0.2.72",
+  "version": "0.2.73",
   "description": "Gitick desktop task manager",
   "author": "Myrick Wang",
   "repository": {
