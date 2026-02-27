@@ -249,7 +249,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     /* DESKTOP CONFIGURATION (Overrides) */
     md:translate-x-0 md:shadow-none md:relative md:z-30 
     md:transition-all md:duration-300 md:ease-[cubic-bezier(0.2,0,0,1)]
-    ${renderCollapsed ? 'md:w-[80px]' : 'md:w-[270px]'}
+    ${renderCollapsed ? 'md:w-[88px]' : 'md:w-[270px]'}
   `;
 
   return (
@@ -266,18 +266,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
       />
       
       <aside className={sidebarClasses}>
-        <div className="flex flex-col h-full w-full p-2 md:p-3 pt-safe md:pt-3">
+        <div className={`flex flex-col h-full w-full p-2 md:p-3 ${isDesktopMac ? 'pt-10 md:pt-10' : 'pt-safe md:pt-3'}`}>
           <div className="relative flex flex-col h-full overflow-hidden rounded-[var(--app-radius)] border border-white/65 dark:border-white/[0.04] bg-white/24 dark:bg-zinc-900/30 backdrop-blur-[28px] backdrop-saturate-200 shadow-[0_12px_28px_-20px_rgba(0,0,0,0.2)] dark:shadow-[0_8px_18px_-18px_rgba(0,0,0,0.14)] ring-1 ring-white/25 dark:ring-0">
-          {isDesktopMac && (
-            <div className="hidden md:flex absolute top-4 left-4 z-20 items-center gap-3 pointer-events-none">
-              <span className="h-5 w-5 rounded-full bg-[#ff5f57] shadow-[inset_0_0_0_1px_rgba(0,0,0,0.15)]" />
-              <span className="h-5 w-5 rounded-full bg-[#febc2e] shadow-[inset_0_0_0_1px_rgba(0,0,0,0.15)]" />
-              <span className="h-5 w-5 rounded-full bg-[#28c840] shadow-[inset_0_0_0_1px_rgba(0,0,0,0.15)]" />
-            </div>
-          )}
-          
           {/* Header - Completely Refactored for Zero-Flicker */}
-          <div className={`h-[76px] ${isDesktopMac ? 'md:h-[100px]' : 'md:h-[88px]'} relative flex items-center shrink-0 select-none w-full`}>
+          <div className="h-[76px] md:h-[88px] relative flex items-center shrink-0 select-none w-full">
              
              {/* 1. MOBILE HEADER: Static, Always Visible on Mobile (md:hidden) */}
              {/* This separates mobile logic from desktop state, preventing logo flicker during open */}
