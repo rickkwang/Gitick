@@ -250,7 +250,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   // Optimized for "Silky" feel (ChatGPT/Obsidian style)
   // Using a custom spring-like bezier for more natural movement
   const sidebarClasses = `
-    fixed inset-y-0 left-0 z-[60] bg-gray-50 dark:bg-[#181818] flex flex-col
+    fixed inset-y-0 left-0 z-[60] bg-[var(--app-bg)] flex flex-col
     
     /* MOBILE CONFIGURATION */
     w-[280px]
@@ -280,7 +280,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
       
       <aside className={sidebarClasses}>
         <div className="flex flex-col h-full w-full p-2 md:p-3 pt-safe md:pt-3">
-          <div className="relative flex flex-col h-full overflow-hidden rounded-[var(--app-radius)] border border-white/65 dark:border-white/[0.04] bg-white/24 dark:bg-zinc-900/30 backdrop-blur-[28px] backdrop-saturate-200 shadow-[0_12px_28px_-20px_rgba(0,0,0,0.2)] dark:shadow-[0_8px_18px_-18px_rgba(0,0,0,0.14)] ring-1 ring-white/25 dark:ring-0">
+          <div className="relative flex flex-col h-full overflow-hidden rounded-[calc(var(--app-radius)+4px)] border border-white/65 dark:border-white/[0.04] bg-[#f1f5f9] dark:bg-[#21252b] backdrop-blur-[28px] backdrop-saturate-200 shadow-[0_20px_52px_-24px_rgba(15,23,42,0.42)] dark:shadow-[0_24px_58px_-22px_rgba(0,0,0,0.62)] ring-1 ring-white/25 dark:ring-0">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 rounded-[inherit] shadow-[0_34px_70px_-28px_rgba(15,23,42,0.45)] dark:shadow-[0_38px_80px_-26px_rgba(0,0,0,0.72)]"
+            />
           {/* Header - Completely Refactored for Zero-Flicker */}
           <div className={`h-[76px] md:h-[110px] relative flex items-center shrink-0 select-none w-full ${isDesktopMac ? 'md:pt-[58px]' : ''}`}>
              

@@ -636,7 +636,7 @@ const App: React.FC = () => {
            {groupName && (
               // OPTICAL FIX: Added px-5 md:px-6 to align header text with TaskItem content (checkbox)
               // This fixes the "floating header" look relative to the rounded cards
-              <div className={`sticky top-0 bg-gray-50 dark:bg-[#181818] z-10 py-3 mb-2 border-b border-gray-200/60 dark:border-zinc-800/80 flex items-center gap-3 transition-colors ${headerClass} px-5 md:px-6`}>
+              <div className={`sticky top-0 bg-[var(--app-bg)] z-10 py-3 mb-2 border-b border-gray-200/60 dark:border-zinc-800/80 flex items-center gap-3 transition-colors ${headerClass} px-5 md:px-6`}>
                   <span className="text-[11px] font-black uppercase tracking-widest opacity-90 transform translate-y-[1px]">{groupName}</span>
                   <span className="text-[9px] font-bold font-mono opacity-60 bg-gray-200/50 dark:bg-zinc-800 px-2 py-0.5 rounded-full text-black dark:text-white min-w-[1.5rem] text-center">{taskList.length}</span>
               </div>
@@ -658,12 +658,12 @@ const App: React.FC = () => {
 
   return (
     <div
-      className={`[--app-radius:12px] flex flex-col h-dvh md:rounded-[var(--app-radius)] font-sans text-gray-900 dark:text-dark-text bg-white dark:bg-[#181818] overflow-hidden transition-colors duration-300 selection:bg-black selection:text-white dark:selection:bg-white dark:selection:text-black ${
+      className={`[--app-radius:12px] flex flex-col h-dvh md:rounded-[var(--app-radius)] font-sans text-gray-900 dark:text-dark-text bg-[var(--app-bg)] overflow-hidden transition-colors duration-300 selection:bg-black selection:text-white dark:selection:bg-white dark:selection:text-black ${
         isStartupStatic ? 'startup-static' : ''
       }`}
     > 
       {/* Mobile Header with Safe Area Padding */}
-      <header className="md:hidden bg-gray-50 dark:bg-[#181818] border-b border-gray-100 dark:border-zinc-800 shrink-0 z-50 pt-safe transition-colors duration-300">
+      <header className="md:hidden bg-[var(--app-bg)] border-b border-gray-100 dark:border-zinc-800 shrink-0 z-50 pt-safe transition-colors duration-300">
          <div className="h-14 flex items-center px-4 justify-between">
             <div className="flex items-center gap-3">
                <button
@@ -705,7 +705,7 @@ const App: React.FC = () => {
         />
 
         {/* COL 2: Main Content */}
-        <main className="flex-1 flex flex-col min-w-0 h-full bg-gray-50 dark:bg-[#181818] relative z-0 transition-colors duration-300">
+        <main className="flex-1 flex flex-col min-w-0 h-full bg-[var(--app-bg)] relative z-0 transition-colors duration-300">
            
            <div className={`h-full flex flex-col ${filter === 'focus' ? '' : 'animate-view-breathe'}`}>
              
@@ -725,7 +725,7 @@ const App: React.FC = () => {
                   
                   {/* Working Dir Header (Desktop Only) */}
                   <div
-                    className={`hidden md:flex h-16 items-center justify-between shrink-0 bg-gray-50 dark:bg-[#181818] z-10 transition-colors duration-300 ${
+                    className={`hidden md:flex h-16 items-center justify-between shrink-0 bg-[var(--app-bg)] z-10 transition-colors duration-300 ${
                       isDesktopMac ? 'pl-24 pr-8' : 'px-8'
                     }`}
                     style={isDesktopMac ? ({ WebkitAppRegion: 'drag' } as React.CSSProperties) : undefined}
@@ -831,7 +831,7 @@ const App: React.FC = () => {
                   {showTaskInput && (
                      <div className="absolute bottom-0 left-0 right-0 z-20 pointer-events-none">
                         {/* Gradient Mask to catch scrolling text - Taller and solid at bottom */}
-                        <div className="absolute bottom-0 left-0 right-0 h-56 bg-gray-50/92 dark:bg-[#181818]/88" />
+                        <div className="absolute bottom-0 left-0 right-0 h-56 bg-gray-50/92 dark:bg-[#282c34]/88" />
 
                         {/* Input Container - Padded from bottom including Safe Area */}
                         <div className="relative z-10 w-full flex justify-center px-4 pt-10 pb-safe">
@@ -850,7 +850,7 @@ const App: React.FC = () => {
         {/* COL 3: Staging Area */}
         <aside 
           className={`
-             hidden lg:flex flex-col h-full bg-white/95 dark:bg-[#181818]/95 backdrop-blur-sm overflow-hidden border-l border-gray-200/70 dark:border-zinc-800/80
+             hidden lg:flex flex-col h-full bg-white/95 dark:bg-[#282c34]/95 backdrop-blur-sm overflow-hidden border-l border-gray-200/70 dark:border-zinc-800/80
              transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)] 
              ${isRightSidebarOpen && filter !== 'focus' ? 'w-96 translate-x-0 opacity-100' : 'w-0 translate-x-10 opacity-0'}
           `}

@@ -145,10 +145,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-2 md:p-6">
       <div className="absolute inset-0 bg-black/20 dark:bg-black/60 backdrop-blur-sm" onClick={onClose} />
       
-      <div className="relative w-full max-w-4xl bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl border border-gray-100 dark:border-zinc-800 overflow-hidden flex flex-col md:flex-row h-[96dvh] md:h-[min(780px,88vh)] animate-in fade-in zoom-in-95 duration-200">
+      <div className="relative w-full max-w-4xl bg-[#ffffff] dark:bg-[#282c34] rounded-3xl shadow-2xl border border-gray-100 dark:border-zinc-700/70 overflow-hidden flex flex-col md:flex-row h-[96dvh] md:h-[min(780px,88vh)] animate-in fade-in zoom-in-95 duration-200">
         
         {/* Sidebar Nav - Horizontal on Mobile */}
-        <div className="w-full md:w-72 bg-gray-50/70 dark:bg-zinc-950/55 border-b md:border-b-0 md:border-r border-gray-100 dark:border-zinc-700/80 px-4 py-4 md:px-6 md:py-7 flex flex-col shrink-0 pt-safe md:pt-7">
+        <div className="w-full md:w-72 bg-[#f1f5f9] dark:bg-[#21252b] border-b md:border-b-0 md:border-r border-gray-100 dark:border-zinc-700/70 px-4 py-4 md:px-6 md:py-7 flex flex-col shrink-0 pt-safe md:pt-7">
           <div className="flex items-center justify-between mb-4 md:mb-7">
              <h2 className="text-lg font-bold text-black dark:text-white">Settings</h2>
              <button onClick={onClose} aria-label="Close settings" className="md:hidden text-gray-500 p-1">
@@ -173,14 +173,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           </nav>
           
           <div className="mt-4 md:mt-auto hidden md:block">
-             <div className="rounded-xl border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/60 px-3 py-2 text-[10px] text-gray-500 dark:text-zinc-400 font-mono">
+             <div className="rounded-xl border border-gray-200 dark:border-zinc-700/70 bg-white/80 dark:bg-[#282c34]/70 px-3 py-2 text-[10px] text-gray-500 dark:text-zinc-400 font-mono">
                 App Version: {desktopAppVersion || 'Web'}
              </div>
           </div>
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 flex flex-col min-h-0 bg-white dark:bg-zinc-900 pb-safe">
+        <div className="flex-1 flex flex-col min-h-0 bg-[#ffffff] dark:bg-[#282c34] pb-safe">
            <div className="hidden md:flex items-center justify-between px-10 py-7 border-b border-gray-100 dark:border-zinc-800 shrink-0">
               <h3 className="font-semibold text-xl text-black dark:text-white">
                 {tabs.find(t => t.id === activeTab)?.label}
@@ -195,7 +195,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
              {/* --- PROFILE TAB --- */}
              {activeTab === 'profile' && (
                <div className="space-y-7">
-                 <div className="rounded-2xl border border-gray-200 dark:border-zinc-800 bg-gray-50/60 dark:bg-zinc-800/20 p-5 md:p-6">
+                 <div className="rounded-2xl border border-gray-200 dark:border-zinc-700/70 bg-white/85 dark:bg-[#21252b]/70 p-5 md:p-6">
                    <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
                    <button
                      type="button"
@@ -256,7 +256,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                  </div>
                  </div>
 
-                 <div className="rounded-2xl border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 md:p-6 space-y-4">
+                 <div className="rounded-2xl border border-gray-200 dark:border-zinc-700/70 bg-white dark:bg-[#21252b]/65 p-5 md:p-6 space-y-4">
                     <div className="space-y-1">
                        <label className="text-xs font-bold text-gray-500 dark:text-zinc-500 uppercase tracking-wider">Full Name</label>
                        <input 
@@ -296,9 +296,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
              {/* --- GENERAL / APPEARANCE TAB --- */}
              {activeTab === 'general' && (
                <div className="space-y-7">
-                 <div className="rounded-2xl border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 md:p-6 space-y-5">
+                 <div className="rounded-2xl border border-gray-200 dark:border-zinc-700/70 bg-white dark:bg-[#21252b]/65 p-5 md:p-6 space-y-5">
                     <h4 className="text-sm font-medium text-gray-900 dark:text-white border-b border-gray-100 dark:border-zinc-800 pb-3">Theme</h4>
-                    <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-zinc-800/30 rounded-2xl border border-gray-100 dark:border-zinc-800/50">
+                    <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-[#282c34]/70 rounded-2xl border border-gray-100 dark:border-zinc-700/70">
                       <div className="flex items-center gap-3">
                         <span className="p-2 bg-white dark:bg-zinc-800 rounded-lg text-black dark:text-white shadow-sm">
                            {isDarkMode ? <Icons.Moon /> : <Icons.Sun />}
@@ -317,9 +317,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     </div>
                  </div>
 
-                 <div className="rounded-2xl border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 md:p-6 space-y-4">
+                 <div className="rounded-2xl border border-gray-200 dark:border-zinc-700/70 bg-white dark:bg-[#21252b]/65 p-5 md:p-6 space-y-4">
                     <h4 className="text-sm font-medium text-gray-900 dark:text-white border-b border-gray-100 dark:border-zinc-800 pb-3">Text Size (Desktop)</h4>
-                    <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-zinc-800/30 rounded-2xl border border-gray-100 dark:border-zinc-800/50">
+                    <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-[#282c34]/70 rounded-2xl border border-gray-100 dark:border-zinc-700/70">
                       <div>
                         <p className="font-medium text-sm text-gray-900 dark:text-gray-200">Current: {desktopFontSize}px</p>
                         <p className="text-xs text-gray-500 dark:text-zinc-500">Affects desktop layout only</p>
