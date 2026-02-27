@@ -658,7 +658,7 @@ const App: React.FC = () => {
 
   return (
     <div
-      className={`[--app-radius:26px] flex flex-col h-dvh md:rounded-[var(--app-radius)] font-sans text-gray-900 dark:text-dark-text bg-white dark:bg-[#181818] overflow-hidden transition-colors duration-300 selection:bg-black selection:text-white dark:selection:bg-white dark:selection:text-black ${
+      className={`[--app-radius:14px] flex flex-col h-dvh md:rounded-[var(--app-radius)] font-sans text-gray-900 dark:text-dark-text bg-white dark:bg-[#181818] overflow-hidden transition-colors duration-300 selection:bg-black selection:text-white dark:selection:bg-white dark:selection:text-black ${
         isStartupStatic ? 'startup-static' : ''
       }`}
     > 
