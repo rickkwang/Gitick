@@ -97,7 +97,7 @@ export const StagingPanel: React.FC<StagingPanelProps> = ({ task, onClose, onUpd
 
   // Mobile Variant acts as Bottom Sheet
   const containerClasses = variant === 'modal' 
-    ? "fixed inset-x-0 bottom-0 z-50 h-[85dvh] bg-white dark:bg-zinc-900 rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.2)] flex flex-col transform transition-transform duration-300 ease-out animate-in slide-in-from-bottom-full pb-safe"
+    ? "fixed inset-x-0 bottom-0 z-50 h-[85dvh] bg-white dark:bg-[#2b3038] rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.2)] flex flex-col transform transition-transform duration-300 ease-out animate-in slide-in-from-bottom-full pb-safe"
     : "h-full flex flex-col bg-transparent";
 
   const Backdrop = () => variant === 'modal' ? (
@@ -127,7 +127,7 @@ export const StagingPanel: React.FC<StagingPanelProps> = ({ task, onClose, onUpd
         )}
 
         {/* Minimal Header */}
-        <div className={`h-14 flex items-center justify-between px-6 md:px-8 ${variant === 'modal' ? '' : 'bg-white dark:bg-zinc-950'} shrink-0`}>
+        <div className={`h-14 flex items-center justify-between px-6 md:px-8 ${variant === 'modal' ? '' : 'bg-white dark:bg-[#2b3038]'} shrink-0`}>
            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-zinc-600">
              <Icons.GitCommit />
              <span>Details</span>
@@ -140,7 +140,7 @@ export const StagingPanel: React.FC<StagingPanelProps> = ({ task, onClose, onUpd
            </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-6 md:px-8 py-4 space-y-6 custom-scroll bg-white dark:bg-zinc-950/50">
+        <div className="flex-1 overflow-y-auto px-6 md:px-8 py-4 space-y-6 custom-scroll bg-white dark:bg-[#2b3038]">
           
           {/* Title - Clean & Large */}
           <div className="flex items-start gap-3">
@@ -169,7 +169,7 @@ export const StagingPanel: React.FC<StagingPanelProps> = ({ task, onClose, onUpd
                           flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-all
                           ${task.dueDate 
                               ? 'bg-blue-50 dark:bg-blue-900/10 border-blue-100 dark:border-blue-900/30 text-blue-700 dark:text-blue-300' 
-                              : 'bg-white dark:bg-zinc-900 border-gray-200 dark:border-zinc-700 text-gray-500 dark:text-zinc-500 hover:border-gray-300 dark:hover:border-zinc-600'}
+                              : 'bg-white dark:bg-[#252a33] border-gray-200 dark:border-[#3a404c] text-gray-500 dark:text-zinc-400 hover:border-gray-300 dark:hover:border-zinc-500'}
                       `}
                   >
                       <Icons.Calendar />
@@ -196,7 +196,7 @@ export const StagingPanel: React.FC<StagingPanelProps> = ({ task, onClose, onUpd
 
               {/* Project Chip */}
               <div className="relative group">
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border bg-white dark:bg-zinc-900 border-gray-200 dark:border-zinc-700 text-gray-700 dark:text-zinc-300 text-xs font-medium hover:border-gray-300 dark:hover:border-zinc-600 transition-all">
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border bg-white dark:bg-[#252a33] border-gray-200 dark:border-[#3a404c] text-gray-700 dark:text-zinc-300 text-xs font-medium hover:border-gray-300 dark:hover:border-zinc-500 transition-all">
                       <Icons.Folder />
                       <span>{task.list || 'Inbox'}</span>
                       <select 
@@ -214,7 +214,7 @@ export const StagingPanel: React.FC<StagingPanelProps> = ({ task, onClose, onUpd
 
               {/* Tags Chips */}
               {task.tags.map(tag => (
-                 <span key={tag} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 text-xs font-medium group cursor-default">
+                 <span key={tag} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-50 dark:bg-[#252a33] border border-zinc-200 dark:border-[#3a404c] text-zinc-600 dark:text-zinc-400 text-xs font-medium group cursor-default">
                     <Icons.Tag />
                     {tag}
                     <button 
@@ -233,12 +233,12 @@ export const StagingPanel: React.FC<StagingPanelProps> = ({ task, onClose, onUpd
                    value={newTag}
                    onChange={(e) => setNewTag(e.target.value)}
                    placeholder="+Tag"
-                   className="w-16 focus:w-24 px-2 py-1.5 bg-transparent text-xs text-gray-500 dark:text-zinc-500 placeholder:text-gray-400 dark:placeholder:text-zinc-600 outline-none border border-transparent focus:border-gray-200 dark:focus:border-zinc-700 rounded-lg transition-all hover:bg-gray-50 dark:hover:bg-zinc-900 focus:bg-white dark:focus:bg-zinc-900"
+                   className="w-16 focus:w-24 px-2 py-1.5 bg-transparent text-xs text-gray-500 dark:text-zinc-400 placeholder:text-gray-400 dark:placeholder:text-zinc-600 outline-none border border-transparent focus:border-gray-200 dark:focus:border-[#3a404c] rounded-lg transition-all hover:bg-gray-50 dark:hover:bg-[#252a33] focus:bg-white dark:focus:bg-[#252a33]"
                  />
                </form>
           </div>
 
-          <hr className="border-gray-100 dark:border-zinc-800 ml-9" />
+          <hr className="border-gray-100 dark:border-[#3a404c] ml-9" />
 
           {/* Description Section - Fluid */}
           <div className="flex gap-4 group">
@@ -265,7 +265,7 @@ export const StagingPanel: React.FC<StagingPanelProps> = ({ task, onClose, onUpd
                  {/* Progress Bar if tasks exist */}
                  {task.subtasks.length > 0 && (
                      <div className="flex items-center gap-3 mb-2">
-                        <div className="flex-1 h-1 bg-gray-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+                        <div className="flex-1 h-1 bg-gray-100 dark:bg-[#3a404c] rounded-full overflow-hidden">
                            <div 
                              className="h-full bg-black dark:bg-white rounded-full transition-all duration-300"
                              style={{ width: `${(task.subtasks.filter(s => s.completed).length / task.subtasks.length) * 100}%` }}
@@ -314,7 +314,7 @@ export const StagingPanel: React.FC<StagingPanelProps> = ({ task, onClose, onUpd
         </div>
 
         {/* Footer Actions */}
-        <div className={`p-4 md:p-6 ${variant === 'modal' ? 'bg-white dark:bg-zinc-900 border-t border-gray-50 dark:border-zinc-800' : 'bg-transparent'} flex gap-3`}>
+        <div className={`p-4 md:p-6 ${variant === 'modal' ? 'bg-white dark:bg-[#2b3038] border-t border-gray-50 dark:border-[#3a404c]' : 'bg-transparent'} flex gap-3`}>
            <button 
              onClick={() => onCommit(task)}
              className={`flex-1 py-3.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-all shadow-sm

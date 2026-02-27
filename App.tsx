@@ -636,7 +636,7 @@ const App: React.FC = () => {
            {groupName && (
               // OPTICAL FIX: Added px-5 md:px-6 to align header text with TaskItem content (checkbox)
               // This fixes the "floating header" look relative to the rounded cards
-              <div className={`sticky top-0 bg-[var(--app-bg)] z-10 py-3 mb-2 border-b border-gray-200/60 dark:border-zinc-800/80 flex items-center gap-3 transition-colors ${headerClass} px-5 md:px-6`}>
+              <div className={`sticky top-0 bg-[var(--app-bg)] z-10 py-3 mb-2 flex items-center gap-3 transition-colors ${headerClass} px-5 md:px-6`}>
                   <span className="text-[11px] font-black uppercase tracking-widest opacity-90 transform translate-y-[1px]">{groupName}</span>
                   <span className="text-[9px] font-bold font-mono opacity-60 bg-gray-200/50 dark:bg-zinc-800 px-2 py-0.5 rounded-full text-black dark:text-white min-w-[1.5rem] text-center">{taskList.length}</span>
               </div>
@@ -768,7 +768,7 @@ const App: React.FC = () => {
                           {/* Heatmap Section */}
                           {filter === 'next7days' && (
                              <div className="mb-10">
-                                <div className="p-5 md:p-6 bg-white/96 dark:bg-zinc-900/70 rounded-[22px] shadow-sm border border-gray-200/80 dark:border-zinc-800/80">
+                                <div className="p-5 md:p-6 bg-white/96 dark:bg-[#21252b] rounded-[22px] shadow-sm border border-gray-200/80 dark:border-zinc-800/80">
                                    <div className="flex items-center justify-between mb-4">
                                       <div className="flex items-center gap-2">
                                          <Icons.Flame />
@@ -778,7 +778,7 @@ const App: React.FC = () => {
                                          Activity Log
                                       </div>
                                    </div>
-                                   <Suspense fallback={<div className="h-44 animate-pulse rounded-xl bg-gray-100 dark:bg-zinc-800/60" />}>
+                                   <Suspense fallback={<div className="h-44 animate-pulse rounded-xl bg-gray-100 dark:bg-[#21252b]/70" />}>
                                      <Heatmap tasks={tasks} />
                                    </Suspense>
                                 </div>
@@ -850,7 +850,7 @@ const App: React.FC = () => {
         {/* COL 3: Staging Area */}
         <aside 
           className={`
-             hidden lg:flex flex-col h-full bg-white/95 dark:bg-[#282c34]/95 backdrop-blur-sm overflow-hidden border-l border-gray-200/70 dark:border-zinc-800/80
+             hidden lg:flex flex-col h-full bg-white/95 dark:bg-[#2b3038]/95 backdrop-blur-sm overflow-hidden border-l border-gray-200/70 dark:border-[#3a404c]
              transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)] 
              ${isRightSidebarOpen && filter !== 'focus' ? 'w-96 translate-x-0 opacity-100' : 'w-0 translate-x-10 opacity-0'}
           `}

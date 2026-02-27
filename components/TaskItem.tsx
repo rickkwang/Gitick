@@ -49,8 +49,8 @@ const TaskItemComponent: React.FC<TaskItemProps> = ({
       className={`
         group relative flex items-start gap-4 p-4 px-5 md:py-5 md:px-6 rounded-xl md:rounded-2xl cursor-pointer transition-all duration-200 border active:scale-[0.995]
         ${selected 
-          ? 'bg-white dark:bg-zinc-900 border-transparent shadow-[0_8px_24px_rgba(0,0,0,0.06)] dark:shadow-none z-10' 
-          : 'bg-white/96 dark:bg-dark-surface border-gray-200/75 dark:border-zinc-800/85 hover:bg-white dark:hover:bg-zinc-900 hover:border-gray-300/80 dark:hover:border-zinc-700'}
+          ? 'bg-white dark:bg-[#21252b] border-transparent shadow-[0_8px_24px_rgba(0,0,0,0.06)] dark:shadow-none z-10' 
+          : 'bg-white/96 dark:bg-[#21252b] border-gray-200/75 dark:border-zinc-800/85 hover:bg-white dark:hover:bg-[#21252b]'}
         ${task.completed ? 'opacity-70' : 'opacity-100'}
       `}
     >

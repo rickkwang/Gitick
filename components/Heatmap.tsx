@@ -175,20 +175,20 @@ export const Heatmap: React.FC<HeatmapProps> = ({ tasks }) => {
   }, [weeks]);
 
   const getColor = (count: number) => {
-    if (count <= 0) return 'bg-gray-100 dark:bg-zinc-800/85';
+    if (count <= 0) return 'bg-gray-100 dark:bg-[#3a404c]';
 
     if (intensityCeiling <= 4) {
-      if (count === 1) return 'bg-green-200 dark:bg-emerald-700';
-      if (count === 2) return 'bg-green-400 dark:bg-emerald-600';
-      if (count === 3) return 'bg-green-600 dark:bg-emerald-500';
-      return 'bg-green-800 dark:bg-emerald-400';
+      if (count === 1) return 'bg-green-200 dark:bg-emerald-600';
+      if (count === 2) return 'bg-green-400 dark:bg-emerald-500';
+      if (count === 3) return 'bg-green-600 dark:bg-emerald-400';
+      return 'bg-green-800 dark:bg-emerald-300';
     }
 
     const ratio = count / intensityCeiling;
-    if (ratio <= 0.25) return 'bg-green-200 dark:bg-emerald-700';
-    if (ratio <= 0.5) return 'bg-green-400 dark:bg-emerald-600';
-    if (ratio <= 0.75) return 'bg-green-600 dark:bg-emerald-500';
-    return 'bg-green-800 dark:bg-emerald-400';
+    if (ratio <= 0.25) return 'bg-green-200 dark:bg-emerald-600';
+    if (ratio <= 0.5) return 'bg-green-400 dark:bg-emerald-500';
+    if (ratio <= 0.75) return 'bg-green-600 dark:bg-emerald-400';
+    return 'bg-green-800 dark:bg-emerald-300';
   };
 
   const CELL_SIZE = `w-[${CELL_PX}px] h-[${CELL_PX}px]`;
@@ -198,7 +198,7 @@ export const Heatmap: React.FC<HeatmapProps> = ({ tasks }) => {
 
   return (
     <div className="w-full overflow-hidden flex flex-col gap-4">
-      <div className="grid grid-cols-3 divide-x divide-gray-100 dark:divide-zinc-800 border-b border-gray-100 dark:border-zinc-800 pb-3">
+      <div className="grid grid-cols-3 divide-x divide-gray-100 dark:divide-[#3a404c] border-b border-gray-100 dark:border-[#3a404c] pb-3">
         <div className="px-2 md:px-5 text-center">
           <div className="text-[10px] uppercase tracking-wider text-gray-400 dark:text-zinc-500 font-bold mb-1">
             Total
@@ -271,16 +271,16 @@ export const Heatmap: React.FC<HeatmapProps> = ({ tasks }) => {
         </div>
       </div>
 
-      <div className="flex items-center justify-between pt-1.5 px-3 border-t border-transparent dark:border-zinc-800/50">
+      <div className="flex items-center justify-between pt-1.5 px-3 border-t border-transparent dark:border-[#3a404c]">
         <div className="text-[9px] text-gray-400 dark:text-zinc-600 italic">{currentStreak > 0 ? 'On fire! 🔥' : 'Just start.'}</div>
 
         <div className="flex items-center gap-1 text-[8px] text-gray-400 font-mono">
           <span>Less</span>
-          <div className={`${CELL_SIZE} rounded-sm bg-gray-100 dark:bg-zinc-800/85`} />
-          <div className={`${CELL_SIZE} rounded-sm bg-green-200 dark:bg-emerald-700`} />
-          <div className={`${CELL_SIZE} rounded-sm bg-green-400 dark:bg-emerald-600`} />
-          <div className={`${CELL_SIZE} rounded-sm bg-green-600 dark:bg-emerald-500`} />
-          <div className={`${CELL_SIZE} rounded-sm bg-green-800 dark:bg-emerald-400`} />
+          <div className={`${CELL_SIZE} rounded-sm bg-gray-100 dark:bg-[#3a404c]`} />
+          <div className={`${CELL_SIZE} rounded-sm bg-green-200 dark:bg-emerald-600`} />
+          <div className={`${CELL_SIZE} rounded-sm bg-green-400 dark:bg-emerald-500`} />
+          <div className={`${CELL_SIZE} rounded-sm bg-green-600 dark:bg-emerald-400`} />
+          <div className={`${CELL_SIZE} rounded-sm bg-green-800 dark:bg-emerald-300`} />
           <span>More</span>
         </div>
       </div>

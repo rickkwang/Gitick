@@ -199,7 +199,7 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
   return (
     <div className="w-full relative z-30 max-w-3xl mx-auto">
       <form onSubmit={handleSubmit} className="group transition-all duration-300">
-        <div className="relative bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-[24px] shadow-[0_2px_12px_rgba(0,0,0,0.04)] dark:shadow-none overflow-visible transition-all duration-200 ease-out flex flex-col justify-center min-h-[3.25rem] focus-within:shadow-[0_8px_30px_rgba(0,0,0,0.08)] dark:focus-within:shadow-none">
+        <div className="relative bg-white dark:bg-[#21252b] border border-gray-100 dark:border-zinc-800 rounded-[24px] shadow-[0_2px_12px_rgba(0,0,0,0.04)] dark:shadow-none overflow-visible transition-all duration-200 ease-out flex flex-col justify-center min-h-[3.25rem] focus-within:shadow-[0_8px_30px_rgba(0,0,0,0.08)] dark:focus-within:shadow-none">
             <div className="flex items-center pl-5 md:pl-6 pr-2.5 h-[52px] shrink-0">
                 <div className="text-gray-400 shrink-0">
                    <Icons.Plus />
@@ -247,7 +247,7 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
                     </button>
 
                     {isDropdownOpen && (
-                      <div className="absolute bottom-full right-0 mb-2 w-44 rounded-2xl border border-white/35 dark:border-white/10 bg-white/72 dark:bg-zinc-900/62 backdrop-blur-xl shadow-[0_16px_32px_-20px_rgba(0,0,0,0.45)] overflow-hidden py-1.5 animate-in fade-in zoom-in-95 slide-in-from-bottom-2 duration-200">
+                      <div className="absolute bottom-full right-0 mb-2 w-44 rounded-2xl border border-white/35 dark:border-white/10 bg-white/72 dark:bg-[#21252b]/95 backdrop-blur-xl shadow-[0_16px_32px_-20px_rgba(0,0,0,0.45)] overflow-hidden py-1.5 animate-in fade-in zoom-in-95 slide-in-from-bottom-2 duration-200">
                           <button
                               type="button"
                               onClick={() => { setSelectedProject('Inbox'); setIsDropdownOpen(false); }}

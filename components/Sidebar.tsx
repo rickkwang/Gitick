@@ -250,7 +250,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   // Optimized for "Silky" feel (ChatGPT/Obsidian style)
   // Using a custom spring-like bezier for more natural movement
   const sidebarClasses = `
-    fixed inset-y-0 left-0 z-[60] bg-[var(--app-bg)] flex flex-col
+    fixed inset-y-0 left-0 z-[60] ${activeFilter === 'focus' ? 'bg-transparent' : 'bg-[var(--app-bg)]'} flex flex-col
     
     /* MOBILE CONFIGURATION */
     w-[280px]

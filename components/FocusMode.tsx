@@ -66,7 +66,7 @@ export const FocusMode: React.FC<FocusModeProps> = ({
   const progress = ((visualMax - timeLeft) / visualMax) * 100;
 
   return (
-    <div className="flex flex-col h-full bg-gray-50 dark:bg-[#181818] relative overflow-hidden">
+    <div className="flex flex-col h-full bg-[var(--app-bg)] relative overflow-hidden transition-colors duration-300">
       <div className="max-w-[960px] mx-auto w-full h-full px-6 md:px-10 py-8 md:py-12 flex flex-col">
       {/* Top Section: Timer Visualization */}
       <div className="flex-[1.15] flex flex-col items-center justify-center p-6 md:p-8 min-h-[360px]">
