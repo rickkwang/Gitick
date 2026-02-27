@@ -29,6 +29,7 @@ const SettingsModal = lazy(() =>
 );
 const FOCUS_DEFAULT_SECONDS = 25 * 60;
 const BREAK_DEFAULT_SECONDS = 5 * 60;
+const TASKS_PERSIST_DEBOUNCE_MS = 250;
 const getDefaultFocusSeconds = (mode: 'focus' | 'break') =>
   mode === 'focus' ? FOCUS_DEFAULT_SECONDS : BREAK_DEFAULT_SECONDS;
 
@@ -118,6 +119,10 @@ const App: React.FC = () => {
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const showSearchRef = useRef(showSearch);
+  const showSettingsRef = useRef(showSettings);
+  const selectedTaskRef = useRef(selectedTask);
+  const isSidebarOpenRef = useRef(isSidebarOpen);
 
   // Undo / Toast State
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
@@ -132,11 +137,32 @@ const App: React.FC = () => {
   const [focusTimeLeft, setFocusTimeLeft] = useState(FOCUS_DEFAULT_SECONDS);
   const [isFocusActive, setIsFocusActive] = useState(false);
   const [focusModeType, setFocusModeType] = useState<'focus' | 'break'>('focus');
+  const tasksRef = useRef(tasks);
   const isFocusActiveRef = useRef(isFocusActive);
 
   useEffect(() => {
     isFocusActiveRef.current = isFocusActive;
   }, [isFocusActive]);
+
+  useEffect(() => {
+    tasksRef.current = tasks;
+  }, [tasks]);
+
+  useEffect(() => {
+    showSearchRef.current = showSearch;
+  }, [showSearch]);
+
+  useEffect(() => {
+    showSettingsRef.current = showSettings;
+  }, [showSettings]);
+
+  useEffect(() => {
+    selectedTaskRef.current = selectedTask;
+  }, [selectedTask]);
+
+  useEffect(() => {
+    isSidebarOpenRef.current = isSidebarOpen;
+  }, [isSidebarOpen]);
 
   // Helper: Format Time
   const formatTime = (seconds: number) => {
@@ -210,10 +236,10 @@ const App: React.FC = () => {
            }
            switchTimerMode(nextMode, true);
         } else {
-           setFocusTimeLeft(diff);
+           setFocusTimeLeft((prev) => (prev === diff ? prev : diff));
            document.title = `${formatTime(diff)} - ${focusModeType === 'focus' ? 'Focus' : 'Break'}`;
         }
-      }, 500); 
+      }, 1000);
     } else {
       document.title = 'Gitick - Minimalist Tasks';
     }
@@ -269,7 +295,10 @@ const App: React.FC = () => {
 
   // Persistence Effects
   useEffect(() => {
-    writeStoredJson(STORAGE_KEYS.tasks, tasks);
+    const timer = window.setTimeout(() => {
+      writeStoredJson(STORAGE_KEYS.tasks, tasks);
+    }, TASKS_PERSIST_DEBOUNCE_MS);
+    return () => window.clearTimeout(timer);
   }, [tasks]);
   
   useEffect(() => {
@@ -451,13 +480,9 @@ const App: React.FC = () => {
     setTasks(prev => [newTask, ...prev]);
   };
 
-  const requestToggleTask = (task: Task) => {
-    performToggle(task.id);
-  };
-
-  const performToggle = (id: string) => {
+  const performToggle = useCallback((id: string) => {
     const now = Date.now();
-    const task = tasks.find(t => t.id === id);
+    const task = tasksRef.current.find(t => t.id === id);
     if (task && !task.completed) {
       playSuccessSound();
       if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
@@ -469,10 +494,14 @@ const App: React.FC = () => {
       t.id === id ? { ...t, completed: !t.completed, completedAt: !t.completed ? now : undefined } : t
     ));
     
-    if (selectedTask?.id === id) {
-       setSelectedTask(prev => prev ? {...prev, completed: !prev.completed, completedAt: !prev.completed ? now : undefined} : null);
-    }
-  };
+    setSelectedTask((prev) =>
+      prev?.id === id ? { ...prev, completed: !prev.completed, completedAt: !prev.completed ? now : undefined } : prev,
+    );
+  }, []);
+
+  const requestToggleTask = useCallback((task: Task) => {
+    performToggle(task.id);
+  }, [performToggle]);
 
   const updateTask = (updatedTask: Task) => {
      const normalizedTask =
@@ -532,6 +561,19 @@ const App: React.FC = () => {
   const searchResults = useMemo(() => searchTasks(tasks, searchQuery), [searchQuery, tasks]);
 
   const isRightSidebarOpen = selectedTask !== null;
+  const handleSidebarFilterChange = useCallback((nextFilter: FilterType) => {
+    setFilter(nextFilter);
+    setSelectedTask(null);
+  }, []);
+  const handleSidebarToggleCollapse = useCallback(() => {
+    setIsSidebarCollapsed((prev) => !prev);
+  }, []);
+  const handleSidebarCloseMobile = useCallback(() => {
+    setIsSidebarOpen(false);
+  }, []);
+  const handleOpenSettings = useCallback(() => {
+    setShowSettings(true);
+  }, []);
 
   const renderEmptyState = () => (
     <div className="flex flex-col items-center justify-center pt-24 text-center select-none opacity-60">
@@ -554,21 +596,32 @@ const App: React.FC = () => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
-        setShowSearch(prev => !prev);
-        setTimeout(() => searchInputRef.current?.focus(), 50);
+        setShowSearch((prev) => {
+          const next = !prev;
+          if (next) {
+            setTimeout(() => searchInputRef.current?.focus(), 50);
+          }
+          return next;
+        });
         return;
       }
       if (e.key === 'Escape') {
-        if (showSearch) { setShowSearch(false); setSearchQuery(''); }
-        else if (showSettings) setShowSettings(false);
-        else if (selectedTask) setSelectedTask(null);
-        else if (isSidebarOpen) setIsSidebarOpen(false);
+        if (showSearchRef.current) {
+          setShowSearch(false);
+          setSearchQuery('');
+        } else if (showSettingsRef.current) {
+          setShowSettings(false);
+        } else if (selectedTaskRef.current) {
+          setSelectedTask(null);
+        } else if (isSidebarOpenRef.current) {
+          setIsSidebarOpen(false);
+        }
         return;
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [showSettings, selectedTask, isSidebarOpen, showSearch]);
+  }, []);
 
   const renderTaskList = (taskList: Task[], groupName?: string) => {
      if (taskList.length === 0) return null;
@@ -620,7 +673,7 @@ const App: React.FC = () => {
                >
                  <Icons.Menu />
                </button>
-               <span className="font-bold text-black dark:text-white tracking-tight">Gitick</span>
+               <span className="font-display font-bold tracking-tight brand-text">Gitick</span>
             </div>
             {/* Mobile context indicator */}
             <div className="text-[10px] font-mono text-gray-400 dark:text-zinc-600 px-2 py-1 bg-gray-50 dark:bg-zinc-900 rounded-md">
@@ -635,13 +688,13 @@ const App: React.FC = () => {
         {/* COL 1: Sidebar */}
         <Sidebar 
           activeFilter={filter} 
-          onFilterChange={(f) => { setFilter(f); setSelectedTask(null); }} 
+          onFilterChange={handleSidebarFilterChange} 
           isOpen={isSidebarOpen}
           isCollapsed={isSidebarCollapsed}
-          toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-          onCloseMobile={() => setIsSidebarOpen(false)}
+          toggleCollapse={handleSidebarToggleCollapse}
+          onCloseMobile={handleSidebarCloseMobile}
           taskCounts={taskCounts}
-          onOpenSettings={() => setShowSettings(true)}
+          onOpenSettings={handleOpenSettings}
           isFocusActive={isFocusActive}
           focusTimeLeft={focusTimeLeft}
           projects={projects}

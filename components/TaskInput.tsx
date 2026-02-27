@@ -196,7 +196,7 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
   return (
     <div className="w-full relative z-30 max-w-3xl mx-auto">
       <form onSubmit={handleSubmit} className="group transition-all duration-300">
-        <div className="relative bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-[24px] shadow-[0_2px_12px_rgba(0,0,0,0.04)] dark:shadow-none overflow-visible transition-all duration-200 ease-out flex flex-col justify-center min-h-[3.25rem] hover:border-gray-200 dark:hover:border-zinc-700 focus-within:shadow-[0_8px_30px_rgba(0,0,0,0.08)] dark:focus-within:shadow-none focus-within:border-gray-300 dark:focus-within:border-zinc-600">
+        <div className="relative bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-[24px] shadow-[0_2px_12px_rgba(0,0,0,0.04)] dark:shadow-none overflow-visible transition-all duration-200 ease-out flex flex-col justify-center min-h-[3.25rem] focus-within:shadow-[0_8px_30px_rgba(0,0,0,0.08)] dark:focus-within:shadow-none">
             <div className="flex items-center pl-5 md:pl-6 pr-2.5 h-[52px] shrink-0">
                 <div className="text-gray-400 shrink-0">
                    <Icons.Plus />

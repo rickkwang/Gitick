@@ -148,7 +148,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       <div className="relative w-full max-w-4xl bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl border border-gray-100 dark:border-zinc-800 overflow-hidden flex flex-col md:flex-row h-[96dvh] md:h-[min(780px,88vh)] animate-in fade-in zoom-in-95 duration-200">
         
         {/* Sidebar Nav - Horizontal on Mobile */}
-        <div className="w-full md:w-72 bg-gray-50/70 dark:bg-black border-b md:border-b-0 md:border-r border-gray-100 dark:border-zinc-800 px-4 py-4 md:px-6 md:py-7 flex flex-col shrink-0 pt-safe md:pt-7">
+        <div className="w-full md:w-72 bg-gray-50/70 dark:bg-zinc-950/55 border-b md:border-b-0 md:border-r border-gray-100 dark:border-zinc-700/80 px-4 py-4 md:px-6 md:py-7 flex flex-col shrink-0 pt-safe md:pt-7">
           <div className="flex items-center justify-between mb-4 md:mb-7">
              <h2 className="text-lg font-bold text-black dark:text-white">Settings</h2>
              <button onClick={onClose} aria-label="Close settings" className="md:hidden text-gray-500 p-1">
@@ -162,7 +162,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 onClick={() => setActiveTab(tab.id)}
                 className={`whitespace-nowrap flex items-center justify-center md:justify-start gap-2 md:gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
                   activeTab === tab.id
-                    ? 'bg-white dark:bg-zinc-800 text-black dark:text-white shadow-sm border border-gray-200 dark:border-zinc-700'
+                    ? 'bg-white dark:bg-zinc-800 text-black dark:text-white shadow-sm border border-transparent'
                     : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white hover:bg-gray-100 dark:hover:bg-zinc-800/50 border border-transparent'
                 }`}
               >

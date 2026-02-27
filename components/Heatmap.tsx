@@ -39,16 +39,35 @@ export const Heatmap: React.FC<HeatmapProps> = ({ tasks }) => {
   const [weeksToShow, setWeeksToShow] = useState(24);
 
   useEffect(() => {
-    const handleResize = () => {
-      if (typeof window === 'undefined') return;
-      if (window.innerWidth < 640) setWeeksToShow(21);
-      else if (window.innerWidth < 1024) setWeeksToShow(28);
-      else setWeeksToShow(36);
+    let resizeTimer: number | null = null;
+
+    const resolveWeeksToShow = () => {
+      if (window.innerWidth < 640) return 21;
+      if (window.innerWidth < 1024) return 28;
+      return 36;
     };
 
-    handleResize();
+    const updateWeeksToShow = () => {
+      const nextWeeks = resolveWeeksToShow();
+      setWeeksToShow((prev) => (prev === nextWeeks ? prev : nextWeeks));
+    };
+
+    const handleResize = () => {
+      if (resizeTimer !== null) return;
+      resizeTimer = window.setTimeout(() => {
+        resizeTimer = null;
+        updateWeeksToShow();
+      }, 120);
+    };
+
+    updateWeeksToShow();
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      if (resizeTimer !== null) {
+        window.clearTimeout(resizeTimer);
+      }
+    };
   }, []);
 
   const weeks = useMemo<DayCell[][]>(() => {
@@ -156,20 +175,20 @@ export const Heatmap: React.FC<HeatmapProps> = ({ tasks }) => {
   }, [weeks]);
 
   const getColor = (count: number) => {
-    if (count <= 0) return 'bg-gray-100 dark:bg-zinc-900 border-transparent';
+    if (count <= 0) return 'bg-gray-100 dark:bg-zinc-800/85';
 
     if (intensityCeiling <= 4) {
-      if (count === 1) return 'bg-green-200 dark:bg-green-900 border-transparent';
-      if (count === 2) return 'bg-green-400 dark:bg-green-700 border-transparent';
-      if (count === 3) return 'bg-green-600 dark:bg-green-500 border-transparent';
-      return 'bg-green-800 dark:bg-green-400 border-transparent';
+      if (count === 1) return 'bg-green-200 dark:bg-emerald-700';
+      if (count === 2) return 'bg-green-400 dark:bg-emerald-600';
+      if (count === 3) return 'bg-green-600 dark:bg-emerald-500';
+      return 'bg-green-800 dark:bg-emerald-400';
     }
 
     const ratio = count / intensityCeiling;
-    if (ratio <= 0.25) return 'bg-green-200 dark:bg-green-900 border-transparent';
-    if (ratio <= 0.5) return 'bg-green-400 dark:bg-green-700 border-transparent';
-    if (ratio <= 0.75) return 'bg-green-600 dark:bg-green-500 border-transparent';
-    return 'bg-green-800 dark:bg-green-400 border-transparent';
+    if (ratio <= 0.25) return 'bg-green-200 dark:bg-emerald-700';
+    if (ratio <= 0.5) return 'bg-green-400 dark:bg-emerald-600';
+    if (ratio <= 0.75) return 'bg-green-600 dark:bg-emerald-500';
+    return 'bg-green-800 dark:bg-emerald-400';
   };
 
   const CELL_SIZE = `w-[${CELL_PX}px] h-[${CELL_PX}px]`;
@@ -257,11 +276,11 @@ export const Heatmap: React.FC<HeatmapProps> = ({ tasks }) => {
 
         <div className="flex items-center gap-1 text-[8px] text-gray-400 font-mono">
           <span>Less</span>
-          <div className={`${CELL_SIZE} rounded-sm bg-gray-100 dark:bg-zinc-900`} />
-          <div className={`${CELL_SIZE} rounded-sm bg-green-200 dark:bg-green-900`} />
-          <div className={`${CELL_SIZE} rounded-sm bg-green-400 dark:bg-green-700`} />
-          <div className={`${CELL_SIZE} rounded-sm bg-green-600 dark:bg-green-500`} />
-          <div className={`${CELL_SIZE} rounded-sm bg-green-800 dark:bg-green-400`} />
+          <div className={`${CELL_SIZE} rounded-sm bg-gray-100 dark:bg-zinc-800/85`} />
+          <div className={`${CELL_SIZE} rounded-sm bg-green-200 dark:bg-emerald-700`} />
+          <div className={`${CELL_SIZE} rounded-sm bg-green-400 dark:bg-emerald-600`} />
+          <div className={`${CELL_SIZE} rounded-sm bg-green-600 dark:bg-emerald-500`} />
+          <div className={`${CELL_SIZE} rounded-sm bg-green-800 dark:bg-emerald-400`} />
           <span>More</span>
         </div>
       </div>

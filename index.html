@@ -24,6 +24,7 @@
             fontFamily: {
               sans: ['ui-sans-serif', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
               mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
+              display: ['"SF Pro Rounded"', '"Avenir Next"', '"Nunito"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
             },
             colors: {
               // Minimalist Monochrome Palette (Zinc)
@@ -86,6 +87,10 @@
         --ui-border: rgba(228, 228, 231, 0.9);
         --ui-shadow: 0 10px 28px rgba(24, 24, 27, 0.06);
         --desktop-font-size: 13px;
+        --accent: #0ea5a4;
+        --accent-strong: #0f766e;
+        --accent-soft: rgba(14, 165, 164, 0.12);
+        --accent-border: rgba(14, 165, 164, 0.28);
       }
 
       @media (min-width: 1024px) {
@@ -109,6 +114,21 @@
         --ui-border: rgba(63, 63, 70, 0.9);
         --ui-shadow: 0 16px 36px rgba(0, 0, 0, 0.28);
         color: #e4e4e7;
+        --accent: #2dd4bf;
+        --accent-strong: #5eead4;
+        --accent-soft: rgba(45, 212, 191, 0.16);
+        --accent-border: rgba(45, 212, 191, 0.38);
+      }
+
+      .brand-text {
+        color: var(--accent-strong);
+      }
+      .dark .brand-text {
+        color: var(--accent);
+      }
+      .brand-soft {
+        background-color: var(--accent-soft);
+        border-color: var(--accent-border);
       }
 
       

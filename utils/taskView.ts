@@ -85,18 +85,37 @@ export const groupDashboardTasks = (tasks: Task[]): DashboardTaskGroups => {
 };
 
 export const getTaskCounts = (tasks: Task[], projects: string[]): Record<string, number> => {
-  const activeTasks = tasks.filter((task) => !task.completed);
   const todayStr = todayLocalIsoDate();
   const next7daysStr = addDaysLocalIsoDate(7);
 
   const counts: Record<string, number> = {
-    inbox: activeTasks.filter((task) => task.list === 'Inbox' || !task.list).length,
-    today: activeTasks.filter((task) => task.dueDate === todayStr).length,
-    next7days: activeTasks.filter((task) => task.dueDate && task.dueDate <= next7daysStr).length,
+    inbox: 0,
+    today: 0,
+    next7days: 0,
   };
 
   projects.forEach((projectName) => {
-    counts[projectName] = activeTasks.filter((task) => task.list === projectName).length;
+    counts[projectName] = 0;
+  });
+
+  tasks.forEach((task) => {
+    if (task.completed) return;
+
+    if (task.list === 'Inbox' || !task.list) {
+      counts.inbox += 1;
+    }
+
+    if (task.dueDate === todayStr) {
+      counts.today += 1;
+    }
+
+    if (task.dueDate && task.dueDate <= next7daysStr) {
+      counts.next7days += 1;
+    }
+
+    if (task.list && Object.prototype.hasOwnProperty.call(counts, task.list)) {
+      counts[task.list] += 1;
+    }
   });
 
   return counts;

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Task } from '../types';
 import { Icons } from '../constants';
 
@@ -9,9 +9,10 @@ interface GitGraphProps {
 
 export const GitGraph: React.FC<GitGraphProps> = ({ tasks, onDelete }) => {
   // Sort by completedAt descending (newest commits at top)
-  const sortedTasks = [...tasks].sort((a, b) => {
-    return (b.completedAt || 0) - (a.completedAt || 0);
-  });
+  const sortedTasks = useMemo(
+    () => [...tasks].sort((a, b) => (b.completedAt || 0) - (a.completedAt || 0)),
+    [tasks],
+  );
 
   // MONOCHROME LOGIC: Use shades of gray/zinc to distinguish branches
   const getBranchStyles = (list?: string) => {
