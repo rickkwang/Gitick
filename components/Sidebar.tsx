@@ -120,7 +120,7 @@ const NavItemComponent: React.FC<NavItemProps> = ({
             flex items-center flex-1 min-w-0 overflow-hidden whitespace-nowrap pl-1
             transition-opacity duration-150 ease-linear
             opacity-100
-            md:pl-[72px]
+            md:pl-[58px]
             ${isCollapsed ? 'md:opacity-0 md:pointer-events-none' : 'md:opacity-100'}
           `}>
             <span className="truncate pr-2">{label}</span>
