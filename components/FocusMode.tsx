@@ -66,10 +66,10 @@ export const FocusMode: React.FC<FocusModeProps> = ({
   const progress = ((visualMax - timeLeft) / visualMax) * 100;
 
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-dark-surface relative overflow-hidden">
-      
+    <div className="flex flex-col h-full bg-gray-50 dark:bg-zinc-950 relative overflow-hidden">
+      <div className="max-w-[960px] mx-auto w-full h-full px-6 md:px-10 py-8 md:py-12 flex flex-col">
       {/* Top Section: Timer Visualization */}
-      <div className="flex-1 flex flex-col items-center justify-center p-8 min-h-[400px]">
+      <div className="flex-[1.15] flex flex-col items-center justify-center p-6 md:p-8 min-h-[360px]">
         <div className="relative w-64 h-64 md:w-80 md:h-80 flex items-center justify-center">
           {/* SVG Ring */}
           <svg className="w-full h-full transform -rotate-90 drop-shadow-sm">
@@ -106,7 +106,7 @@ export const FocusMode: React.FC<FocusModeProps> = ({
       </div>
 
       {/* Bottom Section: Controls */}
-      <div className="shrink-0 p-8 pb-safe md:pb-12 flex flex-col items-center gap-8 bg-white dark:bg-dark-surface z-20">
+      <div className="shrink-0 mt-2 md:mt-4 p-4 md:p-6 pb-safe md:pb-10 flex flex-col items-center gap-6 md:gap-7 z-20">
           
           {/* Main Action Buttons */}
           <div className="w-full max-w-md grid grid-cols-3 gap-2 md:gap-3">
@@ -208,6 +208,7 @@ export const FocusMode: React.FC<FocusModeProps> = ({
                 </button>
              </div>
           </div>
+      </div>
       </div>
     </div>
   );
