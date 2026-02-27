@@ -643,7 +643,7 @@ const App: React.FC = () => {
 
   return (
     <div
-      className={`flex flex-col h-dvh md:h-[calc(100dvh-1.5rem)] md:m-3 md:rounded-[26px] md:border md:border-gray-200/70 dark:md:border-zinc-800/70 md:shadow-[0_10px_30px_-18px_rgba(0,0,0,0.2)] font-sans text-gray-900 dark:text-dark-text bg-white dark:bg-zinc-950 overflow-hidden transition-colors duration-300 selection:bg-black selection:text-white dark:selection:bg-white dark:selection:text-black ${
+      className={`flex flex-col h-dvh md:rounded-[26px] font-sans text-gray-900 dark:text-dark-text bg-white dark:bg-zinc-950 overflow-hidden transition-colors duration-300 selection:bg-black selection:text-white dark:selection:bg-white dark:selection:text-black ${
         isStartupStatic ? 'startup-static' : ''
       }`}
     > 
