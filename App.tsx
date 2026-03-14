@@ -28,7 +28,7 @@ const GitGraph = lazy(() => import('./components/GitGraph').then((module) => ({ 
 const SettingsModal = lazy(() =>
   import('./components/SettingsModal').then((module) => ({ default: module.SettingsModal })),
 );
-const TASKS_PERSIST_DEBOUNCE_MS = 250;
+const TASKS_PERSIST_DEBOUNCE_MS = 800;
 
 const App: React.FC = () => {
   // Initialize tasks with Onboarding data if localStorage is empty
@@ -227,7 +227,12 @@ const App: React.FC = () => {
            }
            switchTimerMode(nextMode, true);
         } else {
-           setFocusTimeLeft((prev) => (prev === diff ? prev : diff));
+           // Reduce global re-renders when user is not on focus view.
+           const shouldSyncThisTick =
+             filter === 'focus' || diff <= 60 || diff % 10 === 0;
+           if (shouldSyncThisTick) {
+             setFocusTimeLeft((prev) => (prev === diff ? prev : diff));
+           }
            document.title = `${formatTimerLabel(diff)} - ${focusModeType === 'focus' ? 'Focus' : 'Break'}`;
         }
       }, 1000);
@@ -238,7 +243,7 @@ const App: React.FC = () => {
     return () => { 
       if (interval) clearInterval(interval); 
     };
-  }, [isFocusActive, focusEndTime, focusModeType, switchTimerMode]);
+  }, [isFocusActive, focusEndTime, focusModeType, switchTimerMode, filter]);
 
   // Handle Focus Mode UI Updates (Wrapping the logic for the component)
   const handleSetTimeLeft = (val: number | ((prev: number) => number)) => {
@@ -286,10 +291,22 @@ const App: React.FC = () => {
 
   // Persistence Effects
   useEffect(() => {
+    let idleId: number | null = null;
     const timer = window.setTimeout(() => {
-      writeStoredJson(STORAGE_KEYS.tasks, tasks);
+      const persist = () => writeStoredJson(STORAGE_KEYS.tasks, tasks);
+      if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+        idleId = window.requestIdleCallback(persist, { timeout: 1000 });
+      } else {
+        persist();
+      }
     }, TASKS_PERSIST_DEBOUNCE_MS);
-    return () => window.clearTimeout(timer);
+
+    return () => {
+      window.clearTimeout(timer);
+      if (idleId !== null && typeof window !== 'undefined' && 'cancelIdleCallback' in window) {
+        window.cancelIdleCallback(idleId);
+      }
+    };
   }, [tasks]);
   
   useEffect(() => {
@@ -841,7 +858,7 @@ const App: React.FC = () => {
         {/* COL 3: Staging Area */}
         <aside 
           className={`
-             hidden lg:flex flex-col h-full bg-white/95 dark:bg-[#2b3038]/95 backdrop-blur-sm overflow-hidden border-l border-gray-200/70 dark:border-[#3a404c]
+             hidden lg:flex flex-col h-full bg-white/95 dark:bg-[#2b3038]/95 backdrop-blur-[2px] overflow-hidden border-l border-gray-200/70 dark:border-[#3a404c]
              transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)] 
              ${isRightSidebarOpen && filter !== 'focus' ? 'w-96 translate-x-0 opacity-100' : 'w-0 translate-x-10 opacity-0'}
           `}
@@ -891,12 +908,12 @@ const App: React.FC = () => {
          <div className="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh] px-4">
             {/* Backdrop with Blur */}
             <div 
-              className="absolute inset-0 bg-white/20 dark:bg-black/40 backdrop-blur-xl transition-all duration-300 animate-in fade-in"
+              className="absolute inset-0 bg-white/20 dark:bg-black/40 backdrop-blur-md transition-all duration-300 animate-in fade-in"
               onClick={() => setShowSearch(false)} 
             />
             
             {/* Search Box */}
-            <div className="relative w-full max-w-2xl bg-white/80 dark:bg-zinc-900/80 backdrop-blur-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[60vh] ring-1 ring-white/20 dark:ring-white/5 animate-in fade-in zoom-in-95 slide-in-from-bottom-2 duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]">
+            <div className="relative w-full max-w-2xl bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[60vh] ring-1 ring-white/20 dark:ring-white/5 animate-in fade-in zoom-in-95 slide-in-from-bottom-2 duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]">
                
                {/* Large Apple-style Input */}
                <div className="flex items-center gap-4 p-5 border-b border-gray-200/50 dark:border-white/5">
