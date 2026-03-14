@@ -1,7 +1,7 @@
 {
   "name": "gitick---task-manager",
   "private": true,
-  "version": "0.2.83",
+  "version": "0.2.84",
   "description": "Gitick desktop task manager",
   "author": "Myrick Wang",
   "repository": {
@@ -14,11 +14,17 @@
     "dev": "vite",
     "build": "vite build",
     "typecheck": "tsc --noEmit",
+    "lint": "npm run typecheck",
+    "ci:local": "npm run typecheck && npm run build",
     "preview": "vite preview",
     "desktop:dev": "concurrently -k \"vite --host 127.0.0.1 --port 3000\" \"wait-on tcp:3000 && VITE_DEV_SERVER_URL=http://127.0.0.1:3000 electron .\"",
     "desktop:pack": "npm run build && electron-builder --dir",
     "desktop:dmg": "npm run build && electron-builder --mac",
-    "desktop:release": "npm run desktop:dmg && node scripts/verify-mac-signatures.mjs && node scripts/publish-desktop-release.mjs"
+    "desktop:release": "npm run desktop:dmg && node scripts/verify-mac-signatures.mjs && node scripts/publish-desktop-release.mjs",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "desktop:ci:smoke": "npm run build && electron-builder --mac zip --publish never",
+    "desktop:ci:verify-artifacts": "node scripts/verify-mac-updater-artifacts.mjs"
   },
   "dependencies": {
     "electron-updater": "^6.6.2",
@@ -33,6 +39,7 @@
     "electron-builder": "^26.0.12",
     "typescript": "~5.8.2",
     "vite": "^6.2.0",
+    "vitest": "^4.1.0",
     "wait-on": "^9.0.1"
   },
   "build": {
@@ -77,5 +84,8 @@
       "owner": "rickkwang",
       "repo": "Gitick"
     }
+  },
+  "overrides": {
+    "yauzl": "^3.2.1"
   }
 }

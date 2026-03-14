@@ -10,6 +10,7 @@ import { Icons, PROJECTS as DEFAULT_PROJECTS } from './constants';
 import { useDesktopUpdater, type DesktopConfirmDialogRequest } from './hooks/useDesktopUpdater';
 import { playSuccessSound } from './utils/audio';
 import { createOnboardingTasks, DEFAULT_USER_PROFILE } from './utils/appDefaults';
+import { FOCUS_DEFAULT_SECONDS, FocusModeType, formatTimerLabel, getDefaultFocusSeconds } from './utils/focusTimer';
 import { sanitizeTaskList } from './utils/taskSanitizer';
 import { getFilterBreadcrumb, getFilteredTasks, getTaskCounts, groupDashboardTasks, searchTasks } from './utils/taskView';
 import {
@@ -27,11 +28,7 @@ const GitGraph = lazy(() => import('./components/GitGraph').then((module) => ({ 
 const SettingsModal = lazy(() =>
   import('./components/SettingsModal').then((module) => ({ default: module.SettingsModal })),
 );
-const FOCUS_DEFAULT_SECONDS = 25 * 60;
-const BREAK_DEFAULT_SECONDS = 5 * 60;
 const TASKS_PERSIST_DEBOUNCE_MS = 250;
-const getDefaultFocusSeconds = (mode: 'focus' | 'break') =>
-  mode === 'focus' ? FOCUS_DEFAULT_SECONDS : BREAK_DEFAULT_SECONDS;
 
 const App: React.FC = () => {
   // Initialize tasks with Onboarding data if localStorage is empty
@@ -136,7 +133,7 @@ const App: React.FC = () => {
   const [focusEndTime, setFocusEndTime] = useState<number | null>(null);
   const [focusTimeLeft, setFocusTimeLeft] = useState(FOCUS_DEFAULT_SECONDS);
   const [isFocusActive, setIsFocusActive] = useState(false);
-  const [focusModeType, setFocusModeType] = useState<'focus' | 'break'>('focus');
+  const [focusModeType, setFocusModeType] = useState<FocusModeType>('focus');
   const tasksRef = useRef(tasks);
   const isFocusActiveRef = useRef(isFocusActive);
 
@@ -164,15 +161,9 @@ const App: React.FC = () => {
     isSidebarOpenRef.current = isSidebarOpen;
   }, [isSidebarOpen]);
 
-  // Helper: Format Time
-  const formatTime = (seconds: number) => {
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
-    return `${m}:${s.toString().padStart(2, '0')}`;
-  };
 
   // Start Timer Logic
-  const switchTimerMode = useCallback((nextMode: 'focus' | 'break', autoStart = false) => {
+  const switchTimerMode = useCallback((nextMode: FocusModeType, autoStart = false) => {
     const nextDuration = getDefaultFocusSeconds(nextMode);
     setFocusModeType(nextMode);
     setFocusTimeLeft(nextDuration);
@@ -237,7 +228,7 @@ const App: React.FC = () => {
            switchTimerMode(nextMode, true);
         } else {
            setFocusTimeLeft((prev) => (prev === diff ? prev : diff));
-           document.title = `${formatTime(diff)} - ${focusModeType === 'focus' ? 'Focus' : 'Break'}`;
+           document.title = `${formatTimerLabel(diff)} - ${focusModeType === 'focus' ? 'Focus' : 'Break'}`;
         }
       }, 1000);
     } else {
@@ -261,7 +252,7 @@ const App: React.FC = () => {
       });
   };
 
-  const handleFocusModeChange = (nextMode: 'focus' | 'break') => {
+  const handleFocusModeChange = (nextMode: FocusModeType) => {
     switchTimerMode(nextMode, false);
   };
 
@@ -658,7 +649,7 @@ const App: React.FC = () => {
 
   return (
     <div
-      className={`[--app-radius:12px] flex flex-col h-dvh md:rounded-[var(--app-radius)] font-sans text-gray-900 dark:text-dark-text bg-[var(--app-bg)] overflow-hidden transition-colors duration-300 selection:bg-black selection:text-white dark:selection:bg-white dark:selection:text-black ${
+      className={`[--app-radius:16px] flex flex-col h-dvh md:rounded-[var(--app-radius)] font-sans text-gray-900 dark:text-dark-text bg-[var(--app-bg)] overflow-hidden transition-colors duration-300 selection:bg-black selection:text-white dark:selection:bg-white dark:selection:text-black ${
         isStartupStatic ? 'startup-static' : ''
       }`}
     > 
@@ -743,7 +734,7 @@ const App: React.FC = () => {
                         {isFocusActive && (
                             <div className="flex items-center gap-2 px-3 py-1 bg-black dark:bg-white rounded-full text-white dark:text-black shadow-lg shadow-black/10 animate-pulse">
                                 <span className="text-[10px] font-bold uppercase tracking-wider">Focus</span>
-                                <span className="font-mono text-xs font-bold">{formatTime(focusTimeLeft)}</span>
+                                <span className="font-mono text-xs font-bold">{formatTimerLabel(focusTimeLeft)}</span>
                             </div>
                         )}
 
