@@ -6,6 +6,11 @@ const fs = require('fs');
 const os = require('os');
 const https = require('https');
 const { URL } = require('url');
+const {
+  RELEASE_METADATA_URL,
+  isSafeExternalUrl,
+  isTrustedGitHubReleaseUrl,
+} = require('./externalUrl.cjs');
 
 const isDev = !app.isPackaged;
 const isMac = process.platform === 'darwin';
@@ -15,7 +20,6 @@ let updaterDownloadTask = null;
 let latestAvailableVersion = null;
 let latestDownloadedVersion = null;
 let externalInstallTask = null;
-const RELEASE_METADATA_URL = 'https://github.com/rickkwang/Gitick/releases/latest/download/latest-mac.yml';
 
 const sendUpdaterStatus = (payload) => {
   if (!mainWindow || mainWindow.isDestroyed()) return;
@@ -52,6 +56,10 @@ const compareSemver = (a, b) => {
 
 const fetchText = (sourceUrl) => new Promise((resolve, reject) => {
   const request = (urlString) => {
+    if (!isTrustedGitHubReleaseUrl(urlString)) {
+      reject(new Error('Blocked untrusted metadata URL.'));
+      return;
+    }
     const requestUrl = new URL(urlString);
     const req = https.get(requestUrl, (res) => {
       if (res.statusCode && res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
@@ -293,6 +301,10 @@ const setupAutoUpdater = () => {
 
 const downloadFileWithProgress = (sourceUrl, outputPath) => new Promise((resolve, reject) => {
   const request = (urlString) => {
+    if (!isTrustedGitHubReleaseUrl(urlString)) {
+      reject(new Error('Blocked untrusted download URL.'));
+      return;
+    }
     const requestUrl = new URL(urlString);
     const req = https.get(requestUrl, (res) => {
       if (
@@ -467,8 +479,21 @@ function createMainWindow() {
   });
 
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-    shell.openExternal(url);
+    if (isSafeExternalUrl(url)) {
+      shell.openExternal(url);
+    } else {
+      console.warn(`[security] blocked external url: ${url}`);
+    }
     return { action: 'deny' };
+  });
+  mainWindow.webContents.on('will-navigate', (event, url) => {
+    if (!isSafeExternalUrl(url)) {
+      event.preventDefault();
+      console.warn(`[security] blocked navigation url: ${url}`);
+      return;
+    }
+    event.preventDefault();
+    shell.openExternal(url);
   });
 
   mainWindow.on('closed', () => {
