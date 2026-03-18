@@ -39,26 +39,26 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
 
   return (
     <div className="fixed inset-0 z-[140] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onCancel} />
-      <div className="relative w-full max-w-md rounded-2xl border border-gray-200 bg-white p-6 shadow-2xl dark:border-zinc-700 dark:bg-zinc-900">
-        <h3 className="text-lg font-semibold text-black dark:text-white">{title}</h3>
-        <p className="mt-2 text-sm text-gray-600 dark:text-zinc-300">{description}</p>
+      <div className="absolute inset-0 bg-black/40" onClick={onCancel} />
+      <div className="relative w-full max-w-md rounded-lg border border-primary-200 bg-primary-50 p-6 shadow-lg dark:border-dark-border dark:bg-dark-bg">
+        <h3 className="text-lg font-semibold text-primary-900 dark:text-dark-text">{title}</h3>
+        <p className="mt-2 text-sm text-primary-600 dark:text-dark-text">{description}</p>
 
         <div className="mt-6 flex justify-end gap-3">
           <button
             type="button"
             onClick={onCancel}
-            className="rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+            className="rounded-xl border border-primary-200 px-4 py-2 text-sm font-medium text-primary-700 transition-colors hover:bg-primary-100 dark:border-dark-border dark:text-dark-text dark:hover:bg-dark-border"
           >
             {cancelLabel}
           </button>
           <button
             type="button"
             onClick={onConfirm}
-            className={`rounded-xl px-4 py-2 text-sm font-semibold text-white transition-colors dark:text-black ${
+            className={`rounded-xl px-4 py-2 text-sm font-semibold text-white transition-colors ${
               confirmTone === 'danger'
                 ? 'bg-red-600 hover:bg-red-700 dark:bg-red-400 dark:hover:bg-red-300'
-                : 'bg-black hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-200'
+                : 'bg-[var(--accent)] hover:bg-[var(--accent-strong)] dark:bg-[var(--accent)] dark:hover:bg-[var(--accent-strong)]'
             }`}
           >
             {confirmLabel}

@@ -175,54 +175,54 @@ export const Heatmap: React.FC<HeatmapProps> = ({ tasks }) => {
   }, [weeks]);
 
   const getColor = (count: number) => {
-    if (count <= 0) return 'bg-gray-100 dark:bg-[#3a404c]';
+    if (count <= 0) return 'bg-primary-200/50 dark:bg-dark-border';
 
     if (intensityCeiling <= 4) {
-      if (count === 1) return 'bg-green-200 dark:bg-emerald-600';
-      if (count === 2) return 'bg-green-400 dark:bg-emerald-500';
-      if (count === 3) return 'bg-green-600 dark:bg-emerald-400';
-      return 'bg-green-800 dark:bg-emerald-300';
+      if (count === 1) return 'bg-teal-200 dark:bg-teal-700';
+      if (count === 2) return 'bg-teal-400 dark:bg-teal-600';
+      if (count === 3) return 'bg-teal-500 dark:bg-teal-500';
+      return 'bg-teal-700 dark:bg-teal-400';
     }
 
     const ratio = count / intensityCeiling;
-    if (ratio <= 0.25) return 'bg-green-200 dark:bg-emerald-600';
-    if (ratio <= 0.5) return 'bg-green-400 dark:bg-emerald-500';
-    if (ratio <= 0.75) return 'bg-green-600 dark:bg-emerald-400';
-    return 'bg-green-800 dark:bg-emerald-300';
+    if (ratio <= 0.25) return 'bg-teal-200 dark:bg-teal-700';
+    if (ratio <= 0.5) return 'bg-teal-400 dark:bg-teal-600';
+    if (ratio <= 0.75) return 'bg-teal-500 dark:bg-teal-500';
+    return 'bg-teal-700 dark:bg-teal-400';
   };
 
-  const CELL_SIZE = `w-[${CELL_PX}px] h-[${CELL_PX}px]`;
+  const CELL_SIZE = 'w-[10px] h-[10px]';
   const GAP = 'gap-[2px]';
   const COL_WIDTH = CELL_PX + CELL_GAP_PX;
   const todayKey = toLocalIsoDate(new Date());
 
   return (
     <div className="w-full overflow-hidden flex flex-col gap-4">
-      <div className="grid grid-cols-3 divide-x divide-gray-100 dark:divide-[#3a404c] border-b border-gray-100 dark:border-[#3a404c] pb-3">
+      <div className="grid grid-cols-3 divide-x divide-primary-200/80 dark:divide-dark-border border-b border-primary-200/80 dark:border-dark-border pb-3">
         <div className="px-2 md:px-5 text-center">
-          <div className="text-[10px] uppercase tracking-wider text-gray-400 dark:text-zinc-500 font-bold mb-1">
+          <div className="text-[10px] uppercase tracking-wider text-primary-400 dark:text-dark-muted font-bold mb-1">
             Total
           </div>
-          <div className="text-lg md:text-xl font-mono font-medium text-black dark:text-white">{visibleContributions}</div>
-          <div className="text-[8px] text-gray-400 dark:text-zinc-600 mt-1">{allTimeContributions} all-time</div>
+          <div className="text-lg md:text-xl font-mono font-medium text-primary-900 dark:text-dark-text">{visibleContributions}</div>
+          <div className="text-[8px] text-primary-400 dark:text-dark-muted mt-1">{allTimeContributions} all-time</div>
         </div>
         <div className="px-2 md:px-5 text-center">
-          <div className="text-[10px] uppercase tracking-wider text-gray-400 dark:text-zinc-500 font-bold mb-1">
+          <div className="text-[10px] uppercase tracking-wider text-primary-400 dark:text-dark-muted font-bold mb-1">
             Streak
           </div>
-          <div className="text-lg md:text-xl font-mono font-medium text-black dark:text-white">{maxStreak}</div>
+          <div className="text-lg md:text-xl font-mono font-medium text-primary-900 dark:text-dark-text">{maxStreak}</div>
         </div>
         <div className="px-2 md:px-5 text-center">
-          <div className="text-[10px] uppercase tracking-wider text-gray-400 dark:text-zinc-500 font-bold mb-1">
+          <div className="text-[10px] uppercase tracking-wider text-primary-400 dark:text-dark-muted font-bold mb-1">
             Current
           </div>
-          <div className="text-lg md:text-xl font-mono font-medium text-black dark:text-white">{currentStreak}</div>
+          <div className="text-lg md:text-xl font-mono font-medium text-primary-900 dark:text-dark-text">{currentStreak}</div>
         </div>
       </div>
 
       <div className="w-full pb-2 overflow-x-auto no-scrollbar">
         <div className="flex gap-2 md:gap-3 px-2 w-max md:w-fit md:mx-auto">
-          <div className={`flex flex-col ${GAP} pt-[18px] text-[9px] font-mono text-gray-300 dark:text-zinc-600`}>
+          <div className={`flex flex-col ${GAP} pt-[18px] text-[9px] font-mono text-primary-300 dark:text-dark-muted`}>
             <div className="h-2.5 flex items-center opacity-0">Sun</div>
             <div className="h-2.5 flex items-center">Mon</div>
             <div className="h-2.5 flex items-center opacity-0">Tue</div>
@@ -233,7 +233,7 @@ export const Heatmap: React.FC<HeatmapProps> = ({ tasks }) => {
           </div>
 
           <div className="shrink-0">
-            <div className="relative h-4 mb-0 text-[9px] font-mono text-gray-400 dark:text-zinc-500">
+            <div className="relative h-4 mb-0 text-[9px] font-mono text-primary-400 dark:text-dark-muted">
               {monthLabels.map((month) => (
                 <div
                   key={`${month.label}-${month.index}`}
@@ -271,16 +271,16 @@ export const Heatmap: React.FC<HeatmapProps> = ({ tasks }) => {
         </div>
       </div>
 
-      <div className="flex items-center justify-between pt-1.5 px-3 border-t border-transparent dark:border-[#3a404c]">
-        <div className="text-[9px] text-gray-400 dark:text-zinc-600 italic">{currentStreak > 0 ? 'On fire! 🔥' : 'Just start.'}</div>
+      <div className="flex items-center justify-between pt-1.5 px-3 border-t border-transparent dark:border-dark-border">
+        <div className="text-[9px] text-primary-400 dark:text-dark-muted italic">{currentStreak > 0 ? 'On fire! 🔥' : 'Just start.'}</div>
 
-        <div className="flex items-center gap-1 text-[8px] text-gray-400 font-mono">
+        <div className="flex items-center gap-1 text-[8px] text-primary-400 font-mono">
           <span>Less</span>
-          <div className={`${CELL_SIZE} rounded-sm bg-gray-100 dark:bg-[#3a404c]`} />
-          <div className={`${CELL_SIZE} rounded-sm bg-green-200 dark:bg-emerald-600`} />
-          <div className={`${CELL_SIZE} rounded-sm bg-green-400 dark:bg-emerald-500`} />
-          <div className={`${CELL_SIZE} rounded-sm bg-green-600 dark:bg-emerald-400`} />
-          <div className={`${CELL_SIZE} rounded-sm bg-green-800 dark:bg-emerald-300`} />
+          <div className={`${CELL_SIZE} rounded-sm bg-primary-200/50 dark:bg-dark-border`} />
+          <div className={`${CELL_SIZE} rounded-sm bg-teal-200 dark:bg-teal-700`} />
+          <div className={`${CELL_SIZE} rounded-sm bg-teal-400 dark:bg-teal-600`} />
+          <div className={`${CELL_SIZE} rounded-sm bg-teal-500 dark:bg-teal-500`} />
+          <div className={`${CELL_SIZE} rounded-sm bg-teal-700 dark:bg-teal-400`} />
           <span>More</span>
         </div>
       </div>

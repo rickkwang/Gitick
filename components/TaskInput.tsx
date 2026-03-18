@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Task, Priority } from '../types';
 import { Icons } from '../constants';
-import { addDaysLocalIsoDate, todayLocalIsoDate } from '../utils/date';
+import { todayLocalIsoDate } from '../utils/date';
+import { parseTaskInput } from '../utils/taskParser';
 
 interface TaskInputProps {
   onAddTask: (task: Omit<Task, 'id' | 'createdAt'>) => void;
@@ -59,74 +60,13 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const parseTaskInput = (text: string) => {
-    let title = text;
-    let priority: Priority | undefined = undefined;
-    let tags: string[] = [];
-    let dueDate: string | undefined = undefined;
-
-    // 1. Priority Parsing (!high)
-    const priorityRegex = /!(high|medium|low)/i;
-    const priorityMatch = text.match(priorityRegex);
-    if (priorityMatch) {
-      priority = priorityMatch[1].toLowerCase() as Priority;
-    }
-
-    // 2. Tags Parsing (#tag)
-    const tagRegex = /#([^\s#@!]+)/gu;
-    const tagMatches = Array.from(text.matchAll(tagRegex));
-    if (tagMatches.length > 0) {
-      tags = Array.from(new Set(tagMatches.map((match) => match[1].trim()).filter(Boolean)));
-    }
-
-    // 3. Project Parsing (@Project)
-    const projectRegex = /@([^\s#@!]+)/iu;
-    const projectMatch = text.match(projectRegex);
-    let projectFound = null;
-    if (projectMatch) {
-       const pName = projectMatch[1];
-       projectFound = projects.find(p => p.toLowerCase() === pName.toLowerCase());
-    }
-
-    // 4. Date Parsing (Local Time robust)
-    const today = new Date();
-    const lowerText = text.toLowerCase();
-    let dateLabel = '';
-
-    // Regex ensures we match whole words to avoid false positives inside words
-    if (/\b(today|tod)\b/.test(lowerText)) {
-      dueDate = todayLocalIsoDate();
-      dateLabel = 'Today';
-    } else if (/\b(tomorrow|tmr|tom)\b/.test(lowerText)) {
-      dueDate = addDaysLocalIsoDate(1);
-      dateLabel = 'Tomorrow';
-    } else if (/\b(next week)\b/.test(lowerText)) {
-      const nextMon = new Date(today);
-      nextMon.setDate(today.getDate() + ((1 + 7 - today.getDay()) % 7 || 7));
-      const diffDays = Math.round((nextMon.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-      dueDate = addDaysLocalIsoDate(diffDays);
-      dateLabel = 'Next Week';
-    }
-
-    // Generate Clean Title for Preview
-    const projectTokenRegex = /@([^\s#@!]+)/gu;
-    let cleanTitle = title
-        .replace(priorityRegex, '')
-        .replace(tagRegex, '')
-        .replace(projectTokenRegex, '')
-        .replace(/\b(today|tod|tomorrow|tmr|tom|next week)\b/gi, '')
-        .replace(/\s+/g, ' ').trim();
-
-    return { title, priority, tags, dueDate, cleanTitle, dateLabel, projectFound };
-  };
-
   // Real-time parsing effect
   useEffect(() => {
-     const result = parseTaskInput(input);
+     const result = parseTaskInput(input, projects);
      setParsedPreview({
          priority: result.priority,
          tags: result.tags,
-         dueDate: result.dateLabel, // Use label for preview
+         dueDate: result.dateLabel,
          cleanTitle: result.cleanTitle
      });
      if (result.projectFound) {
@@ -137,7 +77,7 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
   const submit = () => {
     if (!input.trim()) return;
 
-    const parsedData = parseTaskInput(input);
+    const parsedData = parseTaskInput(input, projects);
     
     // Determine Date
     // MODIFIED: Default to Today globally if no date was specifically parsed.
@@ -199,9 +139,9 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
   return (
     <div className="w-full relative z-30 max-w-3xl mx-auto">
       <form onSubmit={handleSubmit} className="group transition-all duration-300">
-        <div className="relative bg-white dark:bg-[#21252b] border border-gray-100 dark:border-zinc-800 rounded-[24px] shadow-[0_2px_12px_rgba(0,0,0,0.04)] dark:shadow-none overflow-visible transition-all duration-200 ease-out flex flex-col justify-center min-h-[3.25rem] focus-within:shadow-[0_8px_30px_rgba(0,0,0,0.08)] dark:focus-within:shadow-none">
+        <div className="relative bg-primary-50 dark:bg-dark-surface border border-primary-200/80 dark:border-dark-border rounded-xl shadow-sm dark:shadow-none overflow-visible transition-all duration-200 ease-out flex flex-col justify-center min-h-[3.25rem] focus-within:shadow-md dark:focus-within:shadow-none">
             <div className="flex items-center pl-5 md:pl-6 pr-2.5 h-[52px] shrink-0">
-                <div className="text-gray-400 shrink-0">
+                <div className="text-primary-400 shrink-0">
                    <Icons.Plus />
                 </div>
                 <input
@@ -213,14 +153,14 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
                     onCompositionEnd={() => { isComposingRef.current = false; }}
                     onKeyDown={handleKeyDown}
                     placeholder={getPlaceholder()}
-                    className="w-full h-full pl-3 pr-3 bg-transparent text-black dark:text-white placeholder:text-gray-400 dark:placeholder:text-zinc-600 outline-none font-medium text-[15px] min-w-0"
+                    className="w-full h-full pl-3 pr-3 bg-transparent text-primary-900 dark:text-dark-text placeholder:text-primary-400 dark:placeholder:text-dark-muted outline-none font-medium text-[15px] min-w-0"
                     autoFocus={shouldAutoFocus}
                 />
                 <button
                     onClick={submit}
                     type="button"
                     aria-label="Add task"
-                    className={`mr-1 flex shrink-0 items-center justify-center w-9 h-9 rounded-full bg-black dark:bg-white text-white dark:text-black transition-all duration-200 hover:scale-110 active:scale-95 ${input.length > 0 ? 'opacity-100 scale-100' : 'opacity-0 scale-90 pointer-events-none'}`}
+                    className={`mr-1 flex shrink-0 items-center justify-center w-9 h-9 rounded-full bg-[var(--accent)] text-white transition-all duration-200 hover:scale-110 active:scale-95 ${input.length > 0 ? 'opacity-100 scale-100' : 'opacity-0 scale-90 pointer-events-none'}`}
                 >
                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 10 4 15 9 20"></polyline><path d="M20 4v7a4 4 0 0 1-4 4H4"></path></svg>
                 </button>
@@ -232,41 +172,41 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
                       aria-label="Select project"
                       className={`
                         h-9 px-4 md:px-4.5 flex items-center gap-2 rounded-full transition-all duration-200
-                        bg-gray-100/75 dark:bg-white/5
+                        bg-primary-200/50 dark:bg-dark-border/30
                         ${isDropdownOpen
-                          ? 'bg-gray-100 dark:bg-white/10'
-                          : 'hover:bg-gray-100 dark:hover:bg-white/[0.08]'}
+                          ? 'bg-primary-200/50 dark:bg-dark-border/50'
+                          : 'hover:bg-primary-200/50 dark:hover:bg-dark-border/40'}
                       `}
                       title="Select Project"
                     >
-                        <span className="text-[11px] font-bold uppercase tracking-wide text-gray-400 dark:text-zinc-500">Project</span>
-                        <span className="text-xs font-bold text-black dark:text-white max-w-[96px] truncate">{selectedProject}</span>
-                        <span className={`text-gray-400 dark:text-zinc-500 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`}>
+                        <span className="text-[11px] font-bold uppercase tracking-wide text-primary-400 dark:text-dark-muted">Project</span>
+                        <span className="text-xs font-bold text-primary-900 dark:text-dark-text max-w-[96px] truncate">{selectedProject}</span>
+                        <span className={`text-primary-400 dark:text-dark-muted transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`}>
                           <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
                         </span>
                     </button>
 
                     {isDropdownOpen && (
-                      <div className="absolute bottom-full right-0 mb-2 w-44 rounded-2xl border border-white/35 dark:border-white/10 bg-white/72 dark:bg-[#21252b]/95 backdrop-blur-xl shadow-[0_16px_32px_-20px_rgba(0,0,0,0.45)] overflow-hidden py-1.5 animate-in fade-in zoom-in-95 slide-in-from-bottom-2 duration-200">
+                      <div className="absolute bottom-full right-0 mb-2 w-44 rounded-lg border border-primary-200 dark:border-dark-border bg-primary-50 dark:bg-dark-surface shadow-lg overflow-hidden py-1.5 animate-in fade-in zoom-in-95 slide-in-from-bottom-2 duration-200">
                           <button
                               type="button"
                               onClick={() => { setSelectedProject('Inbox'); setIsDropdownOpen(false); }}
-                              className={`mx-1 w-[calc(100%-0.5rem)] text-left px-2.5 py-2 rounded-xl text-xs font-medium flex items-center gap-2.5 transition-colors ${selectedProject === 'Inbox' ? 'text-black dark:text-white bg-gray-100/85 dark:bg-white/10' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100/60 dark:hover:bg-white/6'}`}
+                              className={`mx-1 w-[calc(100%-0.5rem)] text-left px-2.5 py-2 rounded-xl text-xs font-medium flex items-center gap-2.5 transition-colors ${selectedProject === 'Inbox' ? 'text-primary-900 dark:text-dark-text bg-primary-200/50 dark:bg-dark-border/50' : 'text-primary-500 dark:text-dark-muted hover:bg-primary-200/40 dark:hover:bg-dark-border/30'}`}
                           >
                               <Icons.Inbox /> Inbox
-                              {selectedProject === 'Inbox' && <span className="ml-auto text-black dark:text-white"><Icons.Checked /></span>}
+                              {selectedProject === 'Inbox' && <span className="ml-auto text-primary-900 dark:text-dark-text"><Icons.Checked /></span>}
                           </button>
-                          <div className="h-px bg-gray-200/70 dark:bg-white/10 my-1 mx-2"></div>
+                          <div className="h-px bg-primary-200/70 dark:bg-dark-border/50 my-1 mx-2"></div>
                           <div className="max-h-44 overflow-y-auto custom-scroll">
                             {projects.map(p => (
                                 <button
                                     key={p}
                                     type="button"
                                     onClick={() => { setSelectedProject(p); setIsDropdownOpen(false); }}
-                                    className={`mx-1 w-[calc(100%-0.5rem)] text-left px-2.5 py-2 rounded-xl text-xs font-medium flex items-center gap-2.5 transition-colors ${selectedProject === p ? 'text-black dark:text-white bg-gray-100/85 dark:bg-white/10' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100/60 dark:hover:bg-white/6'}`}
+                                    className={`mx-1 w-[calc(100%-0.5rem)] text-left px-2.5 py-2 rounded-xl text-xs font-medium flex items-center gap-2.5 transition-colors ${selectedProject === p ? 'text-primary-900 dark:text-dark-text bg-primary-200/50 dark:bg-dark-border/50' : 'text-primary-500 dark:text-dark-muted hover:bg-primary-200/40 dark:hover:bg-dark-border/30'}`}
                                 >
                                     <Icons.Folder /> {p}
-                                    {selectedProject === p && <span className="ml-auto text-black dark:text-white"><Icons.Checked /></span>}
+                                    {selectedProject === p && <span className="ml-auto text-primary-900 dark:text-dark-text"><Icons.Checked /></span>}
                                 </button>
                             ))}
                           </div>
@@ -278,7 +218,7 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
             {/* Smart Parsed Attributes (Pills) Row */}
             {(parsedPreview.priority || parsedPreview.tags.length > 0 || parsedPreview.dueDate) && (
                 <div className="flex items-center gap-2 px-6 md:px-8 pb-2.5 pt-0 animate-in fade-in slide-in-from-top-1 duration-200 overflow-x-auto no-scrollbar">
-                    <div className="h-px w-4 bg-gray-200 dark:bg-zinc-800 mr-1 shrink-0"></div>
+                    <div className="h-px w-4 bg-primary-200 dark:bg-dark-border mr-1 shrink-0"></div>
                     
                     {parsedPreview.dueDate && (
                         <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-900/20 text-[10px] font-bold text-blue-600 dark:text-blue-300 border border-blue-100 dark:border-blue-900/30 whitespace-nowrap">
@@ -297,7 +237,7 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
                     )}
                     
                     {parsedPreview.tags.map(tag => (
-                        <span key={tag} className="flex items-center gap-1 px-1.5 py-0.5 rounded-[5px] bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-[10px] font-mono font-medium text-zinc-600 dark:text-zinc-400 whitespace-nowrap">
+                        <span key={tag} className="flex items-center gap-1 px-1.5 py-0.5 rounded-[5px] bg-primary-100 dark:bg-dark-border border border-primary-200 dark:border-dark-border text-[10px] font-mono font-medium text-primary-600 dark:text-dark-muted whitespace-nowrap">
                             <Icons.Tag />
                             {tag}
                         </span>

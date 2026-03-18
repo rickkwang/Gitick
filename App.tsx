@@ -10,7 +10,8 @@ import { Icons, PROJECTS as DEFAULT_PROJECTS } from './constants';
 import { useDesktopUpdater, type DesktopConfirmDialogRequest } from './hooks/useDesktopUpdater';
 import { playSuccessSound } from './utils/audio';
 import { createOnboardingTasks, DEFAULT_USER_PROFILE } from './utils/appDefaults';
-import { FOCUS_DEFAULT_SECONDS, FocusModeType, formatTimerLabel, getDefaultFocusSeconds } from './utils/focusTimer';
+import { formatTimerLabel } from './utils/focusTimer';
+import { useFocusTimer } from './hooks/useFocusTimer';
 import { sanitizeTaskList } from './utils/taskSanitizer';
 import { getFilterBreadcrumb, getFilteredTasks, getTaskCounts, groupDashboardTasks, searchTasks } from './utils/taskView';
 import {
@@ -115,6 +116,7 @@ const App: React.FC = () => {
   // Search / Command Palette State
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchSelectedIndex, setSearchSelectedIndex] = useState(0);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const showSearchRef = useRef(showSearch);
   const showSettingsRef = useRef(showSettings);
@@ -129,17 +131,7 @@ const App: React.FC = () => {
   const themeSwitchRafRef = useRef<number | null>(null);
   const [isStartupStatic, setIsStartupStatic] = useState(() => typeof window !== 'undefined');
   
-  // --- GLOBAL FOCUS TIMER STATE ---
-  const [focusEndTime, setFocusEndTime] = useState<number | null>(null);
-  const [focusTimeLeft, setFocusTimeLeft] = useState(FOCUS_DEFAULT_SECONDS);
-  const [isFocusActive, setIsFocusActive] = useState(false);
-  const [focusModeType, setFocusModeType] = useState<FocusModeType>('focus');
   const tasksRef = useRef(tasks);
-  const isFocusActiveRef = useRef(isFocusActive);
-
-  useEffect(() => {
-    isFocusActiveRef.current = isFocusActive;
-  }, [isFocusActive]);
 
   useEffect(() => {
     tasksRef.current = tasks;
@@ -161,105 +153,6 @@ const App: React.FC = () => {
     isSidebarOpenRef.current = isSidebarOpen;
   }, [isSidebarOpen]);
 
-
-  // Start Timer Logic
-  const switchTimerMode = useCallback((nextMode: FocusModeType, autoStart = false) => {
-    const nextDuration = getDefaultFocusSeconds(nextMode);
-    setFocusModeType(nextMode);
-    setFocusTimeLeft(nextDuration);
-    if (autoStart) {
-      setFocusEndTime(Date.now() + nextDuration * 1000);
-      setIsFocusActive(true);
-      return;
-    }
-
-    setFocusEndTime(null);
-    setIsFocusActive(false);
-  }, []);
-
-  const startTimer = () => {
-     if (isFocusActiveRef.current) return;
-     const startSeconds = Math.max(1, Math.floor(focusTimeLeft));
-     setFocusTimeLeft(startSeconds);
-     const now = Date.now();
-     const end = now + startSeconds * 1000;
-     setFocusEndTime(end);
-     setIsFocusActive(true);
-     if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'default') {
-       Notification.requestPermission();
-     }
-  };
-
-  const pauseTimer = () => {
-    setIsFocusActive(false);
-    setFocusEndTime(null);
-  };
-
-  const resetTimer = () => {
-    pauseTimer();
-    const defaultSeconds = getDefaultFocusSeconds(focusModeType);
-    setFocusTimeLeft(defaultSeconds);
-  };
-
-  // Timer Tick Effect (High Precision)
-  useEffect(() => {
-    let interval: number | null = null;
-
-    if (isFocusActive && focusEndTime) {
-      interval = window.setInterval(() => {
-        const now = Date.now();
-        const diff = Math.ceil((focusEndTime - now) / 1000);
-        
-        if (diff <= 0) {
-           const completedMode = focusModeType;
-           const nextMode = completedMode === 'focus' ? 'break' : 'focus';
-
-           document.title = 'Gitick - Done!';
-           const msg =
-             completedMode === 'focus'
-               ? 'Focus session finished. Time for a break.'
-               : 'Break finished. Back to focus.';
-           showToast(msg);
-           playSuccessSound();
-           
-           if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
-             new Notification('Gitick Timer', { body: msg, icon: '/favicon.ico' });
-           }
-           switchTimerMode(nextMode, true);
-        } else {
-           // Reduce global re-renders when user is not on focus view.
-           const shouldSyncThisTick =
-             filter === 'focus' || diff <= 60 || diff % 10 === 0;
-           if (shouldSyncThisTick) {
-             setFocusTimeLeft((prev) => (prev === diff ? prev : diff));
-           }
-           document.title = `${formatTimerLabel(diff)} - ${focusModeType === 'focus' ? 'Focus' : 'Break'}`;
-        }
-      }, 1000);
-    } else {
-      document.title = 'Gitick - Minimalist Tasks';
-    }
-
-    return () => { 
-      if (interval) clearInterval(interval); 
-    };
-  }, [isFocusActive, focusEndTime, focusModeType, switchTimerMode, filter]);
-
-  // Handle Focus Mode UI Updates (Wrapping the logic for the component)
-  const handleSetTimeLeft = (val: number | ((prev: number) => number)) => {
-      setFocusTimeLeft((prev) => {
-        const nextValue = typeof val === 'function' ? val(prev) : val;
-        const safeValue = Math.max(1, Math.floor(nextValue));
-        if (isFocusActiveRef.current) {
-          setFocusEndTime(Date.now() + safeValue * 1000);
-        }
-        return safeValue;
-      });
-  };
-
-  const handleFocusModeChange = (nextMode: FocusModeType) => {
-    switchTimerMode(nextMode, false);
-  };
 
   const toggleThemeMode = useCallback(() => {
     if (typeof window === 'undefined') {
@@ -365,6 +258,18 @@ const App: React.FC = () => {
   );
 
   const {
+    focusTimeLeft,
+    isFocusActive,
+    focusModeType,
+    startTimer,
+    pauseTimer,
+    resetTimer,
+    handleSetTimeLeft,
+    handleFocusModeChange,
+    resetFocusState,
+  } = useFocusTimer({ filter, showToast });
+
+  const {
     desktopAppVersion,
     desktopUpdateStatus,
     isCheckingDesktopUpdate,
@@ -401,10 +306,7 @@ const App: React.FC = () => {
     setIsSidebarCollapsed(true);
     resetDesktopUpdaterState();
     setDesktopFontSize(13);
-    setFocusEndTime(null);
-    setFocusTimeLeft(FOCUS_DEFAULT_SECONDS);
-    setIsFocusActive(false);
-    setFocusModeType('focus');
+    resetFocusState();
     const fallbackDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     setIsDarkMode(fallbackDark);
     showToast('All local data has been reset.');
@@ -585,15 +487,15 @@ const App: React.FC = () => {
 
   const renderEmptyState = () => (
     <div className="flex flex-col items-center justify-center pt-24 text-center select-none opacity-60">
-      <div className="w-20 h-20 rounded-3xl bg-white dark:bg-zinc-900 border border-gray-200/80 dark:border-zinc-800/80 flex items-center justify-center text-gray-300 dark:text-zinc-600 mb-6 shadow-sm">
+      <div className="w-20 h-20 rounded-xl bg-primary-50 dark:bg-dark-bg border border-primary-200/80 dark:border-dark-border/80 flex items-center justify-center text-primary-300 dark:text-dark-muted mb-6 shadow-sm">
         <div className="scale-150">
           {emptyState.icon}
         </div>
       </div>
-      <p className="text-base font-medium text-gray-900 dark:text-white">
+      <p className="text-base font-medium text-primary-900 dark:text-dark-text">
         {emptyState.title}
       </p>
-      <p className="text-xs font-mono text-gray-400 dark:text-zinc-500 mt-2">
+      <p className="text-xs font-mono text-primary-400 dark:text-dark-muted mt-2">
         {emptyState.sub}
       </p>
     </div>
@@ -635,7 +537,7 @@ const App: React.FC = () => {
      if (taskList.length === 0) return null;
      
      // Determine group color/style
-     let headerClass = "text-gray-900 dark:text-white";
+     let headerClass = "text-primary-900 dark:text-dark-text";
      if (groupName === 'Overdue') headerClass = "text-red-500";
      if (groupName === 'Today') headerClass = "text-blue-500";
 
@@ -646,7 +548,7 @@ const App: React.FC = () => {
               // This fixes the "floating header" look relative to the rounded cards
               <div className={`sticky top-0 bg-[var(--app-bg)] z-10 py-3 mb-2 flex items-center gap-3 transition-colors ${headerClass} px-5 md:px-6`}>
                   <span className="text-[11px] font-black uppercase tracking-widest opacity-90 transform translate-y-[1px]">{groupName}</span>
-                  <span className="text-[9px] font-bold font-mono opacity-60 bg-gray-200/50 dark:bg-zinc-800 px-2 py-0.5 rounded-full text-black dark:text-white min-w-[1.5rem] text-center">{taskList.length}</span>
+                  <span className="text-[9px] font-bold font-mono opacity-60 bg-primary-200/40 dark:bg-dark-border px-2 py-0.5 rounded-full text-primary-900 dark:text-dark-text min-w-[1.5rem] text-center">{taskList.length}</span>
               </div>
            )}
            <div className="space-y-2">
@@ -666,25 +568,25 @@ const App: React.FC = () => {
 
   return (
     <div
-      className={`[--app-radius:16px] flex flex-col h-dvh md:rounded-[var(--app-radius)] font-sans text-gray-900 dark:text-dark-text bg-[var(--app-bg)] overflow-hidden transition-colors duration-300 selection:bg-black selection:text-white dark:selection:bg-white dark:selection:text-black ${
+      className={`[--app-radius:16px] flex flex-col h-dvh md:rounded-[var(--app-radius)] font-sans text-primary-900 dark:text-dark-text bg-[var(--app-bg)] overflow-hidden transition-colors duration-300 selection:bg-primary-900 selection:text-white dark:selection:bg-primary-100 dark:selection:text-primary-900 ${
         isStartupStatic ? 'startup-static' : ''
       }`}
     > 
       {/* Mobile Header with Safe Area Padding */}
-      <header className="md:hidden bg-[var(--app-bg)] border-b border-gray-100 dark:border-zinc-800 shrink-0 z-50 pt-safe transition-colors duration-300">
+      <header className="md:hidden bg-[var(--app-bg)] border-b border-primary-200/80 dark:border-dark-border shrink-0 z-50 pt-safe transition-colors duration-300">
          <div className="h-14 flex items-center px-4 justify-between">
             <div className="flex items-center gap-3">
                <button
                  onClick={() => setIsSidebarOpen(true)}
                  aria-label="Open sidebar"
-                 className="text-black dark:text-white p-1"
+                 className="text-primary-900 dark:text-dark-text p-1"
                >
                  <Icons.Menu />
                </button>
                <span className="font-display font-bold tracking-tight brand-text">Gitick</span>
             </div>
             {/* Mobile context indicator */}
-            <div className="text-[10px] font-mono text-gray-400 dark:text-zinc-600 px-2 py-1 bg-gray-50 dark:bg-zinc-900 rounded-md">
+            <div className="text-[10px] font-mono text-primary-400 dark:text-dark-muted px-2 py-1 bg-primary-100 dark:bg-dark-bg rounded-md">
                {filter === 'next7days' ? 'Dashboard' : filter}
             </div>
          </div>
@@ -738,9 +640,9 @@ const App: React.FC = () => {
                     }`}
                     style={isDesktopMac ? ({ WebkitAppRegion: 'drag' } as React.CSSProperties) : undefined}
                   >
-                     <div className="flex items-center gap-2 text-sm font-mono text-gray-500 dark:text-zinc-500">
+                     <div className="flex items-center gap-2 text-sm font-mono text-primary-500 dark:text-dark-muted">
                         <Icons.Folder />
-                        <span className="truncate tracking-tight font-medium text-black dark:text-white opacity-70">
+                        <span className="truncate tracking-tight font-medium text-primary-900 dark:text-dark-text opacity-70">
                           {getFilterBreadcrumb(filter)}
                         </span>
                      </div>
@@ -749,7 +651,7 @@ const App: React.FC = () => {
                        style={isDesktopMac ? ({ WebkitAppRegion: 'no-drag' } as React.CSSProperties) : undefined}
                      >
                         {isFocusActive && (
-                            <div className="flex items-center gap-2 px-3 py-1 bg-black dark:bg-white rounded-full text-white dark:text-black shadow-lg shadow-black/10 animate-pulse">
+                            <div className="flex items-center gap-2 px-3 py-1 bg-[var(--accent)] rounded-full text-white shadow-lg shadow-[var(--accent)]/20 animate-pulse">
                                 <span className="text-[10px] font-bold uppercase tracking-wider">Focus</span>
                                 <span className="font-mono text-xs font-bold">{formatTimerLabel(focusTimeLeft)}</span>
                             </div>
@@ -759,12 +661,12 @@ const App: React.FC = () => {
                         <button 
                           onClick={() => { setShowSearch(true); setTimeout(() => searchInputRef.current?.focus(), 50); }}
                           aria-label="Open quick search"
-                          className="group flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-100/50 dark:bg-zinc-800/50 hover:bg-white dark:hover:bg-zinc-800 border border-transparent hover:border-gray-200 dark:hover:border-zinc-700 transition-all duration-200"
+                          className="group flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary-200/50 dark:bg-dark-border/50 hover:bg-primary-50 dark:hover:bg-dark-border border border-transparent hover:border-primary-200 dark:hover:border-dark-border transition-all duration-200"
                           title="Quick Search (Cmd+K)"
                         >
                            <Icons.Search />
-                           <span className="text-xs text-gray-400 dark:text-zinc-500 font-medium group-hover:text-black dark:group-hover:text-white transition-colors">Search</span>
-                           <span className="ml-1 text-[10px] text-gray-300 dark:text-zinc-600 font-mono border border-gray-200 dark:border-zinc-700 rounded px-1 group-hover:border-gray-300 dark:group-hover:border-zinc-500">⌘K</span>
+                           <span className="text-xs text-primary-400 dark:text-dark-muted font-medium group-hover:text-primary-900 dark:group-hover:text-dark-text transition-colors">Search</span>
+                           <span className="ml-1 text-[10px] text-primary-300 dark:text-dark-muted font-mono border border-primary-200 dark:border-dark-border rounded px-1 group-hover:border-primary-300 dark:group-hover:border-dark-border">⌘K</span>
                         </button>
                      </div>
                   </div>
@@ -776,17 +678,17 @@ const App: React.FC = () => {
                           {/* Heatmap Section */}
                           {filter === 'next7days' && (
                              <div className="mb-10">
-                                <div className="p-5 md:p-6 bg-white/96 dark:bg-[#21252b] rounded-[22px] shadow-sm border border-gray-200/80 dark:border-zinc-800/80">
+                                <div className="p-5 md:p-6 bg-primary-50 dark:bg-dark-surface rounded-xl shadow-sm border border-primary-200/80 dark:border-dark-border/80">
                                    <div className="flex items-center justify-between mb-4">
                                       <div className="flex items-center gap-2">
                                          <Icons.Flame />
-                                         <h3 className="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-widest">Contribution Graph</h3>
+                                         <h3 className="text-xs font-bold text-primary-900 dark:text-dark-text uppercase tracking-widest">Contribution Graph</h3>
                                       </div>
-                                      <div className="text-[10px] font-mono text-gray-400">
+                                      <div className="text-[10px] font-mono text-primary-400">
                                          Activity Log
                                       </div>
                                    </div>
-                                   <Suspense fallback={<div className="h-44 animate-pulse rounded-xl bg-gray-100 dark:bg-[#21252b]/70" />}>
+                                   <Suspense fallback={<div className="h-44 animate-pulse rounded-xl bg-primary-200/50 dark:bg-dark-surface/70" />}>
                                      <Heatmap tasks={tasks} />
                                    </Suspense>
                                 </div>
@@ -795,8 +697,8 @@ const App: React.FC = () => {
                           
                           {/* LIST RENDERING */}
                           {filter === 'completed' ? (
-                             <Suspense fallback={<div className="h-40 animate-pulse rounded-xl bg-gray-100 dark:bg-zinc-800/60" />}>
-                               <GitGraph tasks={filteredTasks} onDelete={deleteTask} />
+                             <Suspense fallback={<div className="h-40 animate-pulse rounded-xl bg-primary-200/50 dark:bg-dark-border/60" />}>
+                               <GitGraph tasks={filteredTasks} onDelete={deleteTask} userProfile={userProfile} />
                              </Suspense>
                           ) : (
                             <div className="pb-36">
@@ -839,7 +741,7 @@ const App: React.FC = () => {
                   {showTaskInput && (
                      <div className="absolute bottom-0 left-0 right-0 z-20 pointer-events-none">
                         {/* Gradient Mask to catch scrolling text - Taller and solid at bottom */}
-                        <div className="absolute bottom-0 left-0 right-0 h-56 bg-gray-50/92 dark:bg-[#282c34]/88" />
+                        <div className="absolute bottom-0 left-0 right-0 h-56 bg-[var(--app-bg)]/92 dark:bg-[var(--app-bg)]/88" />
 
                         {/* Input Container - Padded from bottom including Safe Area */}
                         <div className="relative z-10 w-full flex justify-center px-4 pt-10 pb-safe">
@@ -858,7 +760,7 @@ const App: React.FC = () => {
         {/* COL 3: Staging Area */}
         <aside 
           className={`
-             hidden lg:flex flex-col h-full bg-white/95 dark:bg-[#2b3038]/95 backdrop-blur-[2px] overflow-hidden border-l border-gray-200/70 dark:border-[#3a404c]
+             hidden lg:flex flex-col h-full bg-primary-50 dark:bg-dark-surface overflow-hidden border-l border-primary-200/70 dark:border-dark-border
              transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)] 
              ${isRightSidebarOpen && filter !== 'focus' ? 'w-96 translate-x-0 opacity-100' : 'w-0 translate-x-10 opacity-0'}
           `}
@@ -879,7 +781,7 @@ const App: React.FC = () => {
             ) : (
                <div className="h-full flex flex-col items-center justify-center text-center p-8 opacity-50">
                    <Icons.GitCommit />
-                   <p className="mt-4 text-xs font-mono text-gray-400">Select a task to view staging details</p>
+                   <p className="mt-4 text-xs font-mono text-primary-400">Select a task to view staging details</p>
                </div>
             )}
           </div>
@@ -908,74 +810,89 @@ const App: React.FC = () => {
          <div className="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh] px-4">
             {/* Backdrop with Blur */}
             <div 
-              className="absolute inset-0 bg-white/20 dark:bg-black/40 backdrop-blur-md transition-all duration-300 animate-in fade-in"
+              className="absolute inset-0 bg-primary-50/20 dark:bg-primary-900/40 transition-all duration-300 animate-in fade-in"
               onClick={() => setShowSearch(false)} 
             />
             
             {/* Search Box */}
-            <div className="relative w-full max-w-2xl bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[60vh] ring-1 ring-white/20 dark:ring-white/5 animate-in fade-in zoom-in-95 slide-in-from-bottom-2 duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]">
+            <div className="relative w-full max-w-2xl bg-primary-50 dark:bg-dark-bg rounded-lg shadow-lg overflow-hidden flex flex-col max-h-[60vh] animate-in fade-in zoom-in-95 slide-in-from-bottom-2 duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]">
                
                {/* Large Apple-style Input */}
-               <div className="flex items-center gap-4 p-5 border-b border-gray-200/50 dark:border-white/5">
-                  <span className="text-gray-400 dark:text-zinc-500 scale-125 ml-2">
+               <div className="flex items-center gap-4 p-5 border-b border-primary-200/50 dark:border-dark-border/50">
+                  <span className="text-primary-400 dark:text-dark-muted scale-125 ml-2">
                      <Icons.Search />
                   </span>
-                  <input 
+                  <input
                      ref={searchInputRef}
                      type="text"
                      placeholder="Type to search..."
                      value={searchQuery}
-                     onChange={(e) => setSearchQuery(e.target.value)}
-                     className="flex-1 bg-transparent text-2xl outline-none text-black dark:text-white placeholder:text-gray-300 dark:placeholder:text-zinc-600 font-medium tracking-tight h-10"
+                     onChange={(e) => { setSearchQuery(e.target.value); setSearchSelectedIndex(0); }}
+                     onKeyDown={(e) => {
+                       const visibleResults = searchResults.slice(0, 10);
+                       if (e.key === 'ArrowDown') {
+                         e.preventDefault();
+                         setSearchSelectedIndex(prev => Math.min(prev + 1, visibleResults.length - 1));
+                       } else if (e.key === 'ArrowUp') {
+                         e.preventDefault();
+                         setSearchSelectedIndex(prev => Math.max(prev - 1, 0));
+                       } else if (e.key === 'Enter' && visibleResults.length > 0) {
+                         e.preventDefault();
+                         const task = visibleResults[searchSelectedIndex];
+                         if (task) { setSelectedTask(task); setShowSearch(false); setSearchQuery(''); }
+                       }
+                     }}
+                     className="flex-1 bg-transparent text-2xl outline-none text-primary-900 dark:text-dark-text placeholder:text-primary-300 dark:placeholder:text-dark-muted font-medium tracking-tight h-10"
                      autoFocus
                   />
                   <button
                     onClick={() => setShowSearch(false)}
                     aria-label="Close search"
-                    className="p-2 bg-gray-100 dark:bg-zinc-800 rounded-lg text-xs font-bold text-gray-500 dark:text-zinc-400 hover:text-black dark:hover:text-white transition-colors"
+                    className="p-2 bg-primary-200/50 dark:bg-dark-border rounded-lg text-xs font-bold text-primary-500 dark:text-dark-muted hover:text-primary-900 dark:hover:text-dark-text transition-colors"
                   >
                      ESC
                   </button>
                </div>
 
                {/* Results Area */}
-               <div className="overflow-y-auto p-2 custom-scroll bg-white/50 dark:bg-zinc-900/50 min-h-[100px]">
+               <div className="overflow-y-auto p-2 custom-scroll bg-primary-50/80 dark:bg-dark-bg/50 min-h-[100px]">
                   {searchQuery ? (
                       searchResults.length > 0 ? (
                         <div className="space-y-1 p-2">
-                            {searchResults.slice(0, 10).map(task => (
-                              <button 
+                            {searchResults.slice(0, 10).map((task, index) => (
+                              <button
                                   key={task.id}
                                   onClick={() => { setSelectedTask(task); setShowSearch(false); setSearchQuery(''); }}
-                                  className="w-full flex items-center justify-between p-3.5 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 group transition-all text-left"
+                                  onMouseEnter={() => setSearchSelectedIndex(index)}
+                                  className={`w-full flex items-center justify-between p-3.5 rounded-xl group transition-all text-left ${index === searchSelectedIndex ? 'bg-primary-900/5 dark:bg-primary-100/10' : 'hover:bg-primary-900/5 dark:hover:bg-primary-100/10'}`}
                               >
                                   <div className="flex items-center gap-3">
-                                    <span className={`text-gray-400 dark:text-zinc-600 ${task.completed ? 'text-green-500' : ''}`}>
+                                    <span className={`text-primary-400 dark:text-dark-muted ${task.completed ? 'text-green-500' : ''}`}>
                                         {task.completed ? <Icons.Checked /> : <Icons.Circle />}
                                     </span>
                                     <div>
-                                        <div className="text-base font-medium text-gray-900 dark:text-gray-200 group-hover:text-black dark:group-hover:text-white">
+                                        <div className={`text-base font-medium transition-colors ${index === searchSelectedIndex ? 'text-primary-900 dark:text-dark-text' : 'text-primary-900 dark:text-dark-text group-hover:text-primary-900 dark:group-hover:text-dark-text'}`}>
                                           {task.title}
                                         </div>
-                                        <div className="text-xs text-gray-400 mt-0.5 flex gap-2">
+                                        <div className="text-xs text-primary-400 mt-0.5 flex gap-2">
                                           <span>{task.list || 'Inbox'}</span>
                                           {task.tags.map(t => <span key={t}>#{t}</span>)}
                                         </div>
                                     </div>
                                   </div>
-                                  <span className="text-[10px] font-mono text-gray-400 dark:text-zinc-600 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    Enter to open
+                                  <span className={`text-[10px] font-mono text-primary-400 dark:text-dark-muted transition-opacity ${index === searchSelectedIndex ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+                                    Enter
                                   </span>
                               </button>
                             ))}
                         </div>
                       ) : (
-                        <div className="flex flex-col items-center justify-center py-10 text-gray-400 dark:text-zinc-600">
+                        <div className="flex flex-col items-center justify-center py-10 text-primary-400 dark:text-dark-muted">
                            <span className="text-sm">No results found for "{searchQuery}"</span>
                         </div>
                       )
                   ) : (
-                      <div className="p-8 text-center text-gray-400 dark:text-zinc-600">
+                      <div className="p-8 text-center text-primary-400 dark:text-dark-muted">
                           <div className="flex flex-col items-center gap-2 opacity-50">
                              <Icons.Command />
                              <span className="text-sm font-medium">Search your tasks, tags, and projects</span>
@@ -986,9 +903,13 @@ const App: React.FC = () => {
                
                {/* Footer hints */}
                {searchQuery && (
-                  <div className="px-4 py-2 bg-gray-50/80 dark:bg-black/20 border-t border-gray-100/50 dark:border-white/5 flex justify-end">
-                          <span className="text-[10px] text-gray-400 dark:text-zinc-600 font-mono">
-                          {searchResults.length} results found
+                  <div className="px-4 py-2 bg-primary-100/80 dark:bg-primary-900/20 border-t border-primary-200/50 dark:border-dark-border/50 flex items-center justify-between">
+                          <div className="flex items-center gap-3 text-[10px] text-primary-400 dark:text-dark-muted font-mono">
+                            <span><kbd className="px-1 py-0.5 rounded border border-primary-200 dark:border-dark-border">↑↓</kbd> navigate</span>
+                            <span><kbd className="px-1 py-0.5 rounded border border-primary-200 dark:border-dark-border">↵</kbd> open</span>
+                          </div>
+                          <span className="text-[10px] text-primary-400 dark:text-dark-muted font-mono">
+                          {searchResults.length} results
                           </span>
                   </div>
                )}
@@ -998,7 +919,7 @@ const App: React.FC = () => {
 
       {/* Settings Modal */}
       {showSettings && (
-        <Suspense fallback={<div className="fixed inset-0 z-[90] bg-black/20 backdrop-blur-sm" />}>
+        <Suspense fallback={<div className="fixed inset-0 z-[90] bg-primary-900/20" />}>
           <SettingsModal
             onClose={() => setShowSettings(false)}
             isDarkMode={isDarkMode}

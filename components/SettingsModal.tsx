@@ -143,15 +143,15 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-2 md:p-6">
-      <div className="absolute inset-0 bg-black/20 dark:bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/20 dark:bg-black/60" onClick={onClose} />
       
-      <div className="relative w-full max-w-4xl bg-[#ffffff] dark:bg-[#282c34] rounded-3xl shadow-2xl border border-gray-100 dark:border-zinc-700/70 overflow-hidden flex flex-col md:flex-row h-[96dvh] md:h-[min(780px,88vh)] animate-in fade-in zoom-in-95 duration-200">
+      <div className="relative w-full max-w-4xl bg-primary-50 dark:bg-dark-bg rounded-xl shadow-lg border border-primary-200/80 dark:border-dark-border overflow-hidden flex flex-col md:flex-row h-[96dvh] md:h-[min(780px,88vh)] animate-in fade-in zoom-in-95 duration-200">
         
         {/* Sidebar Nav - Horizontal on Mobile */}
-        <div className="w-full md:w-72 bg-[#f1f5f9] dark:bg-[#21252b] border-b md:border-b-0 md:border-r border-gray-100 dark:border-zinc-700/70 px-4 py-4 md:px-6 md:py-7 flex flex-col shrink-0 pt-safe md:pt-7">
+        <div className="w-full md:w-72 bg-primary-100 dark:bg-dark-surface border-b md:border-b-0 md:border-r border-primary-200/80 dark:border-dark-border px-4 py-4 md:px-6 md:py-7 flex flex-col shrink-0 pt-safe md:pt-7">
           <div className="flex items-center justify-between mb-4 md:mb-7">
-             <h2 className="text-lg font-bold text-black dark:text-white">Settings</h2>
-             <button onClick={onClose} aria-label="Close settings" className="md:hidden text-gray-500 p-1">
+             <h2 className="text-lg font-bold text-primary-900 dark:text-dark-text">Settings</h2>
+             <button onClick={onClose} aria-label="Close settings" className="md:hidden text-primary-500 p-1">
                <Icons.X />
              </button>
           </div>
@@ -162,8 +162,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 onClick={() => setActiveTab(tab.id)}
                 className={`whitespace-nowrap flex items-center justify-center md:justify-start gap-2 md:gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
                   activeTab === tab.id
-                    ? 'bg-white dark:bg-zinc-800 text-black dark:text-white shadow-sm border border-transparent'
-                    : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white hover:bg-gray-100 dark:hover:bg-zinc-800/50 border border-transparent'
+                    ? 'bg-primary-50 dark:bg-dark-border text-primary-900 dark:text-dark-text shadow-sm border border-transparent'
+                    : 'text-primary-500 dark:text-dark-muted hover:text-primary-900 dark:hover:text-dark-text hover:bg-primary-200/50 dark:hover:bg-dark-border/50 border border-transparent'
                 }`}
               >
                 {tab.icon}
@@ -173,19 +173,19 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           </nav>
           
           <div className="mt-4 md:mt-auto hidden md:block">
-             <div className="rounded-xl border border-gray-200 dark:border-zinc-700/70 bg-white/80 dark:bg-[#282c34]/70 px-3 py-2 text-[10px] text-gray-500 dark:text-zinc-400 font-mono">
+             <div className="rounded-xl border border-primary-200 dark:border-dark-border bg-primary-50 dark:bg-dark-bg/70 px-3 py-2 text-[10px] text-primary-500 dark:text-dark-muted font-mono">
                 App Version: {desktopAppVersion || 'Web'}
              </div>
           </div>
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 flex flex-col min-h-0 bg-[#ffffff] dark:bg-[#282c34] pb-safe">
-           <div className="hidden md:flex items-center justify-between px-10 py-7 border-b border-gray-100 dark:border-zinc-800 shrink-0">
-              <h3 className="font-semibold text-xl text-black dark:text-white">
+        <div className="flex-1 flex flex-col min-h-0 bg-primary-50 dark:bg-dark-bg pb-safe">
+           <div className="hidden md:flex items-center justify-between px-10 py-7 border-b border-primary-200/80 dark:border-dark-border shrink-0">
+              <h3 className="font-semibold text-xl text-primary-900 dark:text-dark-text">
                 {tabs.find(t => t.id === activeTab)?.label}
               </h3>
-              <button onClick={onClose} aria-label="Close settings" className="text-gray-400 hover:text-black dark:hover:text-white transition-colors">
+              <button onClick={onClose} aria-label="Close settings" className="text-primary-400 hover:text-primary-900 dark:hover:text-dark-text transition-colors">
                 <Icons.X />
               </button>
            </div>
@@ -195,7 +195,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
              {/* --- PROFILE TAB --- */}
              {activeTab === 'profile' && (
                <div className="space-y-7">
-                 <div className="rounded-2xl border border-gray-200 dark:border-zinc-700/70 bg-white/85 dark:bg-[#21252b]/70 p-5 md:p-6">
+                 <div className="rounded-lg border border-primary-200 dark:border-dark-border bg-primary-50 dark:bg-dark-surface p-5 md:p-6">
                    <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
                    <button
                      type="button"
@@ -216,8 +216,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       <span className="pointer-events-none absolute inset-0 bg-black/0 group-hover:bg-black/10 group-focus-visible:bg-black/10 transition-colors" />
                    </button>
                    <div className="space-y-1 pt-1 text-center md:text-left flex-1 min-w-0">
-                     <p className="font-medium text-black dark:text-white">Profile Photo</p>
-                     <p className="text-xs text-gray-400 dark:text-zinc-500">Click your avatar to upload or replace image. You can also keep initials with a background color.</p>
+                     <p className="font-medium text-primary-900 dark:text-dark-text">Profile Photo</p>
+                     <p className="text-xs text-primary-400 dark:text-dark-muted">Click your avatar to upload or replace image. You can also keep initials with a background color.</p>
                      <div className="mt-3 space-y-3">
                         <input
                           ref={avatarInputRef}
@@ -230,7 +230,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                           {localProfile.avatarImage && (
                             <button
                               onClick={handleRemoveAvatar}
-                              className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-300 text-gray-600 hover:text-red-500 hover:border-red-300 dark:border-zinc-700 dark:text-zinc-300 dark:hover:text-red-400 dark:hover:border-red-900/50 transition-colors"
+                              className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-primary-300 text-primary-600 hover:text-red-500 hover:border-red-300 dark:border-dark-border dark:text-dark-text dark:hover:text-red-400 dark:hover:border-red-900/50 transition-colors"
                             >
                               Remove photo
                             </button>
@@ -244,7 +244,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                                 onUpdateProfile(newProfile);
                               }}
                               aria-label={`Set avatar color ${color.replace('bg-', '')}`}
-                              className={`w-7 h-7 rounded-full ${color} transition-transform hover:scale-105 ${localProfile.avatarColor === color ? 'ring-2 ring-offset-2 ring-gray-400 dark:ring-zinc-500' : ''}`}
+                              className={`w-7 h-7 rounded-full ${color} transition-transform hover:scale-105 ${localProfile.avatarColor === color ? 'ring-2 ring-offset-2 ring-primary-400 dark:ring-dark-muted' : ''}`}
                             />
                           ))}
                         </div>
@@ -256,36 +256,36 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                  </div>
                  </div>
 
-                 <div className="rounded-2xl border border-gray-200 dark:border-zinc-700/70 bg-white dark:bg-[#21252b]/65 p-5 md:p-6 space-y-4">
+                 <div className="rounded-lg border border-primary-200 dark:border-dark-border bg-primary-50 dark:bg-dark-surface p-5 md:p-6 space-y-4">
                     <div className="space-y-1">
-                       <label className="text-xs font-bold text-gray-500 dark:text-zinc-500 uppercase tracking-wider">Full Name</label>
+                       <label className="text-xs font-bold text-primary-500 dark:text-dark-muted uppercase tracking-wider">Full Name</label>
                        <input 
                          type="text" 
                          value={localProfile.name}
                          onChange={e => setLocalProfile({...localProfile, name: e.target.value})}
                          onBlur={handleProfileSave}
-                         className="w-full bg-gray-50 dark:bg-zinc-800/50 border border-gray-200 dark:border-zinc-700 rounded-xl px-4 py-3 text-sm text-black dark:text-white outline-none focus:border-black dark:focus:border-white transition-colors"
+                         className="w-full bg-primary-100 dark:bg-dark-border/50 border border-primary-200 dark:border-dark-border rounded-xl px-4 py-3 text-sm text-primary-900 dark:text-dark-text outline-none focus:border-primary-900 dark:focus:border-dark-text transition-colors"
                        />
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                       <div className="space-y-1">
-                        <label className="text-xs font-bold text-gray-500 dark:text-zinc-500 uppercase tracking-wider">Title / Role</label>
+                        <label className="text-xs font-bold text-primary-500 dark:text-dark-muted uppercase tracking-wider">Title / Role</label>
                         <input 
                           type="text" 
                           value={localProfile.jobTitle}
                           onChange={e => setLocalProfile({...localProfile, jobTitle: e.target.value})}
                           onBlur={handleProfileSave}
-                          className="w-full bg-gray-50 dark:bg-zinc-800/50 border border-gray-200 dark:border-zinc-700 rounded-xl px-4 py-3 text-sm text-black dark:text-white outline-none focus:border-black dark:focus:border-white transition-colors"
+                          className="w-full bg-primary-100 dark:bg-dark-border/50 border border-primary-200 dark:border-dark-border rounded-xl px-4 py-3 text-sm text-primary-900 dark:text-dark-text outline-none focus:border-primary-900 dark:focus:border-dark-text transition-colors"
                         />
                       </div>
                       <div className="space-y-1">
-                        <label className="text-xs font-bold text-gray-500 dark:text-zinc-500 uppercase tracking-wider">Email</label>
-                        <input 
-                          type="email" 
+                        <label className="text-xs font-bold text-primary-500 dark:text-dark-muted uppercase tracking-wider">Email</label>
+                        <input
+                          type="email"
                           value={localProfile.email}
                           onChange={e => setLocalProfile({...localProfile, email: e.target.value})}
                           onBlur={handleProfileSave}
-                          className="w-full bg-gray-50 dark:bg-zinc-800/50 border border-gray-200 dark:border-zinc-700 rounded-xl px-4 py-3 text-sm text-black dark:text-white outline-none focus:border-black dark:focus:border-white transition-colors"
+                          className="w-full bg-primary-100 dark:bg-dark-border/50 border border-primary-200 dark:border-dark-border rounded-xl px-4 py-3 text-sm text-primary-900 dark:text-dark-text outline-none focus:border-primary-900 dark:focus:border-dark-text transition-colors"
                         />
                       </div>
                     </div>
@@ -296,16 +296,16 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
              {/* --- GENERAL / APPEARANCE TAB --- */}
              {activeTab === 'general' && (
                <div className="space-y-7">
-                 <div className="rounded-2xl border border-gray-200 dark:border-zinc-700/70 bg-white dark:bg-[#21252b]/65 p-5 md:p-6 space-y-5">
-                    <h4 className="text-sm font-medium text-gray-900 dark:text-white border-b border-gray-100 dark:border-zinc-800 pb-3">Theme</h4>
-                    <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-[#282c34]/70 rounded-2xl border border-gray-100 dark:border-zinc-700/70">
+                 <div className="rounded-lg border border-primary-200 dark:border-dark-border bg-primary-50 dark:bg-dark-surface p-5 md:p-6 space-y-5">
+                    <h4 className="text-sm font-medium text-primary-900 dark:text-dark-text border-b border-primary-200/80 dark:border-dark-border pb-3">Theme</h4>
+                    <div className="flex items-center justify-between p-4 bg-primary-100 dark:bg-dark-bg/70 rounded-lg border border-primary-200/80 dark:border-dark-border">
                       <div className="flex items-center gap-3">
-                        <span className="p-2 bg-white dark:bg-zinc-800 rounded-lg text-black dark:text-white shadow-sm">
+                        <span className="p-2 bg-primary-50 dark:bg-dark-border rounded-lg text-primary-900 dark:text-dark-text shadow-sm">
                            {isDarkMode ? <Icons.Moon /> : <Icons.Sun />}
                         </span>
                         <div>
-                          <p className="font-medium text-sm text-gray-900 dark:text-gray-200">Dark Mode</p>
-                          <p className="text-xs text-gray-500 dark:text-zinc-500">Switch between light and dark themes</p>
+                          <p className="font-medium text-sm text-primary-900 dark:text-dark-text">Dark Mode</p>
+                          <p className="text-xs text-primary-500 dark:text-dark-muted">Switch between light and dark themes</p>
                         </div>
                       </div>
                       <button 
@@ -317,12 +317,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     </div>
                  </div>
 
-                 <div className="rounded-2xl border border-gray-200 dark:border-zinc-700/70 bg-white dark:bg-[#21252b]/65 p-5 md:p-6 space-y-4">
-                    <h4 className="text-sm font-medium text-gray-900 dark:text-white border-b border-gray-100 dark:border-zinc-800 pb-3">Text Size (Desktop)</h4>
-                    <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-[#282c34]/70 rounded-2xl border border-gray-100 dark:border-zinc-700/70">
+                 <div className="rounded-lg border border-primary-200 dark:border-dark-border bg-primary-50 dark:bg-dark-surface p-5 md:p-6 space-y-4">
+                    <h4 className="text-sm font-medium text-primary-900 dark:text-dark-text border-b border-primary-200/80 dark:border-dark-border pb-3">Text Size (Desktop)</h4>
+                    <div className="flex items-center justify-between p-4 bg-primary-100 dark:bg-dark-bg/70 rounded-lg border border-primary-200/80 dark:border-dark-border">
                       <div>
-                        <p className="font-medium text-sm text-gray-900 dark:text-gray-200">Current: {desktopFontSize}px</p>
-                        <p className="text-xs text-gray-500 dark:text-zinc-500">Affects desktop layout only</p>
+                        <p className="font-medium text-sm text-primary-900 dark:text-dark-text">Current: {desktopFontSize}px</p>
+                        <p className="text-xs text-primary-500 dark:text-dark-muted">Affects desktop layout only</p>
                       </div>
                       <div className="flex items-center gap-2">
                         {[12, 13, 14, 15].map((size) => (
@@ -331,8 +331,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                             onClick={() => onChangeDesktopFontSize(size)}
                             className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
                               desktopFontSize === size
-                                ? 'bg-black text-white dark:bg-white dark:text-black'
-                                : 'bg-white text-gray-600 border border-gray-200 hover:border-black dark:bg-zinc-800 dark:text-zinc-300 dark:border-zinc-700 dark:hover:border-white'
+                                ? 'bg-primary-900 text-white dark:bg-primary-200 dark:text-primary-900'
+                                : 'bg-primary-50 text-primary-600 border border-primary-200 hover:border-primary-900 dark:bg-dark-border dark:text-dark-text dark:border-dark-border dark:hover:border-dark-text'
                             }`}
                           >
                             {size}
@@ -347,7 +347,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
              {/* --- DATA TAB --- */}
              {activeTab === 'data' && (
                <div className="space-y-7">
-                 <div className="p-4 md:p-5 bg-blue-50 dark:bg-blue-900/10 rounded-2xl border border-blue-100 dark:border-blue-900/30">
+                 <div className="p-4 md:p-5 bg-blue-50 dark:bg-blue-900/10 rounded-lg border border-blue-100 dark:border-blue-900/30">
                     <div className="flex gap-3">
                        <Icons.Briefcase />
                        <div className="space-y-1">
@@ -360,13 +360,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <button 
                       onClick={handleExport}
-                      className="flex flex-col items-center justify-center gap-2 p-6 rounded-2xl border border-gray-200 dark:border-zinc-700 hover:border-black dark:hover:border-white hover:bg-gray-50 dark:hover:bg-zinc-800 transition-all text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white"
+                      className="flex flex-col items-center justify-center gap-2 p-6 rounded-lg border border-primary-200 dark:border-dark-border hover:border-primary-900 dark:hover:border-dark-text hover:bg-primary-100 dark:hover:bg-dark-border transition-all text-sm font-medium text-primary-600 dark:text-dark-text hover:text-primary-900 dark:hover:text-dark-text"
                     >
                       <Icons.Download />
                       <span>Export JSON</span>
                     </button>
                     
-                    <label className="cursor-pointer flex flex-col items-center justify-center gap-2 p-6 rounded-2xl border border-gray-200 dark:border-zinc-700 hover:border-black dark:hover:border-white hover:bg-gray-50 dark:hover:bg-zinc-800 transition-all text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white">
+                    <label className="cursor-pointer flex flex-col items-center justify-center gap-2 p-6 rounded-lg border border-primary-200 dark:border-dark-border hover:border-primary-900 dark:hover:border-dark-text hover:bg-primary-100 dark:hover:bg-dark-border transition-all text-sm font-medium text-primary-600 dark:text-dark-text hover:text-primary-900 dark:hover:text-dark-text">
                       <Icons.Upload />
                       <span>Import JSON</span>
                       <input type="file" accept=".json" onChange={handleImport} className="hidden" />
@@ -377,7 +377,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                    <p className="text-xs text-red-500 font-bold">{importError}</p>
                  )}
 
-                 <div className="pt-6 border-t border-gray-100 dark:border-zinc-800">
+                 <div className="pt-6 border-t border-primary-200/80 dark:border-dark-border">
                     <h4 className="text-sm font-bold text-red-500 mb-2">Danger Zone</h4>
                     <button 
                       onClick={() => setShowClearConfirm(true)}
@@ -393,51 +393,51 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
              {/* --- ABOUT TAB --- */}
              {activeTab === 'about' && (
                <div className="space-y-7">
-                 <div className="flex flex-col items-center text-center space-y-3 pb-6 border-b border-gray-100 dark:border-zinc-800">
-                    <div className="p-4 bg-black dark:bg-white rounded-2xl text-white dark:text-black mb-2">
+                 <div className="flex flex-col items-center text-center space-y-3 pb-6 border-b border-primary-200/80 dark:border-dark-border">
+                    <div className="p-4 bg-primary-900 dark:bg-primary-200 rounded-lg text-white dark:text-primary-900 mb-2">
                        <Icons.GitickLogo />
                     </div>
-                    <h2 className="text-xl font-bold text-black dark:text-white">Gitick</h2>
-                    <p className="text-sm text-gray-500 dark:text-zinc-400 max-w-sm">
+                    <h2 className="text-xl font-bold text-primary-900 dark:text-dark-text">Gitick</h2>
+                    <p className="text-sm text-primary-500 dark:text-dark-muted max-w-sm">
                        A minimalist, privacy-first task manager inspired by developer workflows. No tracking, no servers, just productivity.
                     </p>
                  </div>
 
                 <div className="space-y-5">
-                   <h4 className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-zinc-600">Desktop Updates</h4>
+                   <h4 className="text-xs font-bold uppercase tracking-wider text-primary-400 dark:text-dark-muted">Desktop Updates</h4>
 
-                    <div className="rounded-2xl border border-gray-200 dark:border-zinc-700 p-5 bg-white dark:bg-zinc-800/40 space-y-4">
+                    <div className="rounded-lg border border-primary-200 dark:border-dark-border p-5 bg-primary-50 dark:bg-dark-border/40 space-y-4">
                       {canCheckDesktopUpdate && (
                         <div className="space-y-3">
                           <div className="flex items-center justify-between">
-                            <p className="text-xs uppercase tracking-wider text-gray-400 dark:text-zinc-500">Desktop Version</p>
-                            <span className="text-xs font-mono text-black dark:text-white">{desktopAppVersion || 'Unknown'}</span>
+                            <p className="text-xs uppercase tracking-wider text-primary-400 dark:text-dark-muted">Desktop Version</p>
+                            <span className="text-xs font-mono text-primary-900 dark:text-dark-text">{desktopAppVersion || 'Unknown'}</span>
                           </div>
                           <button
                             onClick={() => { void onCheckDesktopUpdate(); }}
                             disabled={isCheckingDesktopUpdate}
                             className={`w-full rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors ${
                               isCheckingDesktopUpdate
-                                ? 'bg-gray-200 text-gray-500 dark:bg-zinc-700 dark:text-zinc-400 cursor-not-allowed'
-                                : 'bg-black text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200'
+                                ? 'bg-primary-200 text-primary-500 dark:bg-dark-border dark:text-dark-muted cursor-not-allowed'
+                                : 'bg-[var(--accent)] text-white hover:bg-[var(--accent-strong)] dark:bg-[var(--accent)] dark:text-white dark:hover:bg-[var(--accent-strong)]'
                             }`}
                           >
                             {isCheckingDesktopUpdate ? 'Checking...' : 'Check for Updates'}
                           </button>
                           {desktopUpdateStatus && (
-                            <p className="text-xs text-gray-500 dark:text-zinc-400">{desktopUpdateStatus}</p>
+                            <p className="text-xs text-primary-500 dark:text-dark-muted">{desktopUpdateStatus}</p>
                           )}
                         </div>
                       )}
                       {!canCheckDesktopUpdate && (
-                        <p className="text-xs text-gray-500 dark:text-zinc-400">
+                        <p className="text-xs text-primary-500 dark:text-dark-muted">
                           Update checks are available in the desktop app runtime.
                         </p>
                       )}
                     </div>
                  </div>
 
-                 <div className="p-5 rounded-2xl bg-green-50 dark:bg-green-900/10 border border-green-100 dark:border-green-900/30">
+                 <div className="p-5 rounded-lg bg-green-50 dark:bg-green-900/10 border border-green-100 dark:border-green-900/30">
                     <p className="text-xs text-green-700 dark:text-green-400 font-medium">
                        🔒 <span className="font-bold">Local First:</span> Your data is stored locally on your current device. We don't see your tasks. Export backup before switching devices.
                     </p>

@@ -74,12 +74,12 @@ export const FocusMode: React.FC<FocusModeProps> = ({
           {/* SVG Ring */}
           <svg className="w-full h-full transform -rotate-90 drop-shadow-sm">
              {/* Background Circle */}
-             <circle 
-               cx="50%" cy="50%" r="48%" 
-               fill="none" 
-               stroke="currentColor" 
-               className="text-gray-100 dark:text-zinc-800/50 transition-colors duration-500" 
-               strokeWidth="2" 
+             <circle
+               cx="50%" cy="50%" r="48%"
+               fill="none"
+               stroke="currentColor"
+               className="text-primary-200 dark:text-dark-border transition-colors duration-500"
+               strokeWidth="3"
              />
              {/* Progress Circle */}
              <circle
@@ -89,16 +89,16 @@ export const FocusMode: React.FC<FocusModeProps> = ({
                strokeDasharray="301%"
                strokeDashoffset={`${301 - (301 * (100 - progress)) / 100}%`} 
                strokeLinecap="round"
-               className={`transition-all duration-1000 ease-in-out ${mode === 'focus' ? 'text-black dark:text-white' : 'text-gray-400 dark:text-zinc-500'}`}
+               className={`transition-all duration-1000 ease-in-out ${mode === 'focus' ? 'text-primary-900 dark:text-dark-text' : 'text-primary-400 dark:text-dark-muted'}`}
              />
           </svg>
 
           {/* Centered Time Display (No buttons inside to prevent overlap) */}
           <div className="absolute flex flex-col items-center justify-center w-full z-10">
-            <span className="text-[4rem] md:text-[5rem] leading-none font-light text-black dark:text-white tabular-nums tracking-tighter select-none font-sans">
+            <span className="text-[4rem] md:text-[5rem] leading-none font-light text-primary-900 dark:text-dark-text tabular-nums tracking-tighter select-none font-sans">
                 {formatTime(timeLeft)}
             </span>
-            <span className="text-xs font-bold text-gray-400 dark:text-zinc-600 uppercase tracking-[0.2em] mt-4 animate-in fade-in slide-in-from-bottom-2 duration-700">
+            <span className="text-xs font-bold text-primary-400 dark:text-dark-muted uppercase tracking-[0.2em] mt-4 animate-in fade-in slide-in-from-bottom-2 duration-700">
               {isActive ? (mode === 'focus' ? 'Focusing' : 'Break Time') : 'Ready'}
             </span>
           </div>
@@ -114,10 +114,10 @@ export const FocusMode: React.FC<FocusModeProps> = ({
               onClick={onStart}
               disabled={isActive}
               className={`
-                h-12 rounded-2xl text-xs md:text-sm font-semibold uppercase tracking-wide border transition-all duration-200
+                h-12 rounded-lg text-xs md:text-sm font-semibold uppercase tracking-wide border transition-all duration-200
                 ${isActive
-                  ? 'bg-gray-100 dark:bg-zinc-900 text-gray-300 dark:text-zinc-700 border-gray-200 dark:border-zinc-800 cursor-not-allowed'
-                  : 'bg-black dark:bg-white text-white dark:text-black border-transparent hover:shadow-lg hover:shadow-black/15 dark:hover:shadow-white/10'}
+                  ? 'bg-primary-200/50 dark:bg-dark-bg text-primary-300 dark:text-dark-muted border-primary-200 dark:border-dark-border cursor-not-allowed'
+                  : 'bg-[var(--accent)] text-white border-transparent hover:shadow-lg hover:shadow-black/15'}
               `}
             >
               {startLabel}
@@ -127,10 +127,10 @@ export const FocusMode: React.FC<FocusModeProps> = ({
               onClick={onPause}
               disabled={!isActive}
               className={`
-                h-12 rounded-2xl text-xs md:text-sm font-semibold uppercase tracking-wide border transition-colors duration-200
+                h-12 rounded-lg text-xs md:text-sm font-semibold uppercase tracking-wide border transition-colors duration-200
                 ${isActive
-                  ? 'bg-white dark:bg-zinc-900 text-black dark:text-white border-gray-300 dark:border-zinc-700 hover:bg-gray-50 dark:hover:bg-zinc-800'
-                  : 'bg-gray-100 dark:bg-zinc-900 text-gray-300 dark:text-zinc-700 border-gray-200 dark:border-zinc-800 cursor-not-allowed'}
+                  ? 'bg-primary-50 dark:bg-dark-bg text-primary-900 dark:text-dark-text border-primary-300 dark:border-dark-border hover:bg-primary-100 dark:hover:bg-dark-border'
+                  : 'bg-primary-200/50 dark:bg-dark-bg text-primary-300 dark:text-dark-muted border-primary-200 dark:border-dark-border cursor-not-allowed'}
               `}
             >
               Stop
@@ -140,10 +140,10 @@ export const FocusMode: React.FC<FocusModeProps> = ({
               onClick={resetTimer}
               disabled={!canReset}
               className={`
-                h-12 rounded-2xl text-xs md:text-sm font-semibold uppercase tracking-wide border transition-colors duration-200 flex items-center justify-center gap-1.5
+                h-12 rounded-lg text-xs md:text-sm font-semibold uppercase tracking-wide border transition-colors duration-200 flex items-center justify-center gap-1.5
                 ${canReset
-                  ? 'bg-white dark:bg-zinc-900 text-gray-600 dark:text-zinc-300 border-gray-300 dark:border-zinc-700 hover:text-red-500 hover:border-red-300 dark:hover:text-red-400 dark:hover:border-red-800'
-                  : 'bg-gray-100 dark:bg-zinc-900 text-gray-300 dark:text-zinc-700 border-gray-200 dark:border-zinc-800 cursor-not-allowed'}
+                  ? 'bg-primary-50 dark:bg-dark-bg text-primary-600 dark:text-dark-text border-primary-300 dark:border-dark-border hover:text-red-500 hover:border-red-300 dark:hover:text-red-400 dark:hover:border-red-800'
+                  : 'bg-primary-200/50 dark:bg-dark-bg text-primary-300 dark:text-dark-muted border-primary-200 dark:border-dark-border cursor-not-allowed'}
               `}
             >
               <Icons.Refresh />
@@ -155,15 +155,15 @@ export const FocusMode: React.FC<FocusModeProps> = ({
           <div className={`flex flex-col items-center gap-6 transition-all duration-500 ${isActive ? 'opacity-0 translate-y-4 pointer-events-none h-0 overflow-hidden' : 'opacity-100 translate-y-0 h-auto'}`}>
              
              {/* Presets Row with Flanking +/- */}
-             <div className="flex items-center gap-2 md:gap-3 p-1.5 bg-gray-50 dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800">
+             <div className="flex items-center gap-2 md:gap-3 p-1.5 bg-primary-100 dark:bg-dark-bg rounded-lg border border-primary-200/80 dark:border-dark-border">
                 <button 
                    onClick={() => adjustTime(-5)}
-                   className="w-10 h-10 flex items-center justify-center rounded-xl text-gray-400 hover:text-black dark:hover:text-white hover:bg-white dark:hover:bg-zinc-800 transition-colors"
+                   className="w-10 h-10 flex items-center justify-center rounded-xl text-primary-400 hover:text-primary-900 dark:hover:text-dark-text hover:bg-primary-50 dark:hover:bg-dark-border transition-colors"
                 >
                    <Icons.Minus />
                 </button>
 
-                <div className="h-4 w-px bg-gray-200 dark:bg-zinc-800 mx-1"></div>
+                <div className="h-4 w-px bg-primary-200 dark:bg-dark-border mx-1"></div>
 
                 <div className="flex gap-1">
                    {presets.map(min => (
@@ -172,9 +172,9 @@ export const FocusMode: React.FC<FocusModeProps> = ({
                           onClick={() => setPreset(min)}
                           className={`
                             px-2 md:px-4 py-2 rounded-xl text-xs font-mono font-medium transition-all
-                            ${timeLeft === min * 60 
-                               ? 'bg-white dark:bg-zinc-800 text-black dark:text-white shadow-sm font-bold' 
-                               : 'text-gray-400 dark:text-zinc-600 hover:text-gray-600 dark:hover:text-zinc-400'}
+                            ${timeLeft === min * 60
+                               ? 'bg-primary-50 dark:bg-dark-border text-primary-900 dark:text-dark-text shadow-sm font-bold'
+                               : 'text-primary-400 dark:text-dark-muted hover:text-primary-600 dark:hover:text-dark-muted'}
                           `}
                       >
                           {min}m
@@ -182,11 +182,11 @@ export const FocusMode: React.FC<FocusModeProps> = ({
                    ))}
                 </div>
 
-                <div className="h-4 w-px bg-gray-200 dark:bg-zinc-800 mx-1"></div>
+                <div className="h-4 w-px bg-primary-200 dark:bg-dark-border mx-1"></div>
 
-                <button 
+                <button
                    onClick={() => adjustTime(5)}
-                   className="w-10 h-10 flex items-center justify-center rounded-xl text-gray-400 hover:text-black dark:hover:text-white hover:bg-white dark:hover:bg-zinc-800 transition-colors"
+                   className="w-10 h-10 flex items-center justify-center rounded-xl text-primary-400 hover:text-primary-900 dark:hover:text-dark-text hover:bg-primary-50 dark:hover:bg-dark-border transition-colors"
                 >
                    <Icons.Plus />
                 </button>
@@ -196,13 +196,13 @@ export const FocusMode: React.FC<FocusModeProps> = ({
              <div className="flex gap-6 text-xs font-medium tracking-wide">
                 <button 
                   onClick={() => switchMode('focus')} 
-                  className={`transition-colors pb-1 border-b-2 ${mode === 'focus' ? 'text-black dark:text-white border-black dark:border-white' : 'text-gray-300 dark:text-zinc-700 border-transparent hover:text-gray-500'}`}
+                  className={`transition-colors pb-1 border-b-2 ${mode === 'focus' ? 'text-primary-900 dark:text-dark-text border-primary-900 dark:border-dark-text' : 'text-primary-300 dark:text-dark-muted border-transparent hover:text-primary-500'}`}
                 >
                   Focus
                 </button>
-                <button 
-                  onClick={() => switchMode('break')} 
-                  className={`transition-colors pb-1 border-b-2 ${mode === 'break' ? 'text-black dark:text-white border-black dark:border-white' : 'text-gray-300 dark:text-zinc-700 border-transparent hover:text-gray-500'}`}
+                <button
+                  onClick={() => switchMode('break')}
+                  className={`transition-colors pb-1 border-b-2 ${mode === 'break' ? 'text-primary-900 dark:text-dark-text border-primary-900 dark:border-dark-text' : 'text-primary-300 dark:text-dark-muted border-transparent hover:text-primary-500'}`}
                 >
                   Break
                 </button>

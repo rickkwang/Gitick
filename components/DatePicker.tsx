@@ -63,26 +63,26 @@ export const DatePicker: React.FC<DatePickerProps> = ({ selectedDate, onSelect, 
 
   return (
     <div 
-        className="absolute top-full right-0 mt-2 z-50 w-72 bg-white dark:bg-zinc-900 rounded-[24px] shadow-2xl ring-1 ring-black/5 dark:ring-white/10 p-6 animate-in fade-in zoom-in-95 duration-200 select-none"
+        className="absolute top-full right-0 mt-2 z-50 w-72 bg-primary-50 dark:bg-dark-bg rounded-xl shadow-lg ring-1 ring-primary-200/50 dark:ring-dark-border/50 p-6 animate-in fade-in zoom-in-95 duration-200 select-none"
         onClick={(e) => e.stopPropagation()}
     >
         {/* Header */}
         <div className="flex items-center justify-between mb-4 px-1">
-            <span className="text-sm font-bold text-black dark:text-white pl-1">
+            <span className="text-sm font-bold text-primary-900 dark:text-dark-text pl-1">
                 {monthNames[month]} {year}
             </span>
             <div className="flex gap-1">
                 <button 
                   onClick={handlePrevMonth}
                   aria-label="Previous month"
-                  className="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-zinc-800 text-gray-500 dark:text-zinc-400 hover:text-black dark:hover:text-white transition-colors"
+                  className="p-1.5 rounded-full hover:bg-primary-200/50 dark:hover:bg-dark-border text-primary-500 dark:text-dark-muted hover:text-primary-900 dark:hover:text-dark-text transition-colors"
                 >
                     <Icons.ChevronLeft />
                 </button>
-                <button 
+                <button
                   onClick={handleNextMonth}
                   aria-label="Next month"
-                  className="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-zinc-800 text-gray-500 dark:text-zinc-400 hover:text-black dark:hover:text-white transition-colors"
+                  className="p-1.5 rounded-full hover:bg-primary-200/50 dark:hover:bg-dark-border text-primary-500 dark:text-dark-muted hover:text-primary-900 dark:hover:text-dark-text transition-colors"
                 >
                     <Icons.ChevronRight />
                 </button>
@@ -92,7 +92,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({ selectedDate, onSelect, 
         {/* Weekdays */}
         <div className="grid grid-cols-7 mb-2 text-center">
             {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(d => (
-                <div key={d} className="text-[10px] font-bold text-gray-400 dark:text-zinc-600 uppercase">
+                <div key={d} className="text-[10px] font-bold text-primary-400 dark:text-dark-muted uppercase">
                     {d}
                 </div>
             ))}
@@ -112,10 +112,10 @@ export const DatePicker: React.FC<DatePickerProps> = ({ selectedDate, onSelect, 
                         onClick={() => handleSelect(d)}
                         className={`
                             h-8 w-8 rounded-full flex items-center justify-center text-xs font-medium transition-all duration-200
-                            ${isSelected 
-                                ? 'bg-black dark:bg-white text-white dark:text-black shadow-md scale-105 font-bold' 
-                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-zinc-800'}
-                            ${!isSelected && isToday ? 'text-blue-500 font-bold bg-blue-50 dark:bg-blue-900/20' : ''}
+                            ${isSelected
+                                ? 'bg-[var(--accent)] text-white dark:bg-[var(--accent)] dark:text-white shadow-md scale-105 font-bold'
+                                : 'text-primary-700 dark:text-dark-text hover:bg-primary-200/50 dark:hover:bg-dark-border'}
+                            ${!isSelected && isToday ? 'text-[var(--accent)] font-bold bg-[var(--accent-soft)]' : ''}
                         `}
                     >
                         {d}
@@ -125,28 +125,28 @@ export const DatePicker: React.FC<DatePickerProps> = ({ selectedDate, onSelect, 
         </div>
         
         {/* Shortcuts */}
-        <div className="pt-3 border-t border-gray-100 dark:border-zinc-800 flex flex-wrap gap-2">
+        <div className="pt-3 border-t border-primary-200/80 dark:border-dark-border flex flex-wrap gap-2">
             <button 
                 onClick={() => handleQuickAction('today')}
-                className="px-3 py-1.5 rounded-lg bg-gray-50 dark:bg-zinc-800 text-[10px] font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-zinc-700 transition-colors"
+                className="px-3 py-1.5 rounded-lg bg-primary-100 dark:bg-dark-border text-[10px] font-bold text-primary-600 dark:text-dark-text hover:bg-primary-200/50 dark:hover:bg-dark-border transition-colors"
             >
                 Today
             </button>
             <button 
                 onClick={() => handleQuickAction('tomorrow')}
-                className="px-3 py-1.5 rounded-lg bg-gray-50 dark:bg-zinc-800 text-[10px] font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-zinc-700 transition-colors"
+                className="px-3 py-1.5 rounded-lg bg-primary-100 dark:bg-dark-border text-[10px] font-bold text-primary-600 dark:text-dark-text hover:bg-primary-200/50 dark:hover:bg-dark-border transition-colors"
             >
                 Tomorrow
             </button>
             <button 
                 onClick={() => handleQuickAction('nextWeek')}
-                className="px-3 py-1.5 rounded-lg bg-gray-50 dark:bg-zinc-800 text-[10px] font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-zinc-700 transition-colors"
+                className="px-3 py-1.5 rounded-lg bg-primary-100 dark:bg-dark-border text-[10px] font-bold text-primary-600 dark:text-dark-text hover:bg-primary-200/50 dark:hover:bg-dark-border transition-colors"
             >
                 Next Week
             </button>
             <button 
                 onClick={() => handleQuickAction('clear')}
-                className="px-3 py-1.5 rounded-lg border border-transparent hover:border-red-100 dark:hover:border-red-900/30 text-[10px] font-bold text-gray-400 dark:text-zinc-600 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors ml-auto"
+                className="px-3 py-1.5 rounded-lg border border-transparent hover:border-red-100 dark:hover:border-red-900/30 text-[10px] font-bold text-primary-400 dark:text-dark-muted hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors ml-auto"
             >
                 Clear
             </button>

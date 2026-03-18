@@ -83,11 +83,11 @@ const NavItemComponent: React.FC<NavItemProps> = ({
               ${
                 isActive
                   ? isCollapsed
-                  ? 'text-black dark:text-white border border-transparent'
-                  : 'bg-gray-100 dark:bg-zinc-800/90 text-black dark:text-white font-bold border border-transparent'
+                  ? 'text-primary-900 dark:text-dark-text border border-transparent'
+                  : 'bg-primary-200/50 dark:bg-dark-border/60 text-primary-900 dark:text-dark-text font-bold border border-transparent'
                 : isCollapsed
-                  ? 'text-gray-500 dark:text-zinc-400 border border-transparent hover:text-gray-900 dark:hover:text-gray-200'
-                  : 'text-gray-500 dark:text-zinc-400 border border-transparent hover:bg-gray-50 dark:hover:bg-zinc-800/50 hover:border-gray-200/80 dark:hover:border-zinc-800 hover:text-gray-900 dark:hover:text-gray-200'
+                  ? 'text-primary-500 dark:text-dark-muted border border-transparent hover:text-primary-900 dark:hover:text-dark-text'
+                  : 'text-primary-500 dark:text-dark-muted border border-transparent hover:bg-primary-100 dark:hover:bg-dark-border/50 hover:border-primary-200/80 dark:hover:border-dark-border hover:text-primary-900 dark:hover:text-dark-text'
             }
           `}
         >
@@ -105,8 +105,8 @@ const NavItemComponent: React.FC<NavItemProps> = ({
                 w-[20px] h-[20px]
                 ${
                   isActive
-                    ? 'text-black dark:text-white'
-                    : 'text-gray-400 dark:text-zinc-500 group-hover:text-gray-600 dark:group-hover:text-gray-300'
+                    ? 'text-primary-900 dark:text-dark-text'
+                    : 'text-primary-400 dark:text-dark-muted group-hover:text-gray-600 dark:group-hover:text-dark-text'
                 }
               `}
             >
@@ -128,7 +128,7 @@ const NavItemComponent: React.FC<NavItemProps> = ({
             {/* Task Count / Focus Timer */}
             <div className="ml-auto pr-3 pl-1">
               {!isFocusItem && taskCount > 0 && (
-                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${isActive ? 'bg-white dark:bg-zinc-900 text-black dark:text-white' : 'bg-gray-200 dark:bg-zinc-800 text-gray-500 dark:text-zinc-400'}`}>
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${isActive ? 'bg-primary-50 dark:bg-dark-bg text-primary-900 dark:text-dark-text' : 'bg-primary-200 dark:bg-dark-border text-primary-500 dark:text-dark-muted'}`}>
                   {taskCount}
                 </span>
               )}
@@ -150,7 +150,7 @@ const NavItemComponent: React.FC<NavItemProps> = ({
 
         {/* Collapsed Indicator Dot - Desktop Only */}
         {!isFocusItem && taskCount > 0 && isCollapsed && (
-             <span className="hidden md:block absolute top-3 left-1/2 translate-x-[10px] w-2 h-2 rounded-full bg-black dark:bg-white ring-2 ring-white dark:ring-zinc-950 pointer-events-none animate-in fade-in zoom-in duration-200" />
+             <span className="hidden md:block absolute top-3 left-1/2 translate-x-[10px] w-2 h-2 rounded-full bg-primary-900 dark:bg-dark-text ring-2 ring-primary-50 dark:ring-dark-bg pointer-events-none animate-in fade-in zoom-in duration-200" />
         )}
         
         {/* Delete Button */}
@@ -163,7 +163,7 @@ const NavItemComponent: React.FC<NavItemProps> = ({
                onDeleteProject(id);
              }}
              aria-label={`Delete project ${label}`}
-             className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-20"
+             className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-primary-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-20"
              title="Delete Project"
           >
             <Icons.Trash />
@@ -270,7 +270,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Mobile Backdrop - Persistent for smooth exit animation */}
       <div 
         className={`
-          fixed inset-0 bg-gray-900/30 dark:bg-black/60 z-50 md:hidden backdrop-blur-[2px]
+          fixed inset-0 bg-primary-900/30 dark:bg-primary-950/60 z-50 md:hidden
           transition-opacity duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]
           ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}
         `}
@@ -280,22 +280,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
       
       <aside className={sidebarClasses}>
         <div className="flex flex-col h-full w-full p-2 md:p-3 pt-safe md:pt-3">
-          <div className="relative flex flex-col h-full overflow-hidden rounded-[calc(var(--app-radius)+4px)] border border-white/65 dark:border-white/[0.04] bg-[#f1f5f9] dark:bg-[#21252b] backdrop-blur-[28px] backdrop-saturate-200 shadow-[0_20px_52px_-24px_rgba(15,23,42,0.42)] dark:shadow-[0_24px_58px_-22px_rgba(0,0,0,0.62)] ring-1 ring-white/25 dark:ring-0">
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-0 rounded-[inherit] shadow-[0_34px_70px_-28px_rgba(15,23,42,0.45)] dark:shadow-[0_38px_80px_-26px_rgba(0,0,0,0.72)]"
-            />
+          <div className="relative flex flex-col h-full overflow-hidden rounded-[calc(var(--app-radius)+4px)] border border-primary-200/80 dark:border-dark-border bg-primary-100 dark:bg-dark-surface shadow-[0_1px_3px_rgba(20,20,19,0.04)] dark:shadow-none">
           {/* Header - Completely Refactored for Zero-Flicker */}
           <div className={`h-[76px] md:h-[110px] relative flex items-center shrink-0 select-none w-full ${isDesktopMac ? 'md:pt-[58px]' : ''}`}>
              
              {/* 1. MOBILE HEADER: Static, Always Visible on Mobile (md:hidden) */}
              {/* This separates mobile logic from desktop state, preventing logo flicker during open */}
              <div className="md:hidden absolute inset-0 px-6 flex items-center justify-between">
-                <div className="flex items-center gap-3.5 text-black dark:text-white">
-                    <span className="shrink-0 w-7 h-7 flex items-center justify-center [&>svg]:w-6 [&>svg]:h-6">
+                <div className="flex items-center gap-3.5">
+                    <span className="shrink-0 w-7 h-7 flex items-center justify-center [&>svg]:w-6 [&>svg]:h-6 text-primary-900 dark:text-dark-text">
                         <Icons.GitickLogo />
                     </span>
-                    <span className="text-lg leading-none font-semibold tracking-tight whitespace-nowrap font-display text-black dark:text-white">
+                    <span className="text-lg leading-none font-semibold tracking-tight whitespace-nowrap font-display brand-text">
                         Gitick
                     </span>
                 </div>
@@ -303,7 +299,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <button 
                   onClick={onCloseMobile} 
                   aria-label="Close sidebar"
-                  className="flex items-center justify-center p-2 -mr-2 rounded-lg text-gray-400 hover:text-black dark:hover:text-white transition-colors active:scale-95 transform"
+                  className="flex items-center justify-center p-2 -mr-2 rounded-lg text-primary-400 hover:text-primary-900 dark:hover:text-dark-text transition-colors active:scale-95 transform"
                   title="Close Sidebar"
                >
                   <Icons.SidebarLeft />
@@ -316,11 +312,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 transition-opacity duration-200 ease-linear
                 ${renderCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}
              `}>
-               <div className="flex items-center gap-2.5 text-black dark:text-white overflow-hidden">
-                 <span className="shrink-0 w-12 h-12 flex items-center justify-center [&>svg]:w-6 [&>svg]:h-6">
+               <div className="flex items-center gap-2.5 overflow-hidden">
+                 <span className="shrink-0 w-12 h-12 flex items-center justify-center [&>svg]:w-6 [&>svg]:h-6 text-primary-900 dark:text-dark-text">
                    <Icons.GitickLogo />
                  </span>
-                 <span className="text-lg leading-none font-semibold tracking-tight whitespace-nowrap font-display text-black dark:text-white">
+                 <span className="text-lg leading-none font-semibold tracking-tight whitespace-nowrap font-display brand-text">
                    Gitick
                  </span>
                </div>
@@ -328,7 +324,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                <button 
                   onClick={toggleCollapse} 
                   aria-label="Collapse sidebar"
-                  className="flex items-center justify-center p-2 rounded-lg text-gray-400 hover:text-black dark:hover:text-white hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
+                  className="flex items-center justify-center p-2 rounded-lg text-primary-400 hover:text-primary-900 dark:hover:text-dark-text hover:bg-primary-200/50 dark:hover:bg-dark-border transition-colors"
                   title="Collapse Sidebar"
                >
                   <Icons.SidebarLeft />
@@ -344,16 +340,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <button 
                   onClick={toggleCollapse} 
                   aria-label="Expand sidebar"
-                  className="group relative flex items-center justify-center w-12 h-12 rounded-xl hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
+                  className="group relative flex items-center justify-center w-12 h-12 rounded-xl hover:bg-primary-200/50 dark:hover:bg-dark-border transition-colors"
                   title="Expand Sidebar"
                 >
                    {/* Brand Logo - Visible by default */}
-                   <span className="absolute inset-0 flex items-center justify-center text-black dark:text-white transition-opacity duration-200 group-hover:opacity-0 [&>svg]:w-6 [&>svg]:h-6">
+                   <span className="absolute inset-0 flex items-center justify-center text-primary-900 dark:text-dark-text transition-opacity duration-200 group-hover:opacity-0 [&>svg]:w-6 [&>svg]:h-6">
                      <Icons.GitickLogo />
                    </span>
-                   
+
                    {/* Expand Icon - Visible on Hover */}
-                   <span className="absolute inset-0 flex items-center justify-center text-gray-500 hover:text-black dark:hover:text-white transition-opacity duration-200 opacity-0 group-hover:opacity-100">
+                   <span className="absolute inset-0 flex items-center justify-center text-primary-500 hover:text-primary-900 dark:hover:text-dark-text transition-opacity duration-200 opacity-0 group-hover:opacity-100">
                      <Icons.SidebarRight />
                    </span>
                 </button>
@@ -370,7 +366,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                  opacity-100
                  ${renderCollapsed ? 'md:opacity-0 md:pointer-events-none' : 'md:opacity-100'}
               `}>
-                <h3 className="text-[10px] font-bold text-gray-400 dark:text-zinc-600 uppercase tracking-widest whitespace-nowrap pl-1">Overview</h3>
+                <h3 className="text-[10px] font-bold text-primary-400 dark:text-dark-muted uppercase tracking-widest whitespace-nowrap pl-1">Overview</h3>
               </div>
               <nav className="space-y-1">
                 <NavItem 
@@ -405,11 +401,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
                  opacity-100
                  ${renderCollapsed ? 'md:opacity-0 md:pointer-events-none' : 'md:opacity-100'}
               `}>
-                  <h3 className="text-[10px] font-bold text-gray-400 dark:text-zinc-600 uppercase tracking-widest pl-1">Projects</h3>
-                  <button 
+                  <h3 className="text-[10px] font-bold text-primary-400 dark:text-dark-muted uppercase tracking-widest pl-1">Projects</h3>
+                  <button
                     onClick={startAddProject}
                     aria-label="Add project"
-                    className="text-gray-300 dark:text-zinc-600 hover:text-black dark:hover:text-white transition-colors p-1 rounded-full hover:bg-gray-100 dark:hover:bg-zinc-800"
+                    className="text-primary-300 dark:text-dark-muted hover:text-primary-900 dark:hover:text-dark-text transition-colors p-1 rounded-full hover:bg-primary-200/50 dark:hover:bg-dark-border"
                     title="Add Project"
                   >
                     <Icons.Plus />
@@ -435,14 +431,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
                 {isAddingProject && !renderCollapsed && (
                   <form onSubmit={handleCreateProject} className="px-1 py-1 animate-in fade-in slide-in-from-top-2 duration-200">
-                    <div className="flex items-center gap-3 px-3 py-2 bg-gray-50 dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-700 focus-within:border-black dark:focus-within:border-zinc-500 focus-within:ring-1 focus-within:ring-black dark:focus-within:ring-zinc-500 transition-all shadow-sm">
-                      <span className="text-gray-400"><Icons.Folder /></span>
+                    <div className="flex items-center gap-3 px-3 py-2 bg-primary-100 dark:bg-dark-bg rounded-lg border border-primary-200 dark:border-dark-border focus-within:border-[var(--accent)] focus-within:ring-1 focus-within:ring-[var(--accent)] transition-all shadow-sm">
+                      <span className="text-primary-400"><Icons.Folder /></span>
                       <input 
                         ref={inputRef}
                         type="text"
                         value={newProjectName}
                         onChange={e => setNewProjectName(e.target.value)}
-                        className="flex-1 bg-transparent outline-none text-sm text-black dark:text-white placeholder:text-gray-400 min-w-0"
+                        className="flex-1 bg-transparent outline-none text-sm text-primary-900 dark:text-dark-text placeholder:text-primary-400 min-w-0"
                         placeholder="Name..."
                         onBlur={() => !newProjectName && setIsAddingProject(false)}
                         onKeyDown={(e) => {
@@ -463,7 +459,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   opacity-100
                   ${renderCollapsed ? 'md:opacity-0 md:pointer-events-none' : 'md:opacity-100'}
                `}>
-                 <h3 className="text-[10px] font-bold text-gray-400 dark:text-zinc-600 uppercase tracking-widest whitespace-nowrap pl-1">History</h3>
+                 <h3 className="text-[10px] font-bold text-primary-400 dark:text-dark-muted uppercase tracking-widest whitespace-nowrap pl-1">History</h3>
                </div>
                <nav className="space-y-1">
                   <NavItem 
@@ -478,7 +474,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           {/* User Profile Footer (Unified Design) */}
           <div className="mt-auto px-3 pb-safe md:pb-4 pt-2 shrink-0">
              {/* Subtle Divider */}
-             <div className="mx-2 mb-2 h-px bg-gray-200/80 dark:bg-zinc-800/80" />
+             <div className="mx-2 mb-2 h-px bg-primary-200/80 dark:bg-dark-border/80" />
              
              <div className={renderCollapsed ? 'md:px-0 px-2' : 'px-2'}> {/* Wrapper to match NavItem padding */}
                 <button 
@@ -487,7 +483,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     group flex items-center w-full rounded-xl transition-colors duration-200 outline-none
                     h-11 px-0
                     ${renderCollapsed ? 'md:justify-center' : ''}
-                    hover:bg-gray-100 dark:hover:bg-zinc-800
+                    hover:bg-primary-200/50 dark:hover:bg-dark-border
                   `}
                   title="Settings & Profile"
                 >
@@ -510,11 +506,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       ${renderCollapsed ? 'md:hidden' : 'md:opacity-100'}
                   `}>
                       <div className="flex flex-col items-start leading-tight">
-                          <span className="text-[13px] font-bold text-gray-900 dark:text-white truncate max-w-[120px]">{userProfile.name}</span>
-                          <span className="text-[10px] text-gray-400 dark:text-zinc-500 font-medium">Settings</span>
+                          <span className="text-[13px] font-bold text-primary-900 dark:text-dark-text truncate max-w-[120px]">{userProfile.name}</span>
+                          <span className="text-[10px] text-primary-400 dark:text-dark-muted font-medium">Settings</span>
                       </div>
                       
-                      <span className="text-gray-300 dark:text-zinc-600 group-hover:text-black dark:group-hover:text-white transition-colors">
+                      <span className="text-primary-300 dark:text-dark-muted group-hover:text-primary-900 dark:group-hover:text-dark-text transition-colors">
                           <Icons.Settings />
                       </span>
                   </div>

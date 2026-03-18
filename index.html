@@ -3,16 +3,21 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    
+
     <meta name="format-detection" content="telephone=no">
 
     <!-- App Icons -->
     <link rel="icon" type="image/png" href="/icons/favicon-64.png">
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
-    
+
     <!-- Dynamic Theme Color for Safari/Chrome UI blending -->
-    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
-    <meta name="theme-color" content="#181818" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#f5f4ed" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#1a1a19" media="(prefers-color-scheme: dark)">
+
+    <!-- Fonts: Source Serif 4 for display, Inter for body -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <title>Gitick - Minimalist Git Tasks</title>
     <script src="/vendor/tailwindcss-3.4.17.browser.js"></script>
@@ -22,52 +27,50 @@
         theme: {
           extend: {
             fontFamily: {
-              sans: ['ui-sans-serif', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
+              sans: ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
               mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
-              display: ['"SF Pro Rounded"', '"Avenir Next"', '"Nunito"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+              display: ['"Source Serif 4"', 'Georgia', 'serif'],
             },
             colors: {
-              // Minimalist Monochrome Palette (Zinc)
               primary: {
-                50: '#fafafa',
-                100: '#f4f4f5',
-                200: '#e4e4e7',
-                300: '#d4d4d8',
-                400: '#a1a1aa',
-                500: '#71717a',
-                600: '#52525b',
-                700: '#3f3f46',
-                800: '#27272a',
-                900: '#18181b', // Main Black
-                950: '#09090b',
+                50: '#faf9f5',
+                100: '#f5f4ed',
+                200: '#e8e6dc',
+                300: '#d4d2c8',
+                400: '#a3a29e',
+                500: '#8b8b87',
+                600: '#6b6b67',
+                700: '#5a5a58',
+                800: '#333330',
+                900: '#141413',
+                950: '#0a0a09',
               },
               gray: {
-                50: '#f9fafb',
-                100: '#f3f4f6',
-                200: '#e5e7eb',
-                300: '#d1d5db',
-                400: '#9ca3af',
-                500: '#6b7280',
-                600: '#4b5563',
-                700: '#374151',
-                800: '#1f2937',
-                900: '#111827',
+                50: '#faf9f5',
+                100: '#f5f4ed',
+                200: '#e8e6dc',
+                300: '#d4d2c8',
+                400: '#a3a29e',
+                500: '#8b8b87',
+                600: '#6b6b67',
+                700: '#5a5a58',
+                800: '#333330',
+                900: '#1a1a19',
               },
-              // Dark Mode Specifics
               dark: {
-                bg: '#09090b',
-                surface: '#18181b',
-                border: '#27272a',
-                text: '#e4e4e7',
-                muted: '#a1a1aa'
+                bg: '#1a1a19',
+                surface: '#222220',
+                border: '#333330',
+                text: '#e8e6dc',
+                muted: '#a3a29e'
               }
             },
             borderRadius: {
-              'lg': '14px',   /* Increased from default */
-              'xl': '20px',   /* Much rounder standard cards */
-              '2xl': '28px',  /* Bubbles */
-              '3xl': '36px',  /* Large containers */
-              '4xl': '48px',  /* Extra large */
+              'lg': '12px',
+              'xl': '16px',
+              '2xl': '20px',
+              '3xl': '24px',
+              '4xl': '32px',
             },
             animation: {
               'fade-in-up': 'fadeInUp 0.3s ease-out forwards',
@@ -82,15 +85,15 @@
         --sar: env(safe-area-inset-right);
         --sab: env(safe-area-inset-bottom);
         --sal: env(safe-area-inset-left);
-        --app-bg: #ffffff;
-        --app-fg: #18181b;
-        --ui-border: rgba(228, 228, 231, 0.9);
-        --ui-shadow: 0 10px 28px rgba(24, 24, 27, 0.06);
+        --app-bg: #f5f4ed;
+        --app-fg: #141413;
+        --ui-border: rgba(232, 230, 220, 0.9);
+        --ui-shadow: 0 1px 3px rgba(20, 20, 19, 0.04);
         --desktop-font-size: 13px;
-        --accent: #0ea5a4;
-        --accent-strong: #0f766e;
-        --accent-soft: rgba(14, 165, 164, 0.12);
-        --accent-border: rgba(14, 165, 164, 0.28);
+        --accent: #d97757;
+        --accent-strong: #c4623f;
+        --accent-soft: rgba(217, 119, 87, 0.12);
+        --accent-border: rgba(217, 119, 87, 0.28);
       }
 
       @media (min-width: 1024px) {
@@ -101,23 +104,23 @@
 
       body {
         background-color: var(--app-bg);
-        color: var(--app-fg); 
-        overflow: hidden; 
+        color: var(--app-fg);
+        overflow: hidden;
         transition: background-color 0.3s ease;
-        overscroll-behavior: none; /* Prevent bounce on mobile */
+        overscroll-behavior: none;
         text-rendering: optimizeLegibility;
         font-feature-settings: "cv11", "ss01";
       }
       .dark body {
-        --app-bg: #282c34;
-        --app-fg: #e4e4e7;
-        --ui-border: rgba(63, 63, 70, 0.9);
-        --ui-shadow: 0 16px 36px rgba(0, 0, 0, 0.28);
-        color: #e4e4e7;
-        --accent: #2dd4bf;
-        --accent-strong: #5eead4;
-        --accent-soft: rgba(45, 212, 191, 0.16);
-        --accent-border: rgba(45, 212, 191, 0.38);
+        --app-bg: #1a1a19;
+        --app-fg: #e8e6dc;
+        --ui-border: rgba(51, 51, 48, 0.9);
+        --ui-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        color: #e8e6dc;
+        --accent: #e8916d;
+        --accent-strong: #d97757;
+        --accent-soft: rgba(217, 119, 87, 0.16);
+        --accent-border: rgba(217, 119, 87, 0.38);
       }
 
       .brand-text {
@@ -131,7 +134,7 @@
         border-color: var(--accent-border);
       }
 
-      
+
       /* Safe Area Utilities */
       .pb-safe { padding-bottom: var(--sab); }
       .pt-safe { padding-top: var(--sat); }
@@ -142,11 +145,11 @@
       /* Cross-browser Minimal Scrollbar */
       * {
         scrollbar-width: thin;
-        scrollbar-color: #e4e4e7 transparent;
-        -webkit-tap-highlight-color: transparent; /* Remove tap highlight on mobile */
+        scrollbar-color: #d4d2c8 transparent;
+        -webkit-tap-highlight-color: transparent;
       }
       .dark * {
-        scrollbar-color: #3f3f46 transparent;
+        scrollbar-color: #333330 transparent;
       }
 
       ::-webkit-scrollbar {
@@ -157,17 +160,17 @@
         background: transparent;
       }
       ::-webkit-scrollbar-thumb {
-        background: #e4e4e7; /* Zinc-200 */
+        background: #d4d2c8;
         border-radius: 99px;
       }
       .dark ::-webkit-scrollbar-thumb {
-         background: #3f3f46; /* Zinc-700 */
+         background: #333330;
       }
       *:hover::-webkit-scrollbar-thumb {
-        background: #d4d4d8; /* Zinc-300 */
+        background: #c4c2b8;
       }
       .dark *:hover::-webkit-scrollbar-thumb {
-        background: #52525b; /* Zinc-600 */
+        background: #444440;
       }
 
       @keyframes fadeInUp {
@@ -180,7 +183,7 @@
           transform: translateY(0);
         }
       }
-      
+
       .animate-fade-in-up {
         animation: fadeInUp 0.4s ease-out forwards;
       }
@@ -219,7 +222,7 @@
         animation: none !important;
         transition: none !important;
       }
-      
+
       /* Hide scrollbar for clean look but allow scroll */
       .no-scrollbar::-webkit-scrollbar {
         display: none;
