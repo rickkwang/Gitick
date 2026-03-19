@@ -235,7 +235,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                               Remove photo
                             </button>
                           )}
-                          {['bg-zinc-900', 'bg-blue-600', 'bg-green-600', 'bg-purple-600', 'bg-orange-500'].map(color => (
+                          {['bg-zinc-900', 'bg-neutral-700', 'bg-stone-600', 'bg-primary-700', 'bg-primary-600'].map(color => (
                             <button 
                               key={color}
                               onClick={() => {
