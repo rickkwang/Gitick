@@ -648,7 +648,7 @@ const App: React.FC = () => {
         {/* COL 2: Main Content */}
         <main className="flex-1 flex flex-col min-w-0 h-full bg-[var(--app-bg)] relative z-0 transition-colors duration-300">
            
-           <div className={`h-full flex flex-col ${filter === 'focus' || isSidebarCollapsed ? '' : 'animate-view-breathe'}`}>
+           <div className="h-full flex flex-col">
              
              {filter === 'focus' ? (
                <FocusMode

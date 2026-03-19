@@ -73,11 +73,9 @@ const NavItemComponent: React.FC<NavItemProps> = ({
             w-full justify-start
               ${
                 isActive
-                  ? isCollapsed
-                  ? 'text-primary-900 dark:text-dark-text border border-transparent'
-                  : 'bg-primary-200/50 dark:bg-dark-border/60 text-primary-900 dark:text-dark-text font-bold border border-transparent'
+                  ? 'bg-primary-200/50 dark:bg-dark-border/60 text-primary-900 dark:text-dark-text font-bold border border-transparent'
                 : isCollapsed
-                  ? 'text-primary-900 dark:text-dark-text border border-transparent hover:text-primary-900 dark:hover:text-dark-text'
+                  ? 'text-primary-900 dark:text-dark-text border border-transparent hover:bg-primary-100 dark:hover:bg-dark-border/50 hover:border-primary-200/80 dark:hover:border-dark-border hover:text-primary-900 dark:hover:text-dark-text'
                   : 'text-primary-900 dark:text-dark-text border border-transparent hover:bg-primary-100 dark:hover:bg-dark-border/50 hover:border-primary-200/80 dark:hover:border-dark-border hover:text-primary-900 dark:hover:text-dark-text'
             }
           `}
@@ -108,7 +106,7 @@ const NavItemComponent: React.FC<NavItemProps> = ({
           {/* Text Container */}
           <div className={`
             flex items-center flex-1 min-w-0 overflow-hidden whitespace-nowrap pl-[52px]
-            transition-opacity duration-200 ease-linear
+            transition-opacity duration-300 ease-[cubic-bezier(0.2,0,0,1)]
             ${isCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}
           `}>
             <span className="truncate pr-2">{label}</span>
@@ -195,6 +193,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const [isAddingProject, setIsAddingProject] = useState(false);
   const [newProjectName, setNewProjectName] = useState('');
+  const [projectsOpen, setProjectsOpen] = useState(true);
+  const [historyOpen, setHistoryOpen] = useState(true);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const renderCollapsed = isCollapsed;
@@ -241,7 +241,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   return (
       <aside className={sidebarClasses}>
-        <div className="flex flex-col h-full w-full p-2.5 pt-2.5">
+        <div className="flex flex-col h-full w-[260px] max-w-none p-2.5 pt-2.5">
           <div className="relative flex flex-col h-full overflow-hidden rounded-[calc(var(--app-radius)+4px)] border border-primary-200/60 dark:border-dark-border/70 bg-primary-100 dark:bg-dark-surface shadow-[0_4px_20px_rgba(20,20,19,0.12),0_1px_4px_rgba(20,20,19,0.06)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.4),0_1px_4px_rgba(0,0,0,0.2)]">
           {/* Header */}
           <div className={`h-[102px] relative flex items-center shrink-0 select-none w-full ${isDesktopMac ? 'pt-[54px]' : ''}`}>
@@ -249,7 +249,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
              {/* EXPANDED HEADER */}
              <div className={`
                 flex absolute inset-0 px-6 items-center justify-between
-                transition-opacity duration-200 ease-linear
+                transition-opacity duration-300 ease-[cubic-bezier(0.2,0,0,1)]
                 ${renderCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}
              `}>
                <div className="flex items-center gap-2.5 overflow-hidden">
@@ -274,7 +274,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
              {/* COLLAPSED HEADER */}
              <div className={`
                 flex absolute inset-0 items-center justify-center
-                transition-opacity duration-200 ease-linear
+                transition-opacity duration-300 ease-[cubic-bezier(0.2,0,0,1)]
                 ${renderCollapsed ? 'opacity-100' : 'opacity-0 pointer-events-none'}
              `}>
                 <button 
@@ -301,7 +301,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <div>
               <div className={`
                  overflow-hidden px-2.5 h-5 mb-1.5 flex items-center
-                 transition-opacity duration-200
+                 transition-opacity duration-300 ease-[cubic-bezier(0.2,0,0,1)]
                  ${renderCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}
               `}>
                 <h3 className="text-[10px] font-bold text-primary-900 dark:text-dark-text uppercase tracking-widest whitespace-nowrap pl-1">Overview</h3>
@@ -335,74 +335,112 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <div>
               <div className={`
                  flex items-center justify-between px-2.5 group overflow-hidden whitespace-nowrap h-5 mb-1.5
-                 transition-opacity duration-200
+                 transition-opacity duration-300 ease-[cubic-bezier(0.2,0,0,1)]
                  ${renderCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}
               `}>
                   <h3 className="text-[10px] font-bold text-primary-900 dark:text-dark-text uppercase tracking-widest pl-1">Projects</h3>
-                  <button
-                    onClick={startAddProject}
-                    aria-label="Add project"
-                    className="text-primary-900 dark:text-dark-text hover:text-primary-900 dark:hover:text-dark-text transition-colors p-1 rounded-full hover:bg-primary-200/50 dark:hover:bg-dark-border"
-                    title="Add Project"
-                  >
-                    <Icons.Plus />
-                  </button>
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => setProjectsOpen((prev) => !prev)}
+                      aria-label={projectsOpen ? 'Collapse projects' : 'Expand projects'}
+                      className="text-primary-900 dark:text-dark-text transition-colors p-1 rounded-full hover:bg-primary-200/50 dark:hover:bg-dark-border"
+                      title={projectsOpen ? 'Collapse Projects' : 'Expand Projects'}
+                    >
+                      <span className={`block transition-transform duration-300 ease-[cubic-bezier(0.2,0,0,1)] ${projectsOpen ? '' : '-rotate-90'}`}>
+                        <Icons.ChevronDown />
+                      </span>
+                    </button>
+                    <button
+                      onClick={startAddProject}
+                      aria-label="Add project"
+                      className="text-primary-900 dark:text-dark-text hover:text-primary-900 dark:hover:text-dark-text transition-colors p-1 rounded-full hover:bg-primary-200/50 dark:hover:bg-dark-border"
+                      title="Add Project"
+                    >
+                      <Icons.Plus />
+                    </button>
+                  </div>
               </div>
 
-              <nav className="space-y-0.5">
-                {projects.map(project => (
-                  <NavItem 
-                    key={project} 
-                    id={project} 
-                    label={project} 
-                    icon={getProjectIcon(project)}
-                    canDelete={!DEFAULT_PROJECTS.includes(project)}
-                    onDeleteProject={onDeleteProject}
-                    activeFilter={activeFilter} 
-                    onFilterChange={onFilterChange} 
-                                       taskCount={taskCounts[project] || 0} 
-                    isCollapsed={renderCollapsed}
-                  />
-                ))}
-
-                {isAddingProject && !renderCollapsed && (
-                  <form onSubmit={handleCreateProject} className="px-1 py-0.5 animate-in fade-in slide-in-from-top-2 duration-200">
-                    <div className="flex items-center gap-2.5 px-2.5 py-1.5 bg-primary-100 dark:bg-dark-bg rounded-lg border border-primary-200 dark:border-dark-border focus-within:border-[var(--accent)] focus-within:ring-1 focus-within:ring-[var(--accent)] transition-all shadow-sm">
-                      <span className="text-primary-900 dark:text-dark-text"><Icons.Folder /></span>
-                      <input 
-                        ref={inputRef}
-                        type="text"
-                        value={newProjectName}
-                        onChange={e => setNewProjectName(e.target.value)}
-                        className="flex-1 bg-transparent outline-none text-sm text-primary-900 dark:text-dark-text placeholder:text-primary-400 min-w-0"
-                        placeholder="Name..."
-                        onBlur={() => !newProjectName && setIsAddingProject(false)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Escape') setIsAddingProject(false);
-                        }}
+              <div
+                className={`grid transition-[grid-template-rows] duration-300 ease-[cubic-bezier(0.2,0,0,1)] ${projectsOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}
+              >
+                <div className="overflow-hidden">
+                  <nav className="space-y-0.5">
+                    {projects.map(project => (
+                      <NavItem 
+                        key={project} 
+                        id={project} 
+                        label={project} 
+                        icon={getProjectIcon(project)}
+                        canDelete={!DEFAULT_PROJECTS.includes(project)}
+                        onDeleteProject={onDeleteProject}
+                        activeFilter={activeFilter} 
+                        onFilterChange={onFilterChange} 
+                                           taskCount={taskCounts[project] || 0} 
+                        isCollapsed={renderCollapsed}
                       />
-                    </div>
-                  </form>
-                )}
-              </nav>
+                    ))}
+
+                    {isAddingProject && !renderCollapsed && (
+                      <form onSubmit={handleCreateProject} className="px-1 py-0.5 animate-in fade-in slide-in-from-top-2 duration-200">
+                        <div className="flex items-center gap-2.5 px-2.5 py-1.5 bg-primary-100 dark:bg-dark-bg rounded-lg border border-primary-200 dark:border-dark-border focus-within:border-[var(--accent)] focus-within:ring-1 focus-within:ring-[var(--accent)] transition-all shadow-sm">
+                          <span className="text-primary-900 dark:text-dark-text"><Icons.Folder /></span>
+                          <input 
+                            ref={inputRef}
+                            type="text"
+                            value={newProjectName}
+                            onChange={e => setNewProjectName(e.target.value)}
+                            className="flex-1 bg-transparent outline-none text-sm text-primary-900 dark:text-dark-text placeholder:text-primary-400 min-w-0"
+                            placeholder="Name..."
+                            onBlur={() => !newProjectName && setIsAddingProject(false)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Escape') setIsAddingProject(false);
+                            }}
+                          />
+                        </div>
+                      </form>
+                    )}
+                  </nav>
+                </div>
+              </div>
             </div>
 
             {/* Section: History */}
             <div>
                <div className={`
                   overflow-hidden px-3 h-6 mb-2 flex items-center
-                  transition-opacity duration-200
+                  transition-opacity duration-300 ease-[cubic-bezier(0.2,0,0,1)]
                   ${renderCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}
                `}>
-                 <h3 className="text-[10px] font-bold text-primary-900 dark:text-dark-text uppercase tracking-widest whitespace-nowrap pl-1">History</h3>
+                 <div className="w-full flex items-center justify-between">
+                   <h3 className="text-[10px] font-bold text-primary-900 dark:text-dark-text uppercase tracking-widest whitespace-nowrap pl-1">History</h3>
+                   <button
+                     type="button"
+                     onClick={() => setHistoryOpen((prev) => !prev)}
+                     aria-label={historyOpen ? 'Collapse history' : 'Expand history'}
+                     className="text-primary-900 dark:text-dark-text transition-colors p-1 rounded-full hover:bg-primary-200/50 dark:hover:bg-dark-border"
+                     title={historyOpen ? 'Collapse History' : 'Expand History'}
+                   >
+                     <span className={`block transition-transform duration-300 ease-[cubic-bezier(0.2,0,0,1)] ${historyOpen ? '' : '-rotate-90'}`}>
+                       <Icons.ChevronDown />
+                     </span>
+                   </button>
+                 </div>
                </div>
-                 <nav className="space-y-0.5">
-                  <NavItem 
-                    id="completed" label="Repository" icon={Icons.CheckCircle} 
-                    activeFilter={activeFilter} onFilterChange={onFilterChange} taskCount={0} 
-                    isCollapsed={renderCollapsed}
-                  />
-               </nav>
+               <div
+                 className={`grid transition-[grid-template-rows] duration-300 ease-[cubic-bezier(0.2,0,0,1)] ${historyOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}
+               >
+                 <div className="overflow-hidden">
+                   <nav className="space-y-0.5">
+                    <NavItem 
+                      id="completed" label="Repository" icon={Icons.CheckCircle} 
+                      activeFilter={activeFilter} onFilterChange={onFilterChange} taskCount={0} 
+                      isCollapsed={renderCollapsed}
+                    />
+                 </nav>
+                 </div>
+               </div>
             </div>
           </div>
           
@@ -436,9 +474,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   {/* Text Container */}
                   <div className={`
                       flex items-center justify-between flex-1 min-w-0 overflow-hidden pr-2.5 pl-1
-                      transition-opacity duration-200
-                      opacity-100
-                      ${renderCollapsed ? 'hidden' : 'opacity-100'}
+                      transition-opacity duration-300 ease-[cubic-bezier(0.2,0,0,1)]
+                      ${renderCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}
                   `}>
                       <div className="flex flex-col items-start leading-tight">
                           <span className="text-sm font-bold text-primary-900 dark:text-dark-text truncate max-w-[120px]">{userProfile.name}</span>
