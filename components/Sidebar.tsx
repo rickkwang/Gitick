@@ -83,14 +83,15 @@ const NavItemComponent: React.FC<NavItemProps> = ({
           {/* Icon Container - Fixed Width 48px (w-12) */}
           <span
             className={`
-              shrink-0 flex items-center justify-center transition-colors duration-200
+              shrink-0 flex items-center justify-center transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)]
               w-[44px] h-[40px] absolute top-0
-              left-0
+              ${isCollapsed ? 'left-1/2 -translate-x-1/2' : 'left-0'}
             `}
           >
             <span
               className={`
-                flex items-center justify-center transition-colors duration-200
+                flex items-center justify-center transition-colors duration-200 leading-none
+                [&>svg]:block
                 w-[20px] h-[20px]
                 ${
                   isActive
@@ -240,7 +241,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   return (
       <aside className={sidebarClasses}>
         <div className="flex flex-col h-full w-full p-2.5 pt-2.5">
-          <div className="relative flex flex-col h-full overflow-hidden rounded-[calc(var(--app-radius)+4px)] border border-primary-200/60 dark:border-dark-border/70 bg-primary-100 dark:bg-dark-surface shadow-[0_4px_20px_rgba(20,20,19,0.12),0_1px_4px_rgba(20,20,19,0.06)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.4),0_1px_4px_rgba(0,0,0,0.2)]">
+          <div className="relative flex flex-col h-full overflow-hidden rounded-[calc(var(--app-radius)+4px)] border border-primary-200/60 dark:border-dark-border/70 bg-primary-100 dark:bg-dark-surface shadow-[0_4px_20px_rgba(20,20,19,0.12),0_1px_4px_rgba(20,20,19,0.06)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.4),0_1px_4px_rgba(0,0,0,0.2)] [&_svg]:block">
           {/* Header */}
           <div className={`h-[102px] relative flex items-center shrink-0 select-none w-full ${isDesktopMac ? 'pt-[54px]' : ''}`}>
 
