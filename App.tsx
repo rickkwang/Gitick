@@ -682,6 +682,12 @@ const App: React.FC = () => {
           onDeleteProject={deleteProject}
           userProfile={userProfile}
           isDesktopMac={isDesktopMac}
+          searchQuery={searchQuery}
+          onSearchQueryChange={setSearchQuery}
+          searchPriority={searchPriority}
+          onSearchPriorityChange={setSearchPriority}
+          searchProject={searchProject}
+          onSearchProjectChange={setSearchProject}
         />
 
         {/* COL 2: Main Content */}
@@ -715,8 +721,8 @@ const App: React.FC = () => {
                   <div className="flex-1 overflow-y-auto main-scroll scroll-smooth">
                       <div className="max-w-[1180px] mx-auto w-full px-5 md:px-11 py-8 md:py-11">
                           {filter !== 'focus' && (
-                            <div className="mb-7">
-                              <div className="flex flex-col gap-3 md:flex-row md:items-center">
+                            <div className="mb-5 md:hidden">
+                              <div className="flex flex-col gap-3">
                                 <div className="flex-1 min-w-0 rounded-2xl border border-primary-200/80 dark:border-dark-border bg-primary-50 dark:bg-dark-surface px-4 py-3.5 shadow-sm">
                                   <div className="flex items-center gap-2.5">
                                     <span className="text-primary-400 dark:text-dark-muted">
@@ -731,7 +737,7 @@ const App: React.FC = () => {
                                   </div>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-3 md:flex md:items-center md:gap-3">
+                                <div className="grid grid-cols-2 gap-3">
                                   <div className="rounded-2xl border border-primary-200/80 dark:border-dark-border bg-primary-50 dark:bg-dark-surface px-3 py-2.5 shadow-sm">
                                     <select
                                       value={searchPriority}

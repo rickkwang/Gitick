@@ -22,6 +22,12 @@ interface SidebarProps {
   isCollapsed: boolean;
   toggleCollapse: () => void;
   isDesktopMac: boolean;
+  searchQuery: string;
+  onSearchQueryChange: (value: string) => void;
+  searchPriority: 'all' | 'high' | 'medium' | 'low';
+  onSearchPriorityChange: (value: 'all' | 'high' | 'medium' | 'low') => void;
+  searchProject: 'all' | string;
+  onSearchProjectChange: (value: 'all' | string) => void;
 }
 
 type IconComponent = React.ComponentType;
@@ -206,9 +212,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
   isCollapsed,
   toggleCollapse,
   isDesktopMac,
+  searchQuery,
+  onSearchQueryChange,
+  searchPriority,
+  onSearchPriorityChange,
+  searchProject,
+  onSearchProjectChange,
 }) => {
   const [isAddingProject, setIsAddingProject] = useState(false);
   const [newProjectName, setNewProjectName] = useState('');
+  const [activeUtilityPanel, setActiveUtilityPanel] = useState<'none' | 'search' | 'category'>('none');
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Logic: renderCollapsed applies MAINLY to Desktop. 
@@ -220,6 +233,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
       inputRef.current?.focus();
     }
   }, [isAddingProject]);
+
+  useEffect(() => {
+    if (renderCollapsed) {
+      setActiveUtilityPanel('none');
+    }
+  }, [renderCollapsed]);
 
   const handleCreateProject = (e: React.FormEvent) => {
     e.preventDefault();
@@ -235,7 +254,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
        toggleCollapse();
     }
     setIsAddingProject(true);
-  }
+  };
+
+  const toggleUtilityPanel = (panel: 'search' | 'category') => {
+    if (renderCollapsed) {
+      toggleCollapse();
+      setActiveUtilityPanel(panel);
+      return;
+    }
+    setActiveUtilityPanel((prev) => (prev === panel ? 'none' : panel));
+  };
 
   const getProjectIcon = (name: string) => {
     switch (name) {
@@ -262,7 +290,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     /* DESKTOP CONFIGURATION (Overrides) */
     md:translate-x-0 md:shadow-none md:relative md:z-30 
     md:transition-[width] md:duration-300 md:ease-[cubic-bezier(0.2,0,0,1)]
-    ${renderCollapsed ? 'md:w-[84px]' : 'md:w-[260px]'}
+    ${renderCollapsed ? 'md:w-[108px]' : 'md:w-[268px]'}
   `;
 
   return (
@@ -281,81 +309,152 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <aside className={sidebarClasses}>
         <div className="flex flex-col h-full w-full p-2 md:p-2.5 pt-safe md:pt-2.5">
           <div className="relative flex flex-col h-full overflow-hidden rounded-[calc(var(--app-radius)+4px)] border border-primary-200/60 dark:border-dark-border/70 bg-primary-100 dark:bg-dark-surface shadow-[0_4px_20px_rgba(20,20,19,0.12),0_1px_4px_rgba(20,20,19,0.06)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.4),0_1px_4px_rgba(0,0,0,0.2)]">
-          {/* Header - Completely Refactored for Zero-Flicker */}
-          <div className={`h-[72px] md:h-[102px] relative flex items-center shrink-0 select-none w-full ${isDesktopMac ? 'md:pt-[54px]' : ''}`}>
-             
-             {/* 1. MOBILE HEADER: Static, Always Visible on Mobile (md:hidden) */}
-             {/* This separates mobile logic from desktop state, preventing logo flicker during open */}
-             <div className="md:hidden absolute inset-0 px-6 flex items-center justify-between">
-                <div className="flex items-center gap-3.5">
-                    <span className="shrink-0 w-7 h-7 flex items-center justify-center [&>svg]:w-6 [&>svg]:h-6 text-primary-900 dark:text-dark-text">
-                        <Icons.GitickLogo />
-                    </span>
-                    <span className="text-lg leading-none font-semibold tracking-tight whitespace-nowrap font-display brand-text">
-                        Gitick
-                    </span>
-                </div>
-                {/* Mobile Close Button */}
-                <button 
-                  onClick={onCloseMobile} 
-                  aria-label="Close sidebar"
-                  className="flex items-center justify-center p-2 -mr-2 rounded-lg text-primary-400 hover:text-primary-900 dark:hover:text-dark-text transition-colors active:scale-95 transform"
-                  title="Close Sidebar"
-               >
-                  <Icons.SidebarLeft />
-               </button>
-             </div>
+          <div className="h-[72px] md:h-[98px] relative shrink-0 select-none w-full">
+            <div className="md:hidden absolute inset-0 px-6 flex items-center justify-between">
+              <div className="flex items-center gap-3.5">
+                <span className="shrink-0 w-7 h-7 flex items-center justify-center [&>svg]:w-6 [&>svg]:h-6 text-primary-900 dark:text-dark-text">
+                  <Icons.GitickLogo />
+                </span>
+                <span className="text-lg leading-none font-semibold tracking-tight whitespace-nowrap font-display brand-text">
+                  Gitick
+                </span>
+              </div>
+              <button
+                onClick={onCloseMobile}
+                aria-label="Close sidebar"
+                className="flex items-center justify-center p-2 -mr-2 rounded-lg text-primary-400 hover:text-primary-900 dark:hover:text-dark-text transition-colors active:scale-95 transform"
+                title="Close Sidebar"
+              >
+                <Icons.SidebarLeft />
+              </button>
+            </div>
 
-             {/* 2. DESKTOP HEADER - EXPANDED (hidden on mobile) */}
-             <div className={`
-                hidden md:flex absolute inset-0 px-6 items-center justify-between
-                transition-opacity duration-200 ease-linear
-                ${renderCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}
-             `}>
-               <div className="flex items-center gap-2.5 overflow-hidden">
-                 <span className="shrink-0 w-12 h-12 flex items-center justify-center [&>svg]:w-6 [&>svg]:h-6 text-primary-900 dark:text-dark-text">
-                   <Icons.GitickLogo />
-                 </span>
-                 <span className="text-lg leading-none font-semibold tracking-tight whitespace-nowrap font-display brand-text">
-                   Gitick
-                 </span>
-               </div>
-               
-               <button 
-                  onClick={toggleCollapse} 
-                  aria-label="Collapse sidebar"
-                  className="flex items-center justify-center p-2 rounded-lg text-primary-400 hover:text-primary-900 dark:hover:text-dark-text hover:bg-primary-200/50 dark:hover:bg-dark-border transition-colors"
-                  title="Collapse Sidebar"
-               >
-                  <Icons.SidebarLeft />
-               </button>
-             </div>
+            <div
+              className={`hidden md:flex absolute top-3 right-3 items-center gap-1.5 ${
+                isDesktopMac ? (renderCollapsed ? 'left-[56px]' : 'left-[74px]') : 'left-3'
+              }`}
+            >
+              <button
+                type="button"
+                onClick={toggleCollapse}
+                aria-label={renderCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+                className="w-8 h-8 rounded-lg border border-primary-200/90 dark:border-dark-border/80 bg-primary-50/90 dark:bg-dark-surface/90 text-primary-500 dark:text-dark-muted hover:text-primary-900 dark:hover:text-dark-text hover:bg-primary-100 dark:hover:bg-dark-bg transition-colors flex items-center justify-center"
+                title={renderCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
+              >
+                {renderCollapsed ? <Icons.SidebarRight /> : <Icons.SidebarLeft />}
+              </button>
 
-             {/* 3. DESKTOP HEADER - COLLAPSED (hidden on mobile) */}
-             <div className={`
-                hidden md:flex absolute inset-0 items-center justify-center
-                transition-opacity duration-200 ease-linear
-                ${renderCollapsed ? 'opacity-100' : 'opacity-0 pointer-events-none'}
-             `}>
-                <button 
-                  onClick={toggleCollapse} 
-                  aria-label="Expand sidebar"
-                  className="group relative flex items-center justify-center w-12 h-12 rounded-xl hover:bg-primary-200/50 dark:hover:bg-dark-border transition-colors"
-                  title="Expand Sidebar"
+              <div
+                className={`flex items-center gap-1.5 transition-all duration-200 ${
+                  renderCollapsed ? 'opacity-0 pointer-events-none -translate-x-1' : 'opacity-100 translate-x-0'
+                }`}
+              >
+                <button
+                  type="button"
+                  onClick={() => toggleUtilityPanel('search')}
+                  aria-label="Search tasks"
+                  className={`w-8 h-8 rounded-lg border transition-colors flex items-center justify-center ${
+                    activeUtilityPanel === 'search'
+                      ? 'border-primary-300 dark:border-dark-border bg-primary-200/70 dark:bg-dark-border text-primary-900 dark:text-dark-text'
+                      : 'border-primary-200/90 dark:border-dark-border/80 bg-primary-50/90 dark:bg-dark-surface/90 text-primary-500 dark:text-dark-muted hover:text-primary-900 dark:hover:text-dark-text hover:bg-primary-100 dark:hover:bg-dark-bg'
+                  }`}
+                  title="Search"
                 >
-                   {/* Brand Logo - Visible by default */}
-                   <span className="absolute inset-0 flex items-center justify-center text-primary-900 dark:text-dark-text transition-opacity duration-200 group-hover:opacity-0 [&>svg]:w-6 [&>svg]:h-6">
-                     <Icons.GitickLogo />
-                   </span>
-
-                   {/* Expand Icon - Visible on Hover */}
-                   <span className="absolute inset-0 flex items-center justify-center text-primary-500 hover:text-primary-900 dark:hover:text-dark-text transition-opacity duration-200 opacity-0 group-hover:opacity-100">
-                     <Icons.SidebarRight />
-                   </span>
+                  <Icons.Search />
                 </button>
-             </div>
+                <button
+                  type="button"
+                  onClick={() => toggleUtilityPanel('category')}
+                  aria-label="Filter by category"
+                  className={`w-8 h-8 rounded-lg border transition-colors flex items-center justify-center ${
+                    activeUtilityPanel === 'category'
+                      ? 'border-primary-300 dark:border-dark-border bg-primary-200/70 dark:bg-dark-border text-primary-900 dark:text-dark-text'
+                      : 'border-primary-200/90 dark:border-dark-border/80 bg-primary-50/90 dark:bg-dark-surface/90 text-primary-500 dark:text-dark-muted hover:text-primary-900 dark:hover:text-dark-text hover:bg-primary-100 dark:hover:bg-dark-bg'
+                  }`}
+                  title="Category"
+                >
+                  <Icons.List />
+                </button>
+              </div>
+            </div>
+
+            <div
+              className={`hidden md:flex absolute left-4 right-4 bottom-3 items-center gap-3 transition-all duration-220 ${
+                renderCollapsed ? 'opacity-0 translate-y-1 pointer-events-none' : 'opacity-100 translate-y-0'
+              }`}
+            >
+              <span className="shrink-0 w-9 h-9 flex items-center justify-center [&>svg]:w-5 [&>svg]:h-5 text-primary-900 dark:text-dark-text">
+                <Icons.GitickLogo />
+              </span>
+              <span className="text-base leading-none font-semibold tracking-tight whitespace-nowrap font-display brand-text">
+                Gitick
+              </span>
+            </div>
           </div>
 
+          <div
+            className={`hidden md:block px-2.5 pb-2 transition-all duration-200 ${
+              renderCollapsed ? 'opacity-0 pointer-events-none max-h-0' : 'opacity-100 max-h-64'
+            }`}
+          >
+            <div
+              className={`rounded-2xl border border-primary-200/80 dark:border-dark-border/80 bg-primary-50/85 dark:bg-dark-bg/80 shadow-sm overflow-hidden transition-all duration-200 ${
+                activeUtilityPanel === 'none' ? 'max-h-0 opacity-0 p-0 border-transparent' : 'max-h-52 opacity-100 p-3'
+              }`}
+            >
+              {activeUtilityPanel === 'search' && (
+                <div className="flex items-center gap-2 rounded-xl border border-primary-200/90 dark:border-dark-border/80 bg-primary-100/70 dark:bg-dark-surface px-3 py-2">
+                  <span className="text-primary-400 dark:text-dark-muted">
+                    <Icons.Search />
+                  </span>
+                  <input
+                    value={searchQuery}
+                    onChange={(event) => onSearchQueryChange(event.target.value)}
+                    placeholder="Search title, tag, project..."
+                    className="w-full bg-transparent outline-none text-xs text-primary-900 dark:text-dark-text placeholder:text-primary-400 dark:placeholder:text-dark-muted"
+                  />
+                </div>
+              )}
+
+              {activeUtilityPanel === 'category' && (
+                <div className="grid grid-cols-1 gap-2">
+                  <div className="rounded-xl border border-primary-200/90 dark:border-dark-border/80 bg-primary-100/70 dark:bg-dark-surface px-3 py-2">
+                    <select
+                      value={searchPriority}
+                      onChange={(event) => onSearchPriorityChange(event.target.value as 'all' | 'high' | 'medium' | 'low')}
+                      className="w-full bg-transparent text-xs text-primary-700 dark:text-dark-text outline-none"
+                    >
+                      <option value="all">Any Priority</option>
+                      <option value="high">High</option>
+                      <option value="medium">Medium</option>
+                      <option value="low">Low</option>
+                    </select>
+                  </div>
+                  <div className="rounded-xl border border-primary-200/90 dark:border-dark-border/80 bg-primary-100/70 dark:bg-dark-surface px-3 py-2">
+                    <select
+                      value={searchProject}
+                      onChange={(event) => onSearchProjectChange(event.target.value as 'all' | string)}
+                      className="w-full bg-transparent text-xs text-primary-700 dark:text-dark-text outline-none"
+                    >
+                      <option value="all">Any Project</option>
+                      <option value="Inbox">Inbox</option>
+                      {projects.map((project) => (
+                        <option key={project} value={project}>
+                          {project}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div
+            className={`flex min-h-0 flex-1 flex-col transition-all duration-220 ${
+              renderCollapsed ? 'md:opacity-0 md:pointer-events-none' : 'md:opacity-100'
+            }`}
+          >
           <div className="flex-1 overflow-y-auto no-scrollbar py-2.5 space-y-5 px-2.5">
             {/* Section: Overview */}
             <div>
@@ -470,7 +569,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                </nav>
             </div>
           </div>
-          
+
           {/* User Profile Footer (Unified Design) */}
           <div className="mt-auto px-2.5 pb-safe md:pb-3 pt-1.5 shrink-0">
              {/* Subtle Divider */}
@@ -516,6 +615,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   </div>
                 </button>
              </div>
+          </div>
           </div>
 
           </div>
