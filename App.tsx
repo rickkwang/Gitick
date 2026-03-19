@@ -677,7 +677,7 @@ const App: React.FC = () => {
                       <div className="max-w-[1400px] mx-auto w-full px-8 py-6">
                           {filter !== 'focus' && (
                             <div className="mb-5">
-                              <div className="max-w-3xl rounded-xl border border-primary-200/80 dark:border-dark-border/80 bg-primary-50/95 dark:bg-dark-surface/95 shadow-sm backdrop-blur-sm px-2 py-2">
+                              <div className="w-full rounded-xl border border-primary-200/80 dark:border-dark-border/80 bg-primary-50/95 dark:bg-dark-surface/95 shadow-sm backdrop-blur-sm px-2 py-2">
                                 <div className="flex items-center gap-2">
                                   <div className="flex-1 min-w-0">
                                     <div className="h-9 flex items-center gap-2 rounded-lg px-3 bg-primary-50 dark:bg-dark-bg/40 border border-primary-200/70 dark:border-dark-border/70">
@@ -693,7 +693,7 @@ const App: React.FC = () => {
                                     </div>
                                   </div>
 
-                                  <div className="h-6 w-px bg-primary-200/80 dark:bg-dark-border/80 shrink-0" />
+                                  <div className="h-6 w-px bg-primary-200/80 dark:bg-dark-border/80 shrink-0 ml-auto" />
 
                                   <div className="flex items-center gap-1.5 shrink-0">
                                     <div className="h-9 rounded-lg border border-primary-200/70 dark:border-dark-border/70 bg-primary-50 dark:bg-dark-bg/40 px-2.5">
