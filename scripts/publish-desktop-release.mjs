@@ -9,7 +9,7 @@ const tag = `v${version}`;
 const repo = 'rickkwang/Gitick';
 const releaseDir = join(root, 'release');
 
-const ARCHS = ['arm64', 'x64'];
+const ARCHS = ['arm64'];
 
 const expectedAssetNames = ARCHS.flatMap((arch) => [
   `Gitick-${version}-${arch}.dmg`,
@@ -50,7 +50,7 @@ if (!releaseExists) {
     '--title',
     `Gitick ${tag}`,
     '--notes',
-    `Desktop release ${tag} with in-app updater artifacts for arm64 and x64.`,
+    `Desktop release ${tag} with in-app updater artifacts for arm64.`,
   ]);
 } else {
   run('gh', [

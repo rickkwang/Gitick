@@ -7,7 +7,6 @@ const releaseDir = join(root, 'release');
 
 const targets = [
   { arch: 'arm64', appPath: join(releaseDir, 'mac-arm64', 'Gitick.app') },
-  { arch: 'x64', appPath: join(releaseDir, 'mac', 'Gitick.app') },
 ];
 
 let hasError = false;
