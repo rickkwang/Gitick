@@ -86,8 +86,8 @@ const NavItemComponent: React.FC<NavItemProps> = ({
                   ? 'text-primary-900 dark:text-dark-text border border-transparent'
                   : 'bg-primary-200/50 dark:bg-dark-border/60 text-primary-900 dark:text-dark-text font-bold border border-transparent'
                 : isCollapsed
-                  ? 'text-primary-500 dark:text-dark-muted border border-transparent hover:text-primary-900 dark:hover:text-dark-text'
-                  : 'text-primary-500 dark:text-dark-muted border border-transparent hover:bg-primary-100 dark:hover:bg-dark-border/50 hover:border-primary-200/80 dark:hover:border-dark-border hover:text-primary-900 dark:hover:text-dark-text'
+                  ? 'text-primary-900 dark:text-dark-text border border-transparent hover:text-primary-900 dark:hover:text-dark-text'
+                  : 'text-primary-900 dark:text-dark-text border border-transparent hover:bg-primary-100 dark:hover:bg-dark-border/50 hover:border-primary-200/80 dark:hover:border-dark-border hover:text-primary-900 dark:hover:text-dark-text'
             }
           `}
         >
@@ -106,7 +106,7 @@ const NavItemComponent: React.FC<NavItemProps> = ({
                 ${
                   isActive
                     ? 'text-primary-900 dark:text-dark-text'
-                    : 'text-primary-400 dark:text-dark-muted group-hover:text-gray-600 dark:group-hover:text-dark-text'
+                    : 'text-primary-900 dark:text-dark-text group-hover:text-primary-900 dark:group-hover:text-dark-text'
                 }
               `}
             >
@@ -128,7 +128,7 @@ const NavItemComponent: React.FC<NavItemProps> = ({
             {/* Task Count / Focus Timer */}
             <div className="ml-auto pr-3 pl-1">
               {!isFocusItem && taskCount > 0 && (
-                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${isActive ? 'bg-primary-50 dark:bg-dark-bg text-primary-900 dark:text-dark-text' : 'bg-primary-200 dark:bg-dark-border text-primary-500 dark:text-dark-muted'}`}>
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${isActive ? 'bg-primary-50 dark:bg-dark-bg text-primary-900 dark:text-dark-text' : 'bg-primary-200 dark:bg-dark-border text-primary-900 dark:text-dark-text'}`}>
                   {taskCount}
                 </span>
               )}
@@ -366,7 +366,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                  opacity-100
                  ${renderCollapsed ? 'md:opacity-0 md:pointer-events-none' : 'md:opacity-100'}
               `}>
-                <h3 className="text-[10px] font-bold text-primary-400 dark:text-dark-muted uppercase tracking-widest whitespace-nowrap pl-1">Overview</h3>
+                <h3 className="text-[10px] font-bold text-primary-900 dark:text-dark-text uppercase tracking-widest whitespace-nowrap pl-1">Overview</h3>
               </div>
               <nav className="space-y-1">
                 <NavItem 
@@ -401,11 +401,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
                  opacity-100
                  ${renderCollapsed ? 'md:opacity-0 md:pointer-events-none' : 'md:opacity-100'}
               `}>
-                  <h3 className="text-[10px] font-bold text-primary-400 dark:text-dark-muted uppercase tracking-widest pl-1">Projects</h3>
+                  <h3 className="text-[10px] font-bold text-primary-900 dark:text-dark-text uppercase tracking-widest pl-1">Projects</h3>
                   <button
                     onClick={startAddProject}
                     aria-label="Add project"
-                    className="text-primary-300 dark:text-dark-muted hover:text-primary-900 dark:hover:text-dark-text transition-colors p-1 rounded-full hover:bg-primary-200/50 dark:hover:bg-dark-border"
+                    className="text-primary-900 dark:text-dark-text hover:text-primary-900 dark:hover:text-dark-text transition-colors p-1 rounded-full hover:bg-primary-200/50 dark:hover:bg-dark-border"
                     title="Add Project"
                   >
                     <Icons.Plus />
@@ -432,7 +432,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 {isAddingProject && !renderCollapsed && (
                   <form onSubmit={handleCreateProject} className="px-1 py-1 animate-in fade-in slide-in-from-top-2 duration-200">
                     <div className="flex items-center gap-3 px-3 py-2 bg-primary-100 dark:bg-dark-bg rounded-lg border border-primary-200 dark:border-dark-border focus-within:border-[var(--accent)] focus-within:ring-1 focus-within:ring-[var(--accent)] transition-all shadow-sm">
-                      <span className="text-primary-400"><Icons.Folder /></span>
+                      <span className="text-primary-900 dark:text-dark-text"><Icons.Folder /></span>
                       <input 
                         ref={inputRef}
                         type="text"
@@ -459,7 +459,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   opacity-100
                   ${renderCollapsed ? 'md:opacity-0 md:pointer-events-none' : 'md:opacity-100'}
                `}>
-                 <h3 className="text-[10px] font-bold text-primary-400 dark:text-dark-muted uppercase tracking-widest whitespace-nowrap pl-1">History</h3>
+                 <h3 className="text-[10px] font-bold text-primary-900 dark:text-dark-text uppercase tracking-widest whitespace-nowrap pl-1">History</h3>
                </div>
                <nav className="space-y-1">
                   <NavItem 
@@ -507,10 +507,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   `}>
                       <div className="flex flex-col items-start leading-tight">
                           <span className="text-sm font-bold text-primary-900 dark:text-dark-text truncate max-w-[120px]">{userProfile.name}</span>
-                          <span className="text-[10px] text-primary-400 dark:text-dark-muted font-medium">Settings</span>
+                          <span className="text-[10px] text-primary-900 dark:text-dark-text font-medium">Settings</span>
                       </div>
                       
-                      <span className="text-primary-300 dark:text-dark-muted group-hover:text-primary-900 dark:group-hover:text-dark-text transition-colors">
+                      <span className="text-primary-900 dark:text-dark-text group-hover:text-primary-900 dark:group-hover:text-dark-text transition-colors">
                           <Icons.Settings />
                       </span>
                   </div>
