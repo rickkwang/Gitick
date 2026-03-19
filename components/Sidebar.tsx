@@ -78,7 +78,7 @@ const NavItemComponent: React.FC<NavItemProps> = ({
           className={`
             relative flex items-center text-sm font-medium rounded-xl outline-none select-none
             transition-colors duration-200
-            h-[44px] px-0
+            h-[40px] px-0
             w-full justify-start
               ${
                 isActive
@@ -95,7 +95,7 @@ const NavItemComponent: React.FC<NavItemProps> = ({
           <span
             className={`
               shrink-0 flex items-center justify-center transition-colors duration-200
-              w-[48px] h-[44px] md:absolute md:top-0
+              w-[44px] h-[40px] md:absolute md:top-0
               ${isCollapsed ? 'md:left-1/2 md:-translate-x-1/2' : 'md:left-0'}
             `}
           >
@@ -120,7 +120,7 @@ const NavItemComponent: React.FC<NavItemProps> = ({
             flex items-center flex-1 min-w-0 overflow-hidden whitespace-nowrap pl-1
             transition-opacity duration-200 ease-linear
             opacity-100
-            md:pl-[58px]
+            md:pl-[52px]
             ${isCollapsed ? 'md:opacity-0 md:pointer-events-none' : 'md:opacity-100'}
           `}>
             <span className="truncate pr-2">{label}</span>
@@ -253,7 +253,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     fixed inset-y-0 left-0 z-[60] ${activeFilter === 'focus' ? 'bg-transparent' : 'bg-[var(--app-bg)]'} flex flex-col
     
     /* MOBILE CONFIGURATION */
-    w-[280px]
+    w-[268px]
     transform-gpu will-change-transform
     /* Smoother, slightly faster transition for mobile drawer feel (500ms) */
     transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]
@@ -262,7 +262,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     /* DESKTOP CONFIGURATION (Overrides) */
     md:translate-x-0 md:shadow-none md:relative md:z-30 
     md:transition-[width] md:duration-300 md:ease-[cubic-bezier(0.2,0,0,1)]
-    ${renderCollapsed ? 'md:w-[88px]' : 'md:w-[270px]'}
+    ${renderCollapsed ? 'md:w-[84px]' : 'md:w-[260px]'}
   `;
 
   return (
@@ -279,10 +279,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
       />
       
       <aside className={sidebarClasses}>
-        <div className="flex flex-col h-full w-full p-2 md:p-3 pt-safe md:pt-3">
+        <div className="flex flex-col h-full w-full p-2 md:p-2.5 pt-safe md:pt-2.5">
           <div className="relative flex flex-col h-full overflow-hidden rounded-[calc(var(--app-radius)+4px)] border border-primary-200/60 dark:border-dark-border/70 bg-primary-100 dark:bg-dark-surface shadow-[0_4px_20px_rgba(20,20,19,0.12),0_1px_4px_rgba(20,20,19,0.06)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.4),0_1px_4px_rgba(0,0,0,0.2)]">
           {/* Header - Completely Refactored for Zero-Flicker */}
-          <div className={`h-[76px] md:h-[110px] relative flex items-center shrink-0 select-none w-full ${isDesktopMac ? 'md:pt-[58px]' : ''}`}>
+          <div className={`h-[72px] md:h-[102px] relative flex items-center shrink-0 select-none w-full ${isDesktopMac ? 'md:pt-[54px]' : ''}`}>
              
              {/* 1. MOBILE HEADER: Static, Always Visible on Mobile (md:hidden) */}
              {/* This separates mobile logic from desktop state, preventing logo flicker during open */}
@@ -356,19 +356,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
              </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto no-scrollbar py-3 space-y-7 px-3">
+          <div className="flex-1 overflow-y-auto no-scrollbar py-2.5 space-y-5 px-2.5">
             {/* Section: Overview */}
             <div>
               {/* CRITICAL: md: prefix ensures collapse logic only affects desktop. Mobile is always visible (h-6) */}
               <div className={`
-                 overflow-hidden px-3 h-6 mb-2 flex items-center
+                 overflow-hidden px-2.5 h-5 mb-1.5 flex items-center
                  transition-opacity duration-200
                  opacity-100
                  ${renderCollapsed ? 'md:opacity-0 md:pointer-events-none' : 'md:opacity-100'}
               `}>
                 <h3 className="text-[10px] font-bold text-primary-900 dark:text-dark-text uppercase tracking-widest whitespace-nowrap pl-1">Overview</h3>
               </div>
-              <nav className="space-y-1">
+              <nav className="space-y-0.5">
                 <NavItem 
                   id="next7days" label="Dashboard" icon={Icons.Dashboard} 
                   activeFilter={activeFilter} onFilterChange={onFilterChange} onCloseMobile={onCloseMobile} taskCount={taskCounts['next7days']} 
@@ -396,7 +396,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             {/* Section: Projects */}
             <div>
               <div className={`
-                 flex items-center justify-between px-3 group overflow-hidden whitespace-nowrap h-6 mb-2
+                 flex items-center justify-between px-2.5 group overflow-hidden whitespace-nowrap h-5 mb-1.5
                  transition-opacity duration-200
                  opacity-100
                  ${renderCollapsed ? 'md:opacity-0 md:pointer-events-none' : 'md:opacity-100'}
@@ -412,7 +412,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   </button>
               </div>
 
-              <nav className="space-y-1">
+              <nav className="space-y-0.5">
                 {projects.map(project => (
                   <NavItem 
                     key={project} 
@@ -430,8 +430,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 ))}
 
                 {isAddingProject && !renderCollapsed && (
-                  <form onSubmit={handleCreateProject} className="px-1 py-1 animate-in fade-in slide-in-from-top-2 duration-200">
-                    <div className="flex items-center gap-3 px-3 py-2 bg-primary-100 dark:bg-dark-bg rounded-lg border border-primary-200 dark:border-dark-border focus-within:border-[var(--accent)] focus-within:ring-1 focus-within:ring-[var(--accent)] transition-all shadow-sm">
+                  <form onSubmit={handleCreateProject} className="px-1 py-0.5 animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div className="flex items-center gap-2.5 px-2.5 py-1.5 bg-primary-100 dark:bg-dark-bg rounded-lg border border-primary-200 dark:border-dark-border focus-within:border-[var(--accent)] focus-within:ring-1 focus-within:ring-[var(--accent)] transition-all shadow-sm">
                       <span className="text-primary-900 dark:text-dark-text"><Icons.Folder /></span>
                       <input 
                         ref={inputRef}
@@ -461,7 +461,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                `}>
                  <h3 className="text-[10px] font-bold text-primary-900 dark:text-dark-text uppercase tracking-widest whitespace-nowrap pl-1">History</h3>
                </div>
-               <nav className="space-y-1">
+                 <nav className="space-y-0.5">
                   <NavItem 
                     id="completed" label="Repository" icon={Icons.CheckCircle} 
                     activeFilter={activeFilter} onFilterChange={onFilterChange} onCloseMobile={onCloseMobile} taskCount={0} 
@@ -472,23 +472,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
           
           {/* User Profile Footer (Unified Design) */}
-          <div className="mt-auto px-3 pb-safe md:pb-4 pt-2 shrink-0">
+          <div className="mt-auto px-2.5 pb-safe md:pb-3 pt-1.5 shrink-0">
              {/* Subtle Divider */}
-             <div className="mx-2 mb-2 h-px bg-primary-200/80 dark:bg-dark-border/80" />
+             <div className="mx-2 mb-1.5 h-px bg-primary-200/80 dark:bg-dark-border/80" />
              
-             <div className={renderCollapsed ? 'md:px-0 px-2' : 'px-2'}> {/* Wrapper to match NavItem padding */}
+             <div className={renderCollapsed ? 'md:px-0 px-1.5' : 'px-1.5'}> {/* Wrapper to match NavItem padding */}
                 <button 
                   onClick={onOpenSettings}
                   className={`
                     group flex items-center w-full rounded-xl transition-colors duration-200 outline-none
-                    h-11 px-0
+                    h-10 px-0
                     ${renderCollapsed ? 'md:justify-center' : ''}
                     hover:bg-primary-200/50 dark:hover:bg-dark-border
                   `}
                   title="Settings & Profile"
                 >
                   {/* Icon Container - Perfectly aligned with NavItem w-12 */}
-                  <div className={`shrink-0 flex items-center justify-center transition-colors duration-200 ${renderCollapsed ? 'w-11 h-11' : 'w-12 h-full'}`}>
+                  <div className={`shrink-0 flex items-center justify-center transition-colors duration-200 ${renderCollapsed ? 'w-10 h-10' : 'w-11 h-full'}`}>
                       <div className={`w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-bold text-white shadow-sm ring-1 ring-white/10 dark:ring-black/10 overflow-hidden ${userProfile.avatarColor}`}>
                           {userProfile.avatarImage ? (
                             <img src={userProfile.avatarImage} alt="User avatar" className="w-full h-full object-cover" />
@@ -500,7 +500,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
                   {/* Text Container */}
                   <div className={`
-                      flex items-center justify-between flex-1 min-w-0 overflow-hidden pr-3 pl-1
+                      flex items-center justify-between flex-1 min-w-0 overflow-hidden pr-2.5 pl-1
                       transition-opacity duration-200
                       opacity-100
                       ${renderCollapsed ? 'md:hidden' : 'md:opacity-100'}
