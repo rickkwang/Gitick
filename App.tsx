@@ -677,7 +677,7 @@ const App: React.FC = () => {
                       <div className="max-w-[1400px] mx-auto w-full px-8 py-6">
                           {filter !== 'focus' && (
                             <div className="mb-5">
-                              <div className="w-full px-1 py-1">
+                              <div className="w-full max-w-[1040px] mx-auto px-1 py-1">
                                 <div className="flex items-center gap-2">
                                   <div className="w-full max-w-[520px] min-w-[280px]">
                                     <div className="h-9 flex items-center gap-2 rounded-lg px-3 bg-primary-50 dark:bg-dark-bg/40 border border-primary-200/70 dark:border-dark-border/70">
@@ -733,7 +733,7 @@ const App: React.FC = () => {
                           {/* Heatmap Section */}
                           {filter === 'next7days' && (
                              <div className="mb-6">
-                                <div className="w-full lg:w-[70%] max-w-[1040px] mx-auto p-4 bg-primary-50 dark:bg-dark-surface rounded-lg shadow-sm border border-primary-200/80 dark:border-dark-border/80">
+                                <div className="w-full max-w-[1040px] mx-auto p-4 bg-primary-50 dark:bg-dark-surface rounded-lg shadow-sm border border-primary-200/80 dark:border-dark-border/80">
                                    <div className="flex items-center justify-between mb-2">
                                       <h3 className="text-[10px] font-bold text-primary-900 dark:text-dark-text uppercase tracking-wider flex items-center gap-1.5">
                                          <Icons.Flame /> Contributions
