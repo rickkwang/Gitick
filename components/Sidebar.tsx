@@ -70,7 +70,7 @@ const NavItemComponent: React.FC<NavItemProps> = ({
             relative flex items-center text-sm font-medium rounded-xl outline-none select-none
             transition-colors duration-200
             h-[40px] px-0
-            w-full ${isCollapsed ? 'justify-center' : 'justify-start'}
+            w-full justify-start
               ${
                 isActive
                   ? 'bg-primary-200/50 dark:bg-dark-border/60 text-primary-900 dark:text-dark-text font-bold border border-transparent'
@@ -84,8 +84,8 @@ const NavItemComponent: React.FC<NavItemProps> = ({
           <span
             className={`
               shrink-0 flex items-center justify-center transition-colors duration-200
-              w-[44px] h-[40px]
-              ${isCollapsed ? 'relative' : 'absolute top-0 left-0'}
+              w-[44px] h-[40px] absolute top-0
+              left-0
             `}
           >
             <span
