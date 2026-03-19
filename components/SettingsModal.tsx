@@ -347,12 +347,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
              {/* --- DATA TAB --- */}
              {activeTab === 'data' && (
                <div className="space-y-7">
-                 <div className="p-4 md:p-5 bg-blue-50 dark:bg-blue-900/10 rounded-lg border border-blue-100 dark:border-blue-900/30">
+                 <div className="p-4 md:p-5 bg-primary-100 dark:bg-dark-border/40 rounded-lg border border-primary-200/80 dark:border-dark-border">
                     <div className="flex gap-3">
                        <Icons.Briefcase />
                        <div className="space-y-1">
-                          <h4 className="text-sm font-bold text-blue-800 dark:text-blue-300">Backup & Restore</h4>
-                          <p className="text-xs text-blue-600 dark:text-blue-400">Export your tasks to JSON or import from a backup.</p>
+                          <h4 className="text-sm font-bold text-primary-900 dark:text-dark-text">Backup & Restore</h4>
+                          <p className="text-xs text-primary-500 dark:text-dark-muted">Export your tasks to JSON or import from a backup.</p>
                        </div>
                     </div>
                  </div>
@@ -374,14 +374,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                  </div>
                  
                  {importError && (
-                   <p className="text-xs text-red-500 font-bold">{importError}</p>
+                   <p className="text-xs text-primary-600 dark:text-dark-text font-semibold">{importError}</p>
                  )}
 
                  <div className="pt-6 border-t border-primary-200/80 dark:border-dark-border">
-                    <h4 className="text-sm font-bold text-red-500 mb-2">Danger Zone</h4>
+                    <h4 className="text-sm font-bold text-primary-700 dark:text-dark-text mb-2">Danger Zone</h4>
                     <button 
                       onClick={() => setShowClearConfirm(true)}
-                      className="w-full flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/30 rounded-xl text-red-600 hover:bg-red-100 dark:hover:bg-red-900/20 transition-colors"
+                      className="w-full flex items-center justify-between p-4 bg-primary-50 dark:bg-dark-surface border border-primary-200/80 dark:border-dark-border rounded-xl text-primary-700 dark:text-dark-text hover:bg-primary-100 dark:hover:bg-dark-border transition-colors"
                     >
                        <span className="text-sm font-medium">Reset All Local Data</span>
                        <Icons.Trash />
@@ -437,8 +437,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     </div>
                  </div>
 
-                 <div className="p-5 rounded-lg bg-green-50 dark:bg-green-900/10 border border-green-100 dark:border-green-900/30">
-                    <p className="text-xs text-green-700 dark:text-green-400 font-medium">
+                 <div className="p-5 rounded-lg bg-primary-100 dark:bg-dark-border/40 border border-primary-200/80 dark:border-dark-border">
+                    <p className="text-xs text-primary-700 dark:text-dark-text font-medium">
                        🔒 <span className="font-bold">Local First:</span> Your data is stored locally on your current device. We don't see your tasks. Export backup before switching devices.
                     </p>
                  </div>
