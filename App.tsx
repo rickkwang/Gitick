@@ -33,7 +33,6 @@ const SettingsModal = lazy(() =>
 );
 const TASKS_PERSIST_DEBOUNCE_MS = 800;
 const DESKTOP_FONT_SIZE_OPTIONS = [10, 12, 14, 16, 18] as const;
-const DESKTOP_TOPBAR_HEIGHT = 44;
 
 const normalizeDesktopFontSize = (value: number): number => {
   if (!Number.isFinite(value)) return 12;
@@ -85,7 +84,6 @@ const App: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchPriority, setSearchPriority] = useState<'all' | 'high' | 'medium' | 'low'>('all');
   const [searchProject, setSearchProject] = useState<'all' | string>('all');
-  const [desktopUtilityPanel, setDesktopUtilityPanel] = useState<'none' | 'search' | 'category'>('none');
   const desktopPlatform = typeof window !== 'undefined' ? window.gitickDesktop?.platform : undefined;
   const isDesktopMac = desktopPlatform === 'darwin';
   const isDesktopRuntime = typeof window !== 'undefined' && Boolean(window.gitickDesktop?.updater);
@@ -508,17 +506,7 @@ const App: React.FC = () => {
     setSelectedTask(null);
   }, []);
   const handleSidebarToggleCollapse = useCallback(() => {
-    setIsSidebarCollapsed((prev) => {
-      const next = !prev;
-      if (next) {
-        setDesktopUtilityPanel('none');
-      }
-      return next;
-    });
-  }, []);
-  const handleDesktopUtilityToggle = useCallback((panel: 'search' | 'category') => {
-    setIsSidebarCollapsed(false);
-    setDesktopUtilityPanel((prev) => (prev === panel ? 'none' : panel));
+    setIsSidebarCollapsed((prev) => !prev);
   }, []);
   const handleSidebarCloseMobile = useCallback(() => {
     setIsSidebarOpen(false);
@@ -526,13 +514,6 @@ const App: React.FC = () => {
   const handleOpenSettings = useCallback(() => {
     setShowSettings(true);
   }, []);
-  const desktopToolbarLeft = isDesktopMac
-    ? isSidebarCollapsed
-      ? 146
-      : 346
-    : isSidebarCollapsed
-      ? 16
-      : 276;
 
   const createTaskFromCommand = useCallback(
     (title: string) => {
@@ -657,7 +638,7 @@ const App: React.FC = () => {
 
   return (
     <div
-      className={`[--app-radius:16px] relative flex flex-col h-dvh md:rounded-[var(--app-radius)] font-sans text-primary-900 dark:text-dark-text bg-[var(--app-bg)] overflow-hidden transition-colors duration-300 selection:bg-primary-900 selection:text-white dark:selection:bg-primary-100 dark:selection:text-primary-900 ${
+      className={`[--app-radius:16px] flex flex-col h-dvh md:rounded-[var(--app-radius)] font-sans text-primary-900 dark:text-dark-text bg-[var(--app-bg)] overflow-hidden transition-colors duration-300 selection:bg-primary-900 selection:text-white dark:selection:bg-primary-100 dark:selection:text-primary-900 ${
         isStartupStatic ? 'startup-static' : ''
       }`}
     > 
@@ -681,65 +662,6 @@ const App: React.FC = () => {
          </div>
       </header>
 
-      {filter !== 'focus' && (
-        <div
-          className="hidden md:block shrink-0 border-b border-primary-200/70 dark:border-dark-border/70 bg-[var(--app-bg)]/94 backdrop-blur-sm z-[70]"
-          style={{ height: `${DESKTOP_TOPBAR_HEIGHT}px`, WebkitAppRegion: 'drag' } as React.CSSProperties}
-        >
-          <div
-            className="absolute z-[120] flex items-center gap-1.5 pointer-events-auto"
-            style={{
-              top: '8px',
-              left: `${desktopToolbarLeft}px`,
-              transition: 'left 300ms cubic-bezier(0.2,0,0,1)',
-              WebkitAppRegion: 'no-drag',
-            } as React.CSSProperties}
-          >
-            <button
-              type="button"
-              onClick={handleSidebarToggleCollapse}
-              aria-label={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-              className="w-8 h-8 transition-colors flex items-center justify-center text-primary-500 dark:text-dark-muted hover:text-primary-900 dark:hover:text-dark-text"
-              title={isSidebarCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
-            >
-              <span className="[&>svg]:w-[15px] [&>svg]:h-[15px]">
-                {isSidebarCollapsed ? <Icons.SidebarRight /> : <Icons.SidebarLeft />}
-              </span>
-            </button>
-            <button
-              type="button"
-              onClick={() => handleDesktopUtilityToggle('search')}
-              aria-label="Search tasks"
-              className={`w-8 h-8 transition-colors flex items-center justify-center ${
-                desktopUtilityPanel === 'search'
-                  ? 'text-primary-900 dark:text-dark-text'
-                  : 'text-primary-500 dark:text-dark-muted hover:text-primary-900 dark:hover:text-dark-text'
-              }`}
-              title="Search"
-            >
-              <span className="[&>svg]:w-[15px] [&>svg]:h-[15px]">
-                <Icons.Search />
-              </span>
-            </button>
-            <button
-              type="button"
-              onClick={() => handleDesktopUtilityToggle('category')}
-              aria-label="Filter by category"
-              className={`w-8 h-8 transition-colors flex items-center justify-center ${
-                desktopUtilityPanel === 'category'
-                  ? 'text-primary-900 dark:text-dark-text'
-                  : 'text-primary-500 dark:text-dark-muted hover:text-primary-900 dark:hover:text-dark-text'
-              }`}
-              title="Category"
-            >
-              <span className="[&>svg]:w-[15px] [&>svg]:h-[15px]">
-                <Icons.Tag />
-              </span>
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* Main Layout Container */}
       <div className="flex-1 flex w-full relative overflow-hidden">
         
@@ -749,7 +671,7 @@ const App: React.FC = () => {
           onFilterChange={handleSidebarFilterChange} 
           isOpen={isSidebarOpen}
           isCollapsed={isSidebarCollapsed}
-          desktopUtilityPanel={desktopUtilityPanel}
+          toggleCollapse={handleSidebarToggleCollapse}
           onCloseMobile={handleSidebarCloseMobile}
           taskCounts={taskCounts}
           onOpenSettings={handleOpenSettings}
@@ -759,18 +681,13 @@ const App: React.FC = () => {
           onAddProject={addProject}
           onDeleteProject={deleteProject}
           userProfile={userProfile}
-          searchQuery={searchQuery}
-          onSearchQueryChange={setSearchQuery}
-          searchPriority={searchPriority}
-          onSearchPriorityChange={setSearchPriority}
-          searchProject={searchProject}
-          onSearchProjectChange={setSearchProject}
+          isDesktopMac={isDesktopMac}
         />
 
         {/* COL 2: Main Content */}
         <main className="flex-1 flex flex-col min-w-0 h-full bg-[var(--app-bg)] relative z-0 transition-colors duration-300">
            
-           <div className={`h-full flex flex-col ${filter === 'focus' || isSidebarCollapsed ? '' : 'animate-view-breathe'}`}>
+           <div className={`h-full flex flex-col ${filter === 'focus' ? '' : 'animate-view-breathe'}`}>
              
              {filter === 'focus' ? (
                <FocusMode
@@ -784,13 +701,22 @@ const App: React.FC = () => {
                  setMode={handleFocusModeChange}
                />
              ) : (
-              <div className="flex-1 flex flex-col h-full relative">
+               <div className="flex-1 flex flex-col h-full relative">
+                  
+                  {/* Desktop drag region for macOS title bar */}
+                  {isDesktopMac && (
+                    <div
+                      className="hidden md:block absolute top-0 left-0 right-0 h-10 z-10 pointer-events-none"
+                      style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
+                    />
+                  )}
+
                   {/* Scrollable List Area */}
                   <div className="flex-1 overflow-y-auto main-scroll scroll-smooth">
                       <div className="max-w-[1180px] mx-auto w-full px-5 md:px-11 py-8 md:py-11">
                           {filter !== 'focus' && (
-                            <div className="mb-5 md:hidden">
-                              <div className="flex flex-col gap-3">
+                            <div className="mb-7">
+                              <div className="flex flex-col gap-3 md:flex-row md:items-center">
                                 <div className="flex-1 min-w-0 rounded-2xl border border-primary-200/80 dark:border-dark-border bg-primary-50 dark:bg-dark-surface px-4 py-3.5 shadow-sm">
                                   <div className="flex items-center gap-2.5">
                                     <span className="text-primary-400 dark:text-dark-muted">
@@ -805,7 +731,7 @@ const App: React.FC = () => {
                                   </div>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-3">
+                                <div className="grid grid-cols-2 gap-3 md:flex md:items-center md:gap-3">
                                   <div className="rounded-2xl border border-primary-200/80 dark:border-dark-border bg-primary-50 dark:bg-dark-surface px-3 py-2.5 shadow-sm">
                                     <select
                                       value={searchPriority}
@@ -841,10 +767,10 @@ const App: React.FC = () => {
                           
                           {/* Heatmap Section */}
                           {filter === 'next7days' && (
-                             <div className="mb-10 md:mb-12">
-                                <div className="p-5 md:p-6 bg-primary-50/90 dark:bg-dark-surface rounded-2xl shadow-sm border border-primary-200/80 dark:border-dark-border/80">
-                                   <div className="flex items-center justify-between mb-5">
-                                      <div className="flex items-center gap-2.5">
+                             <div className="mb-12">
+                                <div className="p-5 md:p-6 bg-primary-50 dark:bg-dark-surface rounded-xl shadow-sm border border-primary-200/80 dark:border-dark-border/80">
+                                   <div className="flex items-center justify-between mb-4">
+                                      <div className="flex items-center gap-2">
                                          <Icons.Flame />
                                          <h3 className="text-xs font-bold text-primary-900 dark:text-dark-text uppercase tracking-widest">Contribution Graph</h3>
                                       </div>
@@ -852,11 +778,9 @@ const App: React.FC = () => {
                                          Activity Log
                                       </div>
                                    </div>
-                                   <div className="rounded-xl border border-primary-200/70 dark:border-dark-border/70 bg-primary-100/70 dark:bg-dark-bg/55 px-4 py-3">
-                                     <Suspense fallback={<div className="h-44 animate-pulse rounded-xl bg-primary-200/50 dark:bg-dark-surface/70" />}>
-                                       <Heatmap tasks={tasks} />
-                                     </Suspense>
-                                   </div>
+                                   <Suspense fallback={<div className="h-44 animate-pulse rounded-xl bg-primary-200/50 dark:bg-dark-surface/70" />}>
+                                     <Heatmap tasks={tasks} />
+                                   </Suspense>
                                 </div>
                              </div>
                           )}
