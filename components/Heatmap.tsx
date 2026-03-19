@@ -303,7 +303,7 @@ export const Heatmap: React.FC<HeatmapProps> = ({ tasks }) => {
           </div>
         </div>
 
-        <div className="min-w-0">
+        <div className="min-w-0 lg:h-full lg:flex lg:flex-col lg:justify-center">
           <div className="w-full overflow-x-auto no-scrollbar">
             <div className="w-max mx-auto">
               <div className="relative mb-1 h-4 text-[10px] text-primary-400 dark:text-dark-muted">
