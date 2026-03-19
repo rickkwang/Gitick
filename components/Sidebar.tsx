@@ -271,7 +271,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   type="button"
                   onClick={toggleCollapse}
                   aria-label="Collapse sidebar"
-                  className="w-9 h-9 rounded-xl border border-primary-200/85 dark:border-dark-border/80 bg-primary-50/70 dark:bg-dark-surface/70 transition-colors flex items-center justify-center text-primary-500 dark:text-dark-muted hover:text-primary-900 dark:hover:text-dark-text hover:bg-primary-100 dark:hover:bg-dark-border/70"
+                  className="w-8 h-8 transition-colors flex items-center justify-center text-primary-500 dark:text-dark-muted hover:text-primary-900 dark:hover:text-dark-text"
                   title="Collapse Sidebar"
                 >
                   <span className="[&>svg]:w-[17px] [&>svg]:h-[17px]">
@@ -283,10 +283,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   type="button"
                   onClick={() => toggleUtilityPanel('search')}
                   aria-label="Search tasks"
-                  className={`w-9 h-9 rounded-xl border transition-colors flex items-center justify-center ${
+                  className={`w-8 h-8 transition-colors flex items-center justify-center ${
                     activeUtilityPanel === 'search'
-                      ? 'border-primary-300/90 dark:border-dark-border bg-primary-200/65 dark:bg-dark-border/70 text-primary-900 dark:text-dark-text'
-                      : 'border-primary-200/85 dark:border-dark-border/80 bg-primary-50/70 dark:bg-dark-surface/70 text-primary-500 dark:text-dark-muted hover:text-primary-900 dark:hover:text-dark-text hover:bg-primary-100 dark:hover:bg-dark-border/70'
+                      ? 'text-primary-900 dark:text-dark-text'
+                      : 'text-primary-500 dark:text-dark-muted hover:text-primary-900 dark:hover:text-dark-text'
                   }`}
                   title="Search"
                 >
@@ -299,10 +299,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   type="button"
                   onClick={() => toggleUtilityPanel('category')}
                   aria-label="Filter by category"
-                  className={`w-9 h-9 rounded-xl border transition-colors flex items-center justify-center ${
+                  className={`w-8 h-8 transition-colors flex items-center justify-center ${
                     activeUtilityPanel === 'category'
-                      ? 'border-primary-300/90 dark:border-dark-border bg-primary-200/65 dark:bg-dark-border/70 text-primary-900 dark:text-dark-text'
-                      : 'border-primary-200/85 dark:border-dark-border/80 bg-primary-50/70 dark:bg-dark-surface/70 text-primary-500 dark:text-dark-muted hover:text-primary-900 dark:hover:text-dark-text hover:bg-primary-100 dark:hover:bg-dark-border/70'
+                      ? 'text-primary-900 dark:text-dark-text'
+                      : 'text-primary-500 dark:text-dark-muted hover:text-primary-900 dark:hover:text-dark-text'
                   }`}
                   title="Category"
                 >
