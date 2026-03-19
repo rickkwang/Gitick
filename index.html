@@ -11,7 +11,7 @@
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 
     <!-- Dynamic Theme Color for Safari/Chrome UI blending -->
-    <meta name="theme-color" content="#f8f6f1" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#f5f4ed" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#1f1a16" media="(prefers-color-scheme: dark)">
 
     <!-- Fonts: Source Serif 4 for display, Work Sans for body -->
@@ -33,10 +33,10 @@
             },
             colors: {
               primary: {
-                50: '#fcfaf6',
-                100: '#f8f6f1',
-                200: '#eeece3',
-                300: '#ddd9cf',
+                50: '#faf9f5',
+                100: '#f5f4ed',
+                200: '#e8e6dc',
+                300: '#d4d2c8',
                 400: '#a3a29e',
                 500: '#8b8b87',
                 600: '#6b6b67',
@@ -46,10 +46,10 @@
                 950: '#0a0a09',
               },
               gray: {
-                50: '#fcfaf6',
-                100: '#f8f6f1',
-                200: '#eeece3',
-                300: '#ddd9cf',
+                50: '#faf9f5',
+                100: '#f5f4ed',
+                200: '#e8e6dc',
+                300: '#d4d2c8',
                 400: '#a3a29e',
                 500: '#8b8b87',
                 600: '#6b6b67',
@@ -84,32 +84,32 @@
         --sat: env(safe-area-inset-top);
         --sab: env(safe-area-inset-bottom);
         --sal: env(safe-area-inset-left);
-        --app-bg: #f8f6f1;
+        --app-bg: #f5f4ed;
         --app-fg: #141413;
-        --ui-border: rgba(238, 236, 227, 0.92);
+        --ui-border: rgba(232, 230, 220, 0.9);
         --ui-shadow: 0 1px 3px rgba(20, 20, 19, 0.04);
         --desktop-font-size: 12px;
-        --accent: #bb8c61;
-        --accent-strong: #a67a53;
-        --accent-soft: rgba(187, 140, 97, 0.12);
-        --accent-border: rgba(187, 140, 97, 0.28);
-        --status-info-bg: #f2f0ea;
-        --status-info-border: #dbd5ca;
-        --status-info-text: #645b4f;
-        --status-warn-bg: #f5f1e9;
-        --status-warn-border: #ddd1bb;
-        --status-warn-text: #78654a;
-        --status-success-bg: #f0f2ec;
-        --status-success-border: #ced5c6;
-        --status-success-text: #5b6753;
-        --status-danger-bg: #f4edeb;
-        --status-danger-border: #dbc8c0;
-        --status-danger-text: #76544a;
-        --heat-0: #eeece3;
-        --heat-1: #e3dfd4;
-        --heat-2: #d3cdbf;
-        --heat-3: #beb6a5;
-        --heat-4: #a59c8b;
+        --accent: #c68a5a;
+        --accent-strong: #a86f43;
+        --accent-soft: rgba(198, 138, 90, 0.14);
+        --accent-border: rgba(198, 138, 90, 0.32);
+        --status-info-bg: #eef2f6;
+        --status-info-border: #cfd8e3;
+        --status-info-text: #4f6074;
+        --status-warn-bg: #f6f1e8;
+        --status-warn-border: #dccdb1;
+        --status-warn-text: #776347;
+        --status-success-bg: #edf2ec;
+        --status-success-border: #c8d5c3;
+        --status-success-text: #556850;
+        --status-danger-bg: #f6ece9;
+        --status-danger-border: #ddc2b8;
+        --status-danger-text: #7b5346;
+        --heat-0: #e8e6dc;
+        --heat-1: #d9d6cb;
+        --heat-2: #c5c1b2;
+        --heat-3: #aca697;
+        --heat-4: #8f887a;
       }
 
       @media (min-width: 1024px) {
@@ -177,7 +177,7 @@
       /* Cross-browser Minimal Scrollbar */
       * {
         scrollbar-width: thin;
-        scrollbar-color: #ddd9cf transparent;
+        scrollbar-color: #d4d2c8 transparent;
         -webkit-tap-highlight-color: transparent;
       }
       .dark * {
@@ -192,14 +192,14 @@
         background: transparent;
       }
       ::-webkit-scrollbar-thumb {
-        background: #ddd9cf;
+        background: #d4d2c8;
         border-radius: 99px;
       }
       .dark ::-webkit-scrollbar-thumb {
          background: #3a3129;
       }
       *:hover::-webkit-scrollbar-thumb {
-        background: #cec9bd;
+        background: #c4c2b8;
       }
       .dark *:hover::-webkit-scrollbar-thumb {
         background: #4a4034;
