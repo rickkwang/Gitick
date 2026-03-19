@@ -87,7 +87,7 @@ const NavItemComponent: React.FC<NavItemProps> = ({
             className={`
               shrink-0 flex items-center justify-center transition-colors duration-200
               w-[44px] h-[40px] absolute top-0
-              ${isCollapsed ? 'left-1/2 -translate-x-1/2' : 'left-0'}
+              left-0
             `}
           >
             <span
@@ -108,7 +108,7 @@ const NavItemComponent: React.FC<NavItemProps> = ({
           {/* Text Container */}
           <div className={`
             flex items-center flex-1 min-w-0 overflow-hidden whitespace-nowrap pl-[52px]
-            transition-opacity duration-200 ease-linear
+            transition-opacity duration-300 ease-[cubic-bezier(0.2,0,0,1)]
             ${isCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}
           `}>
             <span className="truncate pr-2">{label}</span>
@@ -249,7 +249,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
              {/* EXPANDED HEADER */}
              <div className={`
                 flex absolute inset-0 px-6 items-center justify-between
-                transition-opacity duration-200 ease-linear
+                transition-opacity duration-300 ease-[cubic-bezier(0.2,0,0,1)]
                 ${renderCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}
              `}>
                <div className="flex items-center gap-2.5 overflow-hidden">
@@ -274,7 +274,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
              {/* COLLAPSED HEADER */}
              <div className={`
                 flex absolute inset-0 items-center justify-center
-                transition-opacity duration-200 ease-linear
+                transition-opacity duration-300 ease-[cubic-bezier(0.2,0,0,1)]
                 ${renderCollapsed ? 'opacity-100' : 'opacity-0 pointer-events-none'}
              `}>
                 <button 
@@ -301,7 +301,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <div>
               <div className={`
                  overflow-hidden px-2.5 h-5 mb-1.5 flex items-center
-                 transition-opacity duration-200
+                 transition-opacity duration-300 ease-[cubic-bezier(0.2,0,0,1)]
                  ${renderCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}
               `}>
                 <h3 className="text-[10px] font-bold text-primary-900 dark:text-dark-text uppercase tracking-widest whitespace-nowrap pl-1">Overview</h3>
@@ -335,7 +335,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <div>
               <div className={`
                  flex items-center justify-between px-2.5 group overflow-hidden whitespace-nowrap h-5 mb-1.5
-                 transition-opacity duration-200
+                 transition-opacity duration-300 ease-[cubic-bezier(0.2,0,0,1)]
                  ${renderCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}
               `}>
                   <h3 className="text-[10px] font-bold text-primary-900 dark:text-dark-text uppercase tracking-widest pl-1">Projects</h3>
@@ -391,7 +391,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <div>
                <div className={`
                   overflow-hidden px-3 h-6 mb-2 flex items-center
-                  transition-opacity duration-200
+                  transition-opacity duration-300 ease-[cubic-bezier(0.2,0,0,1)]
                   ${renderCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}
                `}>
                  <h3 className="text-[10px] font-bold text-primary-900 dark:text-dark-text uppercase tracking-widest whitespace-nowrap pl-1">History</h3>
@@ -436,9 +436,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   {/* Text Container */}
                   <div className={`
                       flex items-center justify-between flex-1 min-w-0 overflow-hidden pr-2.5 pl-1
-                      transition-opacity duration-200
-                      opacity-100
-                      ${renderCollapsed ? 'hidden' : 'opacity-100'}
+                      transition-opacity duration-300 ease-[cubic-bezier(0.2,0,0,1)]
+                      ${renderCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}
                   `}>
                       <div className="flex flex-col items-start leading-tight">
                           <span className="text-sm font-bold text-primary-900 dark:text-dark-text truncate max-w-[120px]">{userProfile.name}</span>
