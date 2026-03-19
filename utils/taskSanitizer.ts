@@ -1,9 +1,11 @@
-import { Priority, Task } from '../types';
+import { Priority, Task, RecurrenceType } from '../types';
 
 const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 const isPriority = (value: unknown): value is Priority =>
   value === Priority.HIGH || value === Priority.MEDIUM || value === Priority.LOW;
+const isRecurrenceType = (value: unknown): value is RecurrenceType =>
+  value === 'daily' || value === 'weekly' || value === 'monthly' || value === 'weekdays';
 
 const createId = () => {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
@@ -74,6 +76,10 @@ const normalizeTask = (raw: unknown): Task | null => {
     tags: normalizeTags(item.tags),
     list: typeof item.list === 'string' && item.list.trim() ? item.list.trim() : 'Inbox',
     subtasks: normalizeSubtasks(item.subtasks),
+    recurrence:
+      item.recurrence && typeof item.recurrence === 'object' && isRecurrenceType((item.recurrence as Record<string, unknown>).type)
+        ? { type: (item.recurrence as Record<string, unknown>).type as RecurrenceType }
+        : null,
     createdAt,
   };
 };

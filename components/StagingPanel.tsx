@@ -95,6 +95,30 @@ export const StagingPanel: React.FC<StagingPanelProps> = ({ task, onClose, onUpd
     onUpdate({ ...task, priority: map[task.priority] });
   };
 
+  const cycleRecurrence = () => {
+    const order: Array<Task['recurrence']> = [
+      null,
+      { type: 'daily' },
+      { type: 'weekly' },
+      { type: 'monthly' },
+      { type: 'weekdays' },
+    ];
+    const current = task.recurrence?.type ?? null;
+    const currentIndex = order.findIndex((option) => option?.type === current);
+    const next = order[(currentIndex + 1) % order.length] ?? null;
+    onUpdate({ ...task, recurrence: next });
+  };
+
+  const recurrenceLabel = task.recurrence
+    ? task.recurrence.type === 'daily'
+      ? 'Daily'
+      : task.recurrence.type === 'weekly'
+        ? 'Weekly'
+        : task.recurrence.type === 'monthly'
+          ? 'Monthly'
+          : 'Weekdays'
+    : 'No Repeat';
+
   // Mobile Variant acts as Bottom Sheet
   const containerClasses = variant === 'modal' 
     ? "fixed inset-x-0 bottom-0 z-50 h-[85dvh] bg-primary-50 dark:bg-dark-surface rounded-t-xl shadow-[0_-10px_40px_rgba(0,0,0,0.2)] flex flex-col transform transition-transform duration-300 ease-out animate-in slide-in-from-bottom-full pb-safe"
@@ -192,6 +216,19 @@ export const StagingPanel: React.FC<StagingPanelProps> = ({ task, onClose, onUpd
               >
                   <Icons.Flag />
                   <span>{task.priority}</span>
+              </button>
+
+              <button
+                  onClick={cycleRecurrence}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-all ${
+                    task.recurrence
+                      ? 'bg-primary-100 dark:bg-dark-border/60 border-primary-200 dark:border-dark-border text-primary-800 dark:text-dark-text'
+                      : 'bg-primary-50 dark:bg-dark-surface border-primary-200 dark:border-dark-border text-primary-500 dark:text-dark-muted'
+                  }`}
+                  title="Click to cycle repeat frequency"
+              >
+                  <Icons.Refresh />
+                  <span>{recurrenceLabel}</span>
               </button>
 
               {/* Project Chip */}

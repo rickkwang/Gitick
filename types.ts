@@ -11,6 +11,12 @@ export interface Subtask {
   completed: boolean;
 }
 
+export type RecurrenceType = 'daily' | 'weekly' | 'monthly' | 'weekdays';
+
+export interface RecurrenceRule {
+  type: RecurrenceType;
+}
+
 export interface Task {
   id: string;
   title: string;
@@ -22,6 +28,7 @@ export interface Task {
   tags: string[];
   list?: string; // Mapped to "Repository" concept
   subtasks: Subtask[];
+  recurrence?: RecurrenceRule | null;
   createdAt: number;
 }
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Task, Priority } from '../types';
+import { Task, Priority, RecurrenceRule } from '../types';
 import { Icons } from '../constants';
 import { todayLocalIsoDate } from '../utils/date';
 import { parseTaskInput } from '../utils/taskParser';
@@ -9,6 +9,14 @@ interface TaskInputProps {
   activeList?: string;
   projects: string[];
 }
+
+const RECURRENCE_OPTIONS: Array<{ label: string; value: RecurrenceRule | null }> = [
+  { label: 'No Repeat', value: null },
+  { label: 'Daily', value: { type: 'daily' } },
+  { label: 'Weekly', value: { type: 'weekly' } },
+  { label: 'Monthly', value: { type: 'monthly' } },
+  { label: 'Weekdays', value: { type: 'weekdays' } },
+];
 
 const RANDOM_PROMPTS = [
   'Finish report !high',
@@ -23,6 +31,7 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
   const [selectedProject, setSelectedProject] = useState<string>('Inbox');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [placeholderHint, setPlaceholderHint] = useState(RANDOM_PROMPTS[0]);
+  const [recurrence, setRecurrence] = useState<RecurrenceRule | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const isComposingRef = useRef(false);
@@ -92,11 +101,13 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
       tags: parsedData.tags,
       subtasks: [],
       dueDate: date,
-      list: selectedProject // Use the UI state
+      list: selectedProject, // Use the UI state
+      recurrence,
     });
     
     setInput('');
     setParsedPreview({ tags: [], cleanTitle: '' });
+    setRecurrence(null);
     
     // Randomize hint for next task
     setPlaceholderHint(RANDOM_PROMPTS[Math.floor(Math.random() * RANDOM_PROMPTS.length)]);
@@ -165,6 +176,28 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
 <Icons.CornerDownLeft />
                 </button>
                 <div className="h-5 w-px bg-gray-200/70 dark:bg-zinc-700/60 mx-1.5" />
+                <button
+                  type="button"
+                  onClick={() => {
+                    const currentIndex = RECURRENCE_OPTIONS.findIndex(
+                      (option) => option.value?.type === recurrence?.type,
+                    );
+                    const nextIndex = (currentIndex + 1) % RECURRENCE_OPTIONS.length;
+                    setRecurrence(RECURRENCE_OPTIONS[nextIndex].value);
+                  }}
+                  className={`h-9 px-3 flex items-center gap-1 rounded-full transition-colors ${
+                    recurrence
+                      ? 'bg-primary-200/60 dark:bg-dark-border/60 text-primary-900 dark:text-dark-text'
+                      : 'bg-primary-200/40 dark:bg-dark-border/40 text-primary-500 dark:text-dark-muted hover:bg-primary-200/60 dark:hover:bg-dark-border/60'
+                  }`}
+                  title="Repeat"
+                  aria-label="Set repeat frequency"
+                >
+                  <Icons.Refresh />
+                  <span className="text-xs font-semibold">
+                    {recurrence ? RECURRENCE_OPTIONS.find((option) => option.value?.type === recurrence.type)?.label : 'Repeat'}
+                  </span>
+                </button>
                 <div className="relative shrink-0 z-40" ref={dropdownRef}>
                     <button
                       type="button"
@@ -216,7 +249,7 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
             </div>
 
             {/* Smart Parsed Attributes (Pills) Row */}
-            {(parsedPreview.priority || parsedPreview.tags.length > 0 || parsedPreview.dueDate) && (
+            {(parsedPreview.priority || parsedPreview.tags.length > 0 || parsedPreview.dueDate || recurrence) && (
                 <div className="flex items-center gap-2 px-6 md:px-8 pb-2.5 pt-0 animate-in fade-in slide-in-from-top-1 duration-200 overflow-x-auto no-scrollbar">
                     <div className="h-px w-4 bg-primary-200 dark:bg-dark-border mr-1 shrink-0"></div>
                     
@@ -242,6 +275,12 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
                             {tag}
                         </span>
                     ))}
+                    {recurrence && (
+                      <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary-100 dark:bg-dark-border/60 border border-primary-200/80 dark:border-dark-border/80 text-[10px] font-semibold text-primary-700 dark:text-dark-text whitespace-nowrap">
+                        <Icons.Refresh />
+                        {RECURRENCE_OPTIONS.find((option) => option.value?.type === recurrence.type)?.label}
+                      </span>
+                    )}
                 </div>
             )}
 

@@ -4,8 +4,9 @@ import { FocusMode } from './components/FocusMode';
 import { TaskInput } from './components/TaskInput';
 import { TaskItem } from './components/TaskItem';
 import { StagingPanel } from './components/StagingPanel';
+import { CommandPalette } from './components/CommandPalette';
 import { ConfirmDialog } from './components/ConfirmDialog';
-import { FilterType, Task, UserProfile } from './types';
+import { FilterType, Priority, Task, UserProfile } from './types';
 import { Icons, PROJECTS as DEFAULT_PROJECTS } from './constants';
 import { useDesktopUpdater, type DesktopConfirmDialogRequest } from './hooks/useDesktopUpdater';
 import { playSuccessSound } from './utils/audio';
@@ -13,6 +14,8 @@ import { createOnboardingTasks, DEFAULT_USER_PROFILE } from './utils/appDefaults
 import { useFocusTimer } from './hooks/useFocusTimer';
 import { sanitizeTaskList } from './utils/taskSanitizer';
 import { getFilteredTasks, getTaskCounts, groupDashboardTasks } from './utils/taskView';
+import { getNextRecurringDueDate } from './utils/recurrence';
+import { todayLocalIsoDate } from './utils/date';
 import {
   LEGACY_STORAGE_KEYS,
   STORAGE_KEYS,
@@ -77,6 +80,10 @@ const App: React.FC = () => {
   });
   
   const [showSettings, setShowSettings] = useState(false);
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchPriority, setSearchPriority] = useState<'all' | 'high' | 'medium' | 'low'>('all');
+  const [searchProject, setSearchProject] = useState<'all' | string>('all');
   const desktopPlatform = typeof window !== 'undefined' ? window.gitickDesktop?.platform : undefined;
   const isDesktopMac = desktopPlatform === 'darwin';
   const isDesktopRuntime = typeof window !== 'undefined' && Boolean(window.gitickDesktop?.updater);
@@ -299,7 +306,7 @@ const App: React.FC = () => {
     setFilter('next7days');
     setIsSidebarCollapsed(true);
     resetDesktopUpdaterState();
-    setDesktopFontSize(13);
+    setDesktopFontSize(12);
     resetFocusState();
     const fallbackDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     setIsDarkMode(fallbackDark);
@@ -379,7 +386,8 @@ const App: React.FC = () => {
       ...newTaskData,
       id: crypto.randomUUID(),
       createdAt: Date.now(),
-      completedAt: undefined
+      completedAt: undefined,
+      recurrence: newTaskData.recurrence ?? null,
     };
     setTasks(prev => [newTask, ...prev]);
   };
@@ -394,9 +402,25 @@ const App: React.FC = () => {
       }
     }
 
-    setTasks(prev => prev.map(t => 
-      t.id === id ? { ...t, completed: !t.completed, completedAt: !t.completed ? now : undefined } : t
-    ));
+    const shouldGenerateNext = Boolean(task && !task.completed && task.recurrence);
+    const nextTask: Task | null =
+      shouldGenerateNext && task
+        ? {
+            ...task,
+            id: crypto.randomUUID(),
+            completed: false,
+            completedAt: undefined,
+            dueDate: getNextRecurringDueDate(task.dueDate, task.recurrence),
+            createdAt: now + 1,
+          }
+        : null;
+
+    setTasks(prev => {
+      const updated = prev.map(t =>
+        t.id === id ? { ...t, completed: !t.completed, completedAt: !t.completed ? now : undefined } : t
+      );
+      return nextTask ? [nextTask, ...updated] : updated;
+    });
     
     setSelectedTask((prev) =>
       prev?.id === id ? { ...prev, completed: !prev.completed, completedAt: !prev.completed ? now : undefined } : prev,
@@ -436,7 +460,21 @@ const App: React.FC = () => {
       showToast(`${importedTasks.length} tasks imported`);
   };
 
-  const filteredTasks = useMemo(() => getFilteredTasks(tasks, filter, projects), [filter, projects, tasks]);
+  const baseFilteredTasks = useMemo(() => getFilteredTasks(tasks, filter, projects), [filter, projects, tasks]);
+  const filteredTasks = useMemo(() => {
+    const keyword = searchQuery.trim().toLowerCase();
+    return baseFilteredTasks.filter((task) => {
+      if (searchPriority !== 'all' && task.priority !== searchPriority) return false;
+      if (searchProject !== 'all' && (task.list || 'Inbox') !== searchProject) return false;
+
+      if (!keyword) return true;
+      const inTitle = task.title.toLowerCase().includes(keyword);
+      const inDescription = (task.description || '').toLowerCase().includes(keyword);
+      const inTags = task.tags.some((tag) => tag.toLowerCase().includes(keyword));
+      const inList = (task.list || 'Inbox').toLowerCase().includes(keyword);
+      return inTitle || inDescription || inTags || inList;
+    });
+  }, [baseFilteredTasks, searchPriority, searchProject, searchQuery]);
 
   const taskGroups = useMemo(
     () => (filter === 'next7days' ? groupDashboardTasks(filteredTasks) : null),
@@ -477,6 +515,41 @@ const App: React.FC = () => {
     setShowSettings(true);
   }, []);
 
+  const createTaskFromCommand = useCallback(
+    (title: string) => {
+      const cleanTitle = title.trim();
+      if (!cleanTitle) return;
+      addTask({
+        title: cleanTitle,
+        description: '',
+        completed: false,
+        priority: Priority.MEDIUM,
+        dueDate: todayLocalIsoDate(),
+        tags: [],
+        list: 'Inbox',
+        subtasks: [],
+        recurrence: null,
+      });
+      setFilter('inbox');
+      showToast(`Created "${cleanTitle}"`);
+    },
+    [showToast],
+  );
+
+  const openTaskFromCommand = useCallback(
+    (task: Task) => {
+      if (task.completed) {
+        setFilter('completed');
+      } else if (task.list && projects.includes(task.list)) {
+        setFilter(task.list);
+      } else {
+        setFilter('inbox');
+      }
+      setSelectedTask(task);
+    },
+    [projects],
+  );
+
   const renderEmptyState = () => (
     <div className="flex flex-col items-center justify-center pt-24 text-center select-none opacity-60">
       <div className="w-20 h-20 rounded-xl bg-primary-50 dark:bg-dark-bg border border-primary-200/80 dark:border-dark-border/80 flex items-center justify-center text-primary-300 dark:text-dark-muted mb-6 shadow-sm">
@@ -496,8 +569,22 @@ const App: React.FC = () => {
   // --- Keyboard Shortcuts ---
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      const isTextField =
+        target instanceof HTMLInputElement ||
+        target instanceof HTMLTextAreaElement ||
+        Boolean(target?.closest('[contenteditable="true"]'));
+
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setIsCommandPaletteOpen(true);
+        return;
+      }
+
       if (e.key === 'Escape') {
-        if (showSettingsRef.current) {
+        if (isCommandPaletteOpen) {
+          setIsCommandPaletteOpen(false);
+        } else if (showSettingsRef.current) {
           setShowSettings(false);
         } else if (selectedTaskRef.current) {
           setSelectedTask(null);
@@ -506,10 +593,15 @@ const App: React.FC = () => {
         }
         return;
       }
+
+      if (!isTextField && e.key === '/') {
+        e.preventDefault();
+        setIsCommandPaletteOpen(true);
+      }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [isCommandPaletteOpen]);
 
   const renderTaskList = (taskList: Task[], groupName?: string) => {
      if (taskList.length === 0) return null;
@@ -622,6 +714,44 @@ const App: React.FC = () => {
                   {/* Scrollable List Area */}
                   <div className="flex-1 overflow-y-auto main-scroll scroll-smooth">
                       <div className="max-w-[1100px] mx-auto w-full px-5 md:px-10 py-7 md:py-10">
+                          {filter !== 'focus' && (
+                            <div className="mb-6 flex flex-col md:flex-row gap-2.5 md:items-center">
+                              <div className="flex-1 flex items-center gap-2 px-3 py-2.5 rounded-xl border border-primary-200/80 dark:border-dark-border bg-primary-50 dark:bg-dark-surface">
+                                <span className="text-primary-400 dark:text-dark-muted">
+                                  <Icons.Search />
+                                </span>
+                                <input
+                                  value={searchQuery}
+                                  onChange={(event) => setSearchQuery(event.target.value)}
+                                  placeholder="Search title, tag, project..."
+                                  className="w-full bg-transparent outline-none text-sm text-primary-900 dark:text-dark-text placeholder:text-primary-400 dark:placeholder:text-dark-muted"
+                                />
+                              </div>
+                              <select
+                                value={searchPriority}
+                                onChange={(event) => setSearchPriority(event.target.value as 'all' | 'high' | 'medium' | 'low')}
+                                className="px-3 py-2.5 rounded-xl border border-primary-200/80 dark:border-dark-border bg-primary-50 dark:bg-dark-surface text-sm text-primary-700 dark:text-dark-text outline-none"
+                              >
+                                <option value="all">Any Priority</option>
+                                <option value="high">High</option>
+                                <option value="medium">Medium</option>
+                                <option value="low">Low</option>
+                              </select>
+                              <select
+                                value={searchProject}
+                                onChange={(event) => setSearchProject(event.target.value as 'all' | string)}
+                                className="px-3 py-2.5 rounded-xl border border-primary-200/80 dark:border-dark-border bg-primary-50 dark:bg-dark-surface text-sm text-primary-700 dark:text-dark-text outline-none"
+                              >
+                                <option value="all">Any Project</option>
+                                <option value="Inbox">Inbox</option>
+                                {projects.map((project) => (
+                                  <option key={project} value={project}>
+                                    {project}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                          )}
                           
                           {/* Heatmap Section */}
                           {filter === 'next7days' && (
@@ -774,6 +904,16 @@ const App: React.FC = () => {
           />
         </Suspense>
       )}
+
+      <CommandPalette
+        open={isCommandPaletteOpen}
+        tasks={tasks}
+        onClose={() => setIsCommandPaletteOpen(false)}
+        onChangeFilter={handleSidebarFilterChange}
+        onOpenSettings={handleOpenSettings}
+        onOpenTask={openTaskFromCommand}
+        onCreateTask={createTaskFromCommand}
+      />
 
       <ConfirmDialog
         open={Boolean(confirmDialog)}
