@@ -18,19 +18,10 @@ const RECURRENCE_OPTIONS: Array<{ label: string; value: RecurrenceRule | null }>
   { label: 'Weekdays', value: { type: 'weekdays' } },
 ];
 
-const RANDOM_PROMPTS = [
-  'Finish report !high',
-  'Call mom tomorrow',
-  'Buy coffee #life',
-  'Read 20 mins',
-  'Workout today',
-];
-
 export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, projects }) => {
   const [input, setInput] = useState('');
   const [selectedProject, setSelectedProject] = useState<string>('Inbox');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [placeholderHint, setPlaceholderHint] = useState(RANDOM_PROMPTS[0]);
   const [recurrence, setRecurrence] = useState<RecurrenceRule | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -43,11 +34,6 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
      dueDate?: string;
      cleanTitle: string;
   }>({ tags: [], cleanTitle: '' });
-
-  // Initialize random placeholder on mount
-  useEffect(() => {
-    setPlaceholderHint(RANDOM_PROMPTS[Math.floor(Math.random() * RANDOM_PROMPTS.length)]);
-  }, []);
 
   // Sync selectedProject with activeList when context changes
   useEffect(() => {
@@ -109,9 +95,6 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
     setParsedPreview({ tags: [], cleanTitle: '' });
     setRecurrence(null);
     
-    // Randomize hint for next task
-    setPlaceholderHint(RANDOM_PROMPTS[Math.floor(Math.random() * RANDOM_PROMPTS.length)]);
-
     // Reset project selection only if we are not in a specific project view
     if (!activeList || !projects.includes(activeList)) {
         setSelectedProject('Inbox');
@@ -138,20 +121,17 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
   const getPlaceholder = () => {
       if (activeList === 'today') return 'For today...';
       if (activeList && projects.includes(activeList) && activeList !== 'Inbox') return `${activeList}...`;
-      return 'Add task...';
+      return 'Add task... (e.g. Finish report !high #work)';
   }
   
   // Auto-focus logic: Only on desktop
   const shouldAutoFocus = typeof window !== 'undefined';
 
   return (
-    <div className="w-full relative z-30 max-w-3xl mx-auto">
+    <div className="w-full relative z-30 max-w-4xl mx-auto">
       <form onSubmit={handleSubmit} className="group transition-all duration-300">
-        <div className="relative bg-primary-50 dark:bg-dark-surface border border-primary-200/80 dark:border-dark-border rounded-xl shadow-sm dark:shadow-none overflow-visible transition-all duration-200 ease-out flex flex-col justify-center min-h-[3.25rem] focus-within:shadow-md dark:focus-within:shadow-none">
-            <div className="flex items-center pl-6 pr-2.5 h-[52px] shrink-0">
-                <div className="text-primary-400 shrink-0">
-                   <Icons.Plus />
-                </div>
+        <div className="relative overflow-visible rounded-[14px] border border-primary-200/90 dark:border-dark-border/80 bg-primary-50/98 dark:bg-dark-surface shadow-[0_2px_14px_rgba(20,20,19,0.05)] dark:shadow-none transition-all duration-200 ease-out focus-within:shadow-[0_6px_22px_rgba(20,20,19,0.08)]">
+            <div className="flex min-h-[52px] items-center gap-2 pl-4 pr-3">
                 <input
                     ref={inputRef}
                     type="text"
@@ -161,94 +141,94 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
                     onCompositionEnd={() => { isComposingRef.current = false; }}
                     onKeyDown={handleKeyDown}
                     placeholder={getPlaceholder()}
-                    className="w-full h-full pl-3 pr-3 bg-transparent text-primary-900 dark:text-dark-text placeholder:text-primary-400 dark:placeholder:text-dark-muted outline-none font-medium text-base min-w-0"
+                    className="h-full w-full min-w-0 bg-transparent pr-2 text-sm font-medium text-primary-900 outline-none placeholder:text-primary-400 dark:text-dark-text dark:placeholder:text-dark-muted"
                     autoFocus={shouldAutoFocus}
                 />
-                <button
-                    onClick={submit}
+                <div className="flex items-center gap-1.5 text-primary-500 dark:text-dark-muted">
+                  <button
                     type="button"
-                    aria-label="Add task"
-                    className={`mr-1 flex shrink-0 items-center justify-center w-9 h-9 rounded-full bg-[var(--accent)] text-white transition-all duration-200 hover:scale-110 active:scale-95 ${input.length > 0 ? 'opacity-100 scale-100' : 'opacity-0 scale-90 pointer-events-none'}`}
-                >
-<Icons.CornerDownLeft />
-                </button>
-                <div className="h-5 w-px bg-gray-200/70 dark:bg-zinc-700/60 mx-1.5" />
-                <button
-                  type="button"
-                  onClick={() => {
-                    const currentIndex = RECURRENCE_OPTIONS.findIndex(
-                      (option) => option.value?.type === recurrence?.type,
-                    );
-                    const nextIndex = (currentIndex + 1) % RECURRENCE_OPTIONS.length;
-                    setRecurrence(RECURRENCE_OPTIONS[nextIndex].value);
-                  }}
-                  className={`h-9 px-3 flex items-center gap-1 rounded-full transition-colors ${
-                    recurrence
-                      ? 'bg-primary-200/60 dark:bg-dark-border/60 text-primary-900 dark:text-dark-text'
-                      : 'bg-primary-200/40 dark:bg-dark-border/40 text-primary-500 dark:text-dark-muted hover:bg-primary-200/60 dark:hover:bg-dark-border/60'
-                  }`}
-                  title="Repeat"
-                  aria-label="Set repeat frequency"
-                >
-                  <Icons.Refresh />
-                  <span className="text-xs font-semibold">
-                    {recurrence ? RECURRENCE_OPTIONS.find((option) => option.value?.type === recurrence.type)?.label : 'Repeat'}
-                  </span>
-                </button>
-                <div className="relative shrink-0 z-40" ref={dropdownRef}>
+                    onClick={() => {
+                      const currentIndex = RECURRENCE_OPTIONS.findIndex(
+                        (option) => option.value?.type === recurrence?.type,
+                      );
+                      const nextIndex = (currentIndex + 1) % RECURRENCE_OPTIONS.length;
+                      setRecurrence(RECURRENCE_OPTIONS[nextIndex].value);
+                    }}
+                    className={`flex h-7 items-center justify-center rounded-lg px-1.5 transition-colors ${
+                      recurrence
+                        ? 'bg-primary-200/70 text-primary-700 dark:bg-dark-border/70 dark:text-dark-text'
+                        : 'hover:bg-primary-200/60 dark:hover:bg-dark-border/60'
+                    }`}
+                    title="Repeat"
+                    aria-label="Set repeat frequency"
+                  >
+                    <Icons.Refresh />
+                  </button>
+
+                  <div className="relative z-40 shrink-0" ref={dropdownRef}>
                     <button
                       type="button"
                       onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                       aria-label="Select project"
                       className={`
-                        h-9 px-4 flex items-center gap-2 rounded-full transition-all duration-200
-                        bg-primary-200/50 dark:bg-dark-border/30
+                        flex h-7 items-center gap-1 rounded-lg px-1.5 text-[11px] font-semibold transition-colors
                         ${isDropdownOpen
-                          ? 'bg-primary-200/50 dark:bg-dark-border/50'
-                          : 'hover:bg-primary-200/50 dark:hover:bg-dark-border/40'}
+                          ? 'bg-primary-200/70 text-primary-700 dark:bg-dark-border/70 dark:text-dark-text'
+                          : 'text-primary-500 hover:bg-primary-200/60 dark:text-dark-muted dark:hover:bg-dark-border/60'}
                       `}
                       title="Select Project"
                     >
-                        <span className="text-xs font-bold uppercase tracking-wide text-primary-400 dark:text-dark-muted">Project</span>
-                        <span className="text-xs font-bold text-primary-900 dark:text-dark-text max-w-[96px] truncate">{selectedProject}</span>
-                        <span className={`text-primary-400 dark:text-dark-muted transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`}>
-                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                        </span>
+                      <Icons.Folder />
+                      <span className="max-w-[90px] truncate">{selectedProject}</span>
+                      <span className={`transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`}>
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                      </span>
                     </button>
 
                     {isDropdownOpen && (
-                      <div className="absolute bottom-full right-0 mb-2 w-44 rounded-lg border border-primary-200 dark:border-dark-border bg-primary-50 dark:bg-dark-surface shadow-lg overflow-hidden py-1.5 animate-in fade-in zoom-in-95 slide-in-from-bottom-2 duration-200">
-                          <button
+                      <div className="absolute bottom-full right-0 mb-2 w-44 overflow-hidden rounded-lg border border-primary-200 bg-primary-50 py-1.5 shadow-lg dark:border-dark-border dark:bg-dark-surface animate-in fade-in zoom-in-95 slide-in-from-bottom-2 duration-200">
+                        <button
+                          type="button"
+                          onClick={() => { setSelectedProject('Inbox'); setIsDropdownOpen(false); }}
+                          className={`mx-1 w-[calc(100%-0.5rem)] text-left px-2.5 py-2 rounded-xl text-xs font-medium flex items-center gap-2.5 transition-colors ${selectedProject === 'Inbox' ? 'text-primary-900 dark:text-dark-text bg-primary-200/50 dark:bg-dark-border/50' : 'text-primary-500 dark:text-dark-muted hover:bg-primary-200/40 dark:hover:bg-dark-border/30'}`}
+                        >
+                          <Icons.Inbox /> Inbox
+                          {selectedProject === 'Inbox' && <span className="ml-auto text-primary-900 dark:text-dark-text"><Icons.Checked /></span>}
+                        </button>
+                        <div className="h-px bg-primary-200/70 dark:bg-dark-border/50 my-1 mx-2"></div>
+                        <div className="max-h-44 overflow-y-auto custom-scroll">
+                          {projects.map(p => (
+                            <button
+                              key={p}
                               type="button"
-                              onClick={() => { setSelectedProject('Inbox'); setIsDropdownOpen(false); }}
-                              className={`mx-1 w-[calc(100%-0.5rem)] text-left px-2.5 py-2 rounded-xl text-xs font-medium flex items-center gap-2.5 transition-colors ${selectedProject === 'Inbox' ? 'text-primary-900 dark:text-dark-text bg-primary-200/50 dark:bg-dark-border/50' : 'text-primary-500 dark:text-dark-muted hover:bg-primary-200/40 dark:hover:bg-dark-border/30'}`}
-                          >
-                              <Icons.Inbox /> Inbox
-                              {selectedProject === 'Inbox' && <span className="ml-auto text-primary-900 dark:text-dark-text"><Icons.Checked /></span>}
-                          </button>
-                          <div className="h-px bg-primary-200/70 dark:bg-dark-border/50 my-1 mx-2"></div>
-                          <div className="max-h-44 overflow-y-auto custom-scroll">
-                            {projects.map(p => (
-                                <button
-                                    key={p}
-                                    type="button"
-                                    onClick={() => { setSelectedProject(p); setIsDropdownOpen(false); }}
-                                    className={`mx-1 w-[calc(100%-0.5rem)] text-left px-2.5 py-2 rounded-xl text-xs font-medium flex items-center gap-2.5 transition-colors ${selectedProject === p ? 'text-primary-900 dark:text-dark-text bg-primary-200/50 dark:bg-dark-border/50' : 'text-primary-500 dark:text-dark-muted hover:bg-primary-200/40 dark:hover:bg-dark-border/30'}`}
-                                >
-                                    <Icons.Folder /> {p}
-                                    {selectedProject === p && <span className="ml-auto text-primary-900 dark:text-dark-text"><Icons.Checked /></span>}
-                                </button>
-                            ))}
-                          </div>
+                              onClick={() => { setSelectedProject(p); setIsDropdownOpen(false); }}
+                              className={`mx-1 w-[calc(100%-0.5rem)] text-left px-2.5 py-2 rounded-xl text-xs font-medium flex items-center gap-2.5 transition-colors ${selectedProject === p ? 'text-primary-900 dark:text-dark-text bg-primary-200/50 dark:bg-dark-border/50' : 'text-primary-500 dark:text-dark-muted hover:bg-primary-200/40 dark:hover:bg-dark-border/30'}`}
+                            >
+                              <Icons.Folder /> {p}
+                              {selectedProject === p && <span className="ml-auto text-primary-900 dark:text-dark-text"><Icons.Checked /></span>}
+                            </button>
+                          ))}
+                        </div>
                       </div>
                     )}
+                  </div>
                 </div>
+                <button
+                    type="submit"
+                    aria-label="Add task"
+                    className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-primary-200/80 bg-primary-100/80 text-primary-700 transition-all duration-200 dark:border-dark-border dark:bg-dark-border/50 dark:text-dark-text ${
+                      input.length > 0
+                        ? 'opacity-100 hover:scale-105 hover:bg-primary-200/80 active:scale-95'
+                        : 'pointer-events-none opacity-45'
+                    }`}
+                >
+                  <Icons.CornerDownLeft />
+                </button>
             </div>
 
             {/* Smart Parsed Attributes (Pills) Row */}
             {(parsedPreview.priority || parsedPreview.tags.length > 0 || parsedPreview.dueDate || recurrence) && (
-                <div className="flex items-center gap-2 px-8 pb-2.5 pt-0 animate-in fade-in slide-in-from-top-1 duration-200 overflow-x-auto no-scrollbar">
-                    <div className="h-px w-4 bg-primary-200 dark:bg-dark-border mr-1 shrink-0"></div>
+                <div className="flex items-center gap-2 border-t border-primary-200/75 px-3 py-2 overflow-x-auto no-scrollbar dark:border-dark-border/75">
                     
                     {parsedPreview.dueDate && (
                         <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[var(--status-info-bg)] text-[10px] font-bold text-[var(--status-info-text)] border border-[var(--status-info-border)] whitespace-nowrap">
