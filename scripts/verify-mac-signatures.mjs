@@ -11,7 +11,6 @@ const targets = [
 ];
 
 let hasError = false;
-let hasWarning = false;
 
 for (const target of targets) {
   if (!existsSync(target.appPath)) {
@@ -33,14 +32,14 @@ for (const target of targets) {
   }
 
   if (result.status !== 0) {
-    console.warn(`Signature check failed for ${target.arch}: ${raw || `exit ${result.status}`}`);
-    hasWarning = true;
+    console.error(`Signature check failed for ${target.arch}: ${raw || `exit ${result.status}`}`);
+    hasError = true;
     continue;
   }
 
   if (lower.includes('code object is not signed at all')) {
-    console.warn(`Unsigned app bundle for ${target.arch}: ${target.appPath}`);
-    hasWarning = true;
+    console.error(`Unsigned app bundle for ${target.arch}: ${target.appPath}`);
+    hasError = true;
     continue;
   }
 
@@ -49,11 +48,11 @@ for (const target of targets) {
   const teamIdentifier = teamIdentifierMatch?.[1]?.trim() || null;
 
   if (isAdhoc) {
-    console.warn(`${target.arch} build is ad-hoc signed. Continuing release with warning.`);
-    hasWarning = true;
+    console.error(`${target.arch} build is ad-hoc signed. Refusing release.`);
+    hasError = true;
   } else if (!teamIdentifier) {
-    console.warn(`${target.arch} signature missing TeamIdentifier. Continuing release with warning.`);
-    hasWarning = true;
+    console.error(`${target.arch} signature missing TeamIdentifier. Refusing release.`);
+    hasError = true;
   } else {
     console.log(`Verified ${target.arch} signature. TeamIdentifier=${teamIdentifier}`);
   }
@@ -63,9 +62,4 @@ if (hasError) {
   console.error('Mac signature verification failed.');
   process.exit(1);
 }
-
-if (hasWarning) {
-  console.warn('Mac signature verification completed with warnings.');
-} else {
-  console.log('Mac signature verification passed for release artifacts.');
-}
+console.log('Mac signature verification passed for release artifacts.');

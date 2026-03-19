@@ -54,6 +54,9 @@ const compareSemver = (a, b) => {
   return 0;
 };
 
+const shellSingleQuote = (value) => `'${String(value).replace(/'/g, `'\\''`)}'`;
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 const fetchText = (sourceUrl) => new Promise((resolve, reject) => {
   const request = (urlString) => {
     if (!isTrustedGitHubReleaseUrl(urlString)) {
@@ -88,6 +91,16 @@ const fetchText = (sourceUrl) => new Promise((resolve, reject) => {
 
   request(sourceUrl);
 });
+
+const resolveAvailableVersionFromMetadata = async () => {
+  const latestYml = await fetchText(RELEASE_METADATA_URL);
+  const metadataVersion = parseVersionFromLatestMacYml(latestYml);
+  if (metadataVersion && compareSemver(metadataVersion, app.getVersion()) > 0) {
+    latestAvailableVersion = metadataVersion;
+    return metadataVersion;
+  }
+  return null;
+};
 
 const getMacBundlePath = () => {
   const executablePath = app.getPath('exe');
@@ -372,18 +385,73 @@ const findExtractedAppBundle = (dir) => {
   return null;
 };
 
+const waitForInstallerReady = async ({ readyPath, statusPath, timeoutMs = 3000 }) => {
+  const startedAt = Date.now();
+  while (Date.now() - startedAt <= timeoutMs) {
+    if (fs.existsSync(readyPath)) {
+      return { ok: true };
+    }
+    if (fs.existsSync(statusPath)) {
+      const status = fs.readFileSync(statusPath, 'utf8').trim();
+      if (status.startsWith('error:')) {
+        return { ok: false, status };
+      }
+    }
+    await sleep(100);
+  }
+  return { ok: false, status: 'error:installer-timeout-before-ready' };
+};
+
 const scheduleMacExternalInstall = async (sourceAppPath) => {
   const scriptPath = path.join(os.tmpdir(), `gitick-install-${Date.now()}.sh`);
-  const escapedSource = sourceAppPath.replace(/"/g, '\\"');
+  const logPath = path.join(os.tmpdir(), `gitick-install-${Date.now()}.log`);
+  const statusPath = path.join(os.tmpdir(), `gitick-install-${Date.now()}.status`);
+  const readyPath = path.join(os.tmpdir(), `gitick-install-${Date.now()}.ready`);
+  const appPid = process.pid;
   const scriptContent = `#!/bin/bash
-set -e
-sleep 1
-SOURCE_APP="${escapedSource}"
+set -euo pipefail
+SOURCE_APP=${shellSingleQuote(sourceAppPath)}
 TARGET_APP="/Applications/Gitick.app"
 BACKUP_APP="/Applications/Gitick.app.backup.$(date +%s)"
+STATUS_FILE=${shellSingleQuote(statusPath)}
+READY_FILE=${shellSingleQuote(readyPath)}
+LOG_FILE=${shellSingleQuote(logPath)}
+APP_PID=${appPid}
+
+exec >>"$LOG_FILE" 2>&1
+echo "[gitick-update] started at $(date)"
 
 if [ ! -d "$SOURCE_APP" ]; then
+  echo "error:source-missing" > "$STATUS_FILE"
   exit 11
+fi
+
+echo "ready" > "$READY_FILE"
+
+restore_backup() {
+  if [ -d "$BACKUP_APP" ] && [ ! -d "$TARGET_APP" ]; then
+    mv "$BACKUP_APP" "$TARGET_APP"
+  fi
+}
+
+on_error() {
+  code=$?
+  echo "error:install-step-failed:$code" > "$STATUS_FILE"
+  restore_backup || true
+  exit "$code"
+}
+trap on_error ERR
+
+for _ in {1..100}; do
+  if ! kill -0 "$APP_PID" >/dev/null 2>&1; then
+    break
+  fi
+  sleep 0.2
+done
+
+if kill -0 "$APP_PID" >/dev/null 2>&1; then
+  echo "error:app-still-running-timeout" > "$STATUS_FILE"
+  exit 21
 fi
 
 if [ -d "$TARGET_APP" ]; then
@@ -394,6 +462,7 @@ fi
 /usr/bin/xattr -rd com.apple.quarantine "$TARGET_APP" >/dev/null 2>&1 || true
 /usr/bin/open -a "$TARGET_APP"
 /bin/rm -rf "$BACKUP_APP" >/dev/null 2>&1 || true
+echo "ok" > "$STATUS_FILE"
 `;
 
   fs.writeFileSync(scriptPath, scriptContent, { encoding: 'utf8', mode: 0o700 });
@@ -405,6 +474,12 @@ fi
     throw new Error(child.error.message || 'Failed to launch installer script.');
   }
   child.unref();
+  const readyResult = await waitForInstallerReady({ readyPath, statusPath });
+  if (!readyResult.ok) {
+    const status = readyResult.status || 'error:installer-ready-check-failed';
+    throw new Error(`${status}. log=${logPath}`);
+  }
+  return { logPath };
 };
 
 const startExternalMacUpdateInstall = async () => {
@@ -440,15 +515,19 @@ const startExternalMacUpdateInstall = async () => {
       throw new Error('Extracted update package does not contain Gitick.app.');
     }
 
-    await scheduleMacExternalInstall(extractedApp);
+    return scheduleMacExternalInstall(extractedApp);
   })().finally(() => {
     externalInstallTask = null;
   });
 
   try {
-    await externalInstallTask;
+    const installPlan = await externalInstallTask;
     setImmediate(() => app.quit());
-    return { ok: true, reason: 'external-install-started', message: 'Installing update and restarting app...' };
+    return {
+      ok: true,
+      reason: 'external-install-started',
+      message: `Installing update and restarting app...${installPlan?.logPath ? ` (log: ${installPlan.logPath})` : ''}`,
+    };
   } catch (error) {
     return {
       ok: false,
@@ -517,31 +596,44 @@ ipcMain.handle('updater:check', async () => {
   if (updaterCheckTask) {
     return { ok: true, reason: 'in-progress' };
   }
-  updaterCheckTask = autoUpdater.checkForUpdates()
-    .finally(() => {
-      updaterCheckTask = null;
-    });
+  updaterCheckTask = autoUpdater.checkForUpdates().finally(() => {
+    updaterCheckTask = null;
+  });
+
+  let checkError = null;
+  let directVersion = null;
   try {
     const result = await updaterCheckTask;
-    const directVersion = result?.updateInfo?.version;
-    if (directVersion && compareSemver(directVersion, app.getVersion()) > 0) {
-      latestAvailableVersion = directVersion;
-      sendUpdaterStatus({ type: 'available', version: directVersion });
-    }
-    if (!directVersion) {
-      const latestYml = await fetchText(RELEASE_METADATA_URL);
-      const metadataVersion = parseVersionFromLatestMacYml(latestYml);
-      if (metadataVersion && compareSemver(metadataVersion, app.getVersion()) > 0) {
-        latestAvailableVersion = metadataVersion;
-        sendUpdaterStatus({ type: 'available', version: metadataVersion });
-      }
+    directVersion = result?.updateInfo?.version || null;
+  } catch (error) {
+    checkError = error;
+  }
+
+  if (directVersion && compareSemver(directVersion, app.getVersion()) > 0) {
+    latestAvailableVersion = directVersion;
+    sendUpdaterStatus({ type: 'available', version: directVersion });
+    return { ok: true };
+  }
+
+  try {
+    const metadataVersion = await resolveAvailableVersionFromMetadata();
+    if (metadataVersion) {
+      sendUpdaterStatus({ type: 'available', version: metadataVersion });
     }
     return { ok: true };
-  } catch (error) {
+  } catch (metadataError) {
+    if (checkError) {
+      const reason = classifyUpdaterReason(checkError?.message, 'check-failed');
+      return {
+        ok: false,
+        reason,
+        message: `${checkError?.message || 'Unable to check updates right now.'} (metadata fallback failed: ${metadataError?.message || 'unknown error'})`,
+      };
+    }
     return {
       ok: false,
-      reason: classifyUpdaterReason(error?.message, 'check-failed'),
-      message: error?.message || 'Unable to check updates right now.',
+      reason: classifyUpdaterReason(metadataError?.message, 'metadata-missing'),
+      message: metadataError?.message || 'Unable to check updates right now.',
     };
   }
 });
@@ -553,11 +645,7 @@ ipcMain.handle('updater:download', async () => {
   if (isMac) {
     if (!latestAvailableVersion) {
       try {
-        const latestYml = await fetchText(RELEASE_METADATA_URL);
-        const metadataVersion = parseVersionFromLatestMacYml(latestYml);
-        if (metadataVersion && compareSemver(metadataVersion, app.getVersion()) > 0) {
-          latestAvailableVersion = metadataVersion;
-        }
+        await resolveAvailableVersionFromMetadata();
       } catch (error) {
         return {
           ok: false,
