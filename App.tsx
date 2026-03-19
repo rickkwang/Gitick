@@ -525,6 +525,7 @@ const App: React.FC = () => {
   const handleOpenSettings = useCallback(() => {
     setShowSettings(true);
   }, []);
+  const desktopToolbarShift = isSidebarCollapsed ? 0 : 268;
 
   const createTaskFromCommand = useCallback(
     (title: string) => {
@@ -674,7 +675,10 @@ const App: React.FC = () => {
       </header>
 
       {filter !== 'focus' && (
-        <div className={`hidden md:flex absolute top-[10px] z-[80] items-center gap-1.5 ${isDesktopMac ? 'left-[146px]' : 'left-4'}`}>
+        <div
+          className={`hidden md:flex absolute top-[10px] z-[80] items-center gap-1.5 ${isDesktopMac ? 'left-[146px]' : 'left-4'}`}
+          style={{ transform: `translateX(${desktopToolbarShift}px)`, transition: 'transform 300ms cubic-bezier(0.2,0,0,1)' }}
+        >
           <button
             type="button"
             onClick={handleSidebarToggleCollapse}
@@ -832,10 +836,10 @@ const App: React.FC = () => {
                           
                           {/* Heatmap Section */}
                           {filter === 'next7days' && (
-                             <div className="mb-12">
-                                <div className="p-5 md:p-6 bg-primary-50 dark:bg-dark-surface rounded-xl shadow-sm border border-primary-200/80 dark:border-dark-border/80">
-                                   <div className="flex items-center justify-between mb-4">
-                                      <div className="flex items-center gap-2">
+                             <div className="mb-10 md:mb-12">
+                                <div className="p-5 md:p-6 bg-primary-50/90 dark:bg-dark-surface rounded-2xl shadow-sm border border-primary-200/80 dark:border-dark-border/80">
+                                   <div className="flex items-center justify-between mb-5">
+                                      <div className="flex items-center gap-2.5">
                                          <Icons.Flame />
                                          <h3 className="text-xs font-bold text-primary-900 dark:text-dark-text uppercase tracking-widest">Contribution Graph</h3>
                                       </div>
@@ -843,9 +847,11 @@ const App: React.FC = () => {
                                          Activity Log
                                       </div>
                                    </div>
-                                   <Suspense fallback={<div className="h-44 animate-pulse rounded-xl bg-primary-200/50 dark:bg-dark-surface/70" />}>
-                                     <Heatmap tasks={tasks} />
-                                   </Suspense>
+                                   <div className="rounded-xl border border-primary-200/70 dark:border-dark-border/70 bg-primary-100/70 dark:bg-dark-bg/55 px-4 py-3">
+                                     <Suspense fallback={<div className="h-44 animate-pulse rounded-xl bg-primary-200/50 dark:bg-dark-surface/70" />}>
+                                       <Heatmap tasks={tasks} />
+                                     </Suspense>
+                                   </div>
                                 </div>
                              </div>
                           )}
