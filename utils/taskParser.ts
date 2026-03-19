@@ -1,7 +1,7 @@
 import { Priority } from '../types';
 import { addDaysLocalIsoDate, todayLocalIsoDate } from './date';
 
-export interface ParsedTask {
+interface ParsedTask {
   title: string;
   cleanTitle: string;
   priority?: Priority;

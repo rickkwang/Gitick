@@ -7,7 +7,7 @@ const PRIORITY_SCORE: Record<Priority, number> = {
   [Priority.LOW]: 1,
 };
 
-export type DashboardTaskGroups = {
+type DashboardTaskGroups = {
   Overdue: Task[];
   Today: Task[];
   Tomorrow: Task[];

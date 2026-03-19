@@ -280,7 +280,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       
       <aside className={sidebarClasses}>
         <div className="flex flex-col h-full w-full p-2 md:p-3 pt-safe md:pt-3">
-          <div className="relative flex flex-col h-full overflow-hidden rounded-[calc(var(--app-radius)+4px)] border border-primary-200/80 dark:border-dark-border bg-primary-100 dark:bg-dark-surface shadow-[0_1px_3px_rgba(20,20,19,0.04)] dark:shadow-none">
+          <div className="relative flex flex-col h-full overflow-hidden rounded-[calc(var(--app-radius)+4px)] border border-primary-200/60 dark:border-dark-border/70 bg-primary-100 dark:bg-dark-surface shadow-[0_4px_20px_rgba(20,20,19,0.12),0_1px_4px_rgba(20,20,19,0.06)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.4),0_1px_4px_rgba(0,0,0,0.2)]">
           {/* Header - Completely Refactored for Zero-Flicker */}
           <div className={`h-[76px] md:h-[110px] relative flex items-center shrink-0 select-none w-full ${isDesktopMac ? 'md:pt-[58px]' : ''}`}>
              

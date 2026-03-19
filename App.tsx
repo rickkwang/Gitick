@@ -10,10 +10,9 @@ import { Icons, PROJECTS as DEFAULT_PROJECTS } from './constants';
 import { useDesktopUpdater, type DesktopConfirmDialogRequest } from './hooks/useDesktopUpdater';
 import { playSuccessSound } from './utils/audio';
 import { createOnboardingTasks, DEFAULT_USER_PROFILE } from './utils/appDefaults';
-import { formatTimerLabel } from './utils/focusTimer';
 import { useFocusTimer } from './hooks/useFocusTimer';
 import { sanitizeTaskList } from './utils/taskSanitizer';
-import { getFilterBreadcrumb, getFilteredTasks, getTaskCounts, groupDashboardTasks, searchTasks } from './utils/taskView';
+import { getFilteredTasks, getTaskCounts, groupDashboardTasks } from './utils/taskView';
 import {
   LEGACY_STORAGE_KEYS,
   STORAGE_KEYS,
@@ -113,12 +112,6 @@ const App: React.FC = () => {
     ),
   );
   
-  // Search / Command Palette State
-  const [showSearch, setShowSearch] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchSelectedIndex, setSearchSelectedIndex] = useState(0);
-  const searchInputRef = useRef<HTMLInputElement>(null);
-  const showSearchRef = useRef(showSearch);
   const showSettingsRef = useRef(showSettings);
   const selectedTaskRef = useRef(selectedTask);
   const isSidebarOpenRef = useRef(isSidebarOpen);
@@ -136,10 +129,6 @@ const App: React.FC = () => {
   useEffect(() => {
     tasksRef.current = tasks;
   }, [tasks]);
-
-  useEffect(() => {
-    showSearchRef.current = showSearch;
-  }, [showSearch]);
 
   useEffect(() => {
     showSettingsRef.current = showSettings;
@@ -301,8 +290,6 @@ const App: React.FC = () => {
     setUserProfile(DEFAULT_USER_PROFILE);
     setSelectedTask(null);
     setFilter('next7days');
-    setSearchQuery('');
-    setShowSearch(false);
     setIsSidebarCollapsed(true);
     resetDesktopUpdaterState();
     setDesktopFontSize(13);
@@ -468,8 +455,6 @@ const App: React.FC = () => {
 
   // Only show input on Dashboard, Today, Inbox, OR active projects
   const showTaskInput = ['next7days', 'today', 'inbox'].includes(filter) || projects.includes(filter);
-  const searchResults = useMemo(() => searchTasks(tasks, searchQuery), [searchQuery, tasks]);
-
   const isRightSidebarOpen = selectedTask !== null;
   const handleSidebarFilterChange = useCallback((nextFilter: FilterType) => {
     setFilter(nextFilter);
@@ -504,22 +489,8 @@ const App: React.FC = () => {
   // --- Keyboard Shortcuts ---
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault();
-        setShowSearch((prev) => {
-          const next = !prev;
-          if (next) {
-            setTimeout(() => searchInputRef.current?.focus(), 50);
-          }
-          return next;
-        });
-        return;
-      }
       if (e.key === 'Escape') {
-        if (showSearchRef.current) {
-          setShowSearch(false);
-          setSearchQuery('');
-        } else if (showSettingsRef.current) {
+        if (showSettingsRef.current) {
           setShowSettings(false);
         } else if (selectedTaskRef.current) {
           setSelectedTask(null);
@@ -633,43 +604,13 @@ const App: React.FC = () => {
              ) : (
                <div className="flex-1 flex flex-col h-full relative">
                   
-                  {/* Working Dir Header (Desktop Only) */}
-                  <div
-                    className={`hidden md:flex h-16 items-center justify-between shrink-0 bg-[var(--app-bg)] z-10 transition-colors duration-300 ${
-                      isDesktopMac ? 'pl-24 pr-8' : 'px-8'
-                    }`}
-                    style={isDesktopMac ? ({ WebkitAppRegion: 'drag' } as React.CSSProperties) : undefined}
-                  >
-                     <div className="flex items-center gap-2 text-sm font-mono text-primary-500 dark:text-dark-muted">
-                        <Icons.Folder />
-                        <span className="truncate tracking-tight font-medium text-primary-900 dark:text-dark-text opacity-70">
-                          {getFilterBreadcrumb(filter)}
-                        </span>
-                     </div>
-                     <div
-                       className="flex items-center gap-4"
-                       style={isDesktopMac ? ({ WebkitAppRegion: 'no-drag' } as React.CSSProperties) : undefined}
-                     >
-                        {isFocusActive && (
-                            <div className="flex items-center gap-2 px-3 py-1 bg-[var(--accent)] rounded-full text-white shadow-lg shadow-[var(--accent)]/20 animate-pulse">
-                                <span className="text-[10px] font-bold uppercase tracking-wider">Focus</span>
-                                <span className="font-mono text-xs font-bold">{formatTimerLabel(focusTimeLeft)}</span>
-                            </div>
-                        )}
-
-                        {/* Search Trigger (Refined) */}
-                        <button 
-                          onClick={() => { setShowSearch(true); setTimeout(() => searchInputRef.current?.focus(), 50); }}
-                          aria-label="Open quick search"
-                          className="group flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary-200/50 dark:bg-dark-border/50 hover:bg-primary-50 dark:hover:bg-dark-border border border-transparent hover:border-primary-200 dark:hover:border-dark-border transition-all duration-200"
-                          title="Quick Search (Cmd+K)"
-                        >
-                           <Icons.Search />
-                           <span className="text-xs text-primary-400 dark:text-dark-muted font-medium group-hover:text-primary-900 dark:group-hover:text-dark-text transition-colors">Search</span>
-                           <span className="ml-1 text-[10px] text-primary-300 dark:text-dark-muted font-mono border border-primary-200 dark:border-dark-border rounded px-1 group-hover:border-primary-300 dark:group-hover:border-dark-border">⌘K</span>
-                        </button>
-                     </div>
-                  </div>
+                  {/* Desktop drag region for macOS title bar */}
+                  {isDesktopMac && (
+                    <div
+                      className="hidden md:block h-10 shrink-0"
+                      style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
+                    />
+                  )}
 
                   {/* Scrollable List Area */}
                   <div className="flex-1 overflow-y-auto main-scroll scroll-smooth">
@@ -803,119 +744,6 @@ const App: React.FC = () => {
         )}
 
       </div>
-
-      {/* --- OVERLAYS --- */}
-      {/* Search / Command Palette (Redesigned - Spotlight Style) */}
-      {showSearch && (
-         <div className="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh] px-4">
-            {/* Backdrop with Blur */}
-            <div 
-              className="absolute inset-0 bg-primary-50/20 dark:bg-primary-900/40 transition-all duration-300 animate-in fade-in"
-              onClick={() => setShowSearch(false)} 
-            />
-            
-            {/* Search Box */}
-            <div className="relative w-full max-w-2xl bg-primary-50 dark:bg-dark-bg rounded-lg shadow-lg overflow-hidden flex flex-col max-h-[60vh] animate-in fade-in zoom-in-95 slide-in-from-bottom-2 duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]">
-               
-               {/* Large Apple-style Input */}
-               <div className="flex items-center gap-4 p-5 border-b border-primary-200/50 dark:border-dark-border/50">
-                  <span className="text-primary-400 dark:text-dark-muted scale-125 ml-2">
-                     <Icons.Search />
-                  </span>
-                  <input
-                     ref={searchInputRef}
-                     type="text"
-                     placeholder="Type to search..."
-                     value={searchQuery}
-                     onChange={(e) => { setSearchQuery(e.target.value); setSearchSelectedIndex(0); }}
-                     onKeyDown={(e) => {
-                       const visibleResults = searchResults.slice(0, 10);
-                       if (e.key === 'ArrowDown') {
-                         e.preventDefault();
-                         setSearchSelectedIndex(prev => Math.min(prev + 1, visibleResults.length - 1));
-                       } else if (e.key === 'ArrowUp') {
-                         e.preventDefault();
-                         setSearchSelectedIndex(prev => Math.max(prev - 1, 0));
-                       } else if (e.key === 'Enter' && visibleResults.length > 0) {
-                         e.preventDefault();
-                         const task = visibleResults[searchSelectedIndex];
-                         if (task) { setSelectedTask(task); setShowSearch(false); setSearchQuery(''); }
-                       }
-                     }}
-                     className="flex-1 bg-transparent text-2xl outline-none text-primary-900 dark:text-dark-text placeholder:text-primary-300 dark:placeholder:text-dark-muted font-medium tracking-tight h-10"
-                     autoFocus
-                  />
-                  <button
-                    onClick={() => setShowSearch(false)}
-                    aria-label="Close search"
-                    className="p-2 bg-primary-200/50 dark:bg-dark-border rounded-lg text-xs font-bold text-primary-500 dark:text-dark-muted hover:text-primary-900 dark:hover:text-dark-text transition-colors"
-                  >
-                     ESC
-                  </button>
-               </div>
-
-               {/* Results Area */}
-               <div className="overflow-y-auto p-2 custom-scroll bg-primary-50/80 dark:bg-dark-bg/50 min-h-[100px]">
-                  {searchQuery ? (
-                      searchResults.length > 0 ? (
-                        <div className="space-y-1 p-2">
-                            {searchResults.slice(0, 10).map((task, index) => (
-                              <button
-                                  key={task.id}
-                                  onClick={() => { setSelectedTask(task); setShowSearch(false); setSearchQuery(''); }}
-                                  onMouseEnter={() => setSearchSelectedIndex(index)}
-                                  className={`w-full flex items-center justify-between p-3.5 rounded-xl group transition-all text-left ${index === searchSelectedIndex ? 'bg-primary-900/5 dark:bg-primary-100/10' : 'hover:bg-primary-900/5 dark:hover:bg-primary-100/10'}`}
-                              >
-                                  <div className="flex items-center gap-3">
-                                    <span className={`text-primary-400 dark:text-dark-muted ${task.completed ? 'text-green-500' : ''}`}>
-                                        {task.completed ? <Icons.Checked /> : <Icons.Circle />}
-                                    </span>
-                                    <div>
-                                        <div className={`text-base font-medium transition-colors ${index === searchSelectedIndex ? 'text-primary-900 dark:text-dark-text' : 'text-primary-900 dark:text-dark-text group-hover:text-primary-900 dark:group-hover:text-dark-text'}`}>
-                                          {task.title}
-                                        </div>
-                                        <div className="text-xs text-primary-400 mt-0.5 flex gap-2">
-                                          <span>{task.list || 'Inbox'}</span>
-                                          {task.tags.map(t => <span key={t}>#{t}</span>)}
-                                        </div>
-                                    </div>
-                                  </div>
-                                  <span className={`text-[10px] font-mono text-primary-400 dark:text-dark-muted transition-opacity ${index === searchSelectedIndex ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
-                                    Enter
-                                  </span>
-                              </button>
-                            ))}
-                        </div>
-                      ) : (
-                        <div className="flex flex-col items-center justify-center py-10 text-primary-400 dark:text-dark-muted">
-                           <span className="text-sm">No results found for "{searchQuery}"</span>
-                        </div>
-                      )
-                  ) : (
-                      <div className="p-8 text-center text-primary-400 dark:text-dark-muted">
-                          <div className="flex flex-col items-center gap-2 opacity-50">
-                             <Icons.Command />
-                             <span className="text-sm font-medium">Search your tasks, tags, and projects</span>
-                          </div>
-                      </div>
-                  )}
-               </div>
-               
-               {/* Footer hints */}
-               {searchQuery && (
-                  <div className="px-4 py-2 bg-primary-100/80 dark:bg-primary-900/20 border-t border-primary-200/50 dark:border-dark-border/50 flex items-center justify-between">
-                          <div className="flex items-center gap-3 text-[10px] text-primary-400 dark:text-dark-muted font-mono">
-                            <span><kbd className="px-1 py-0.5 rounded border border-primary-200 dark:border-dark-border">↑↓</kbd> navigate</span>
-                            <span><kbd className="px-1 py-0.5 rounded border border-primary-200 dark:border-dark-border">↵</kbd> open</span>
-                          </div>
-                          <span className="text-[10px] text-primary-400 dark:text-dark-muted font-mono">
-                          {searchResults.length} results
-                          </span>
-                  </div>
-               )}
-            </div>
-         </div>
-      )}
 
       {/* Settings Modal */}
       {showSettings && (

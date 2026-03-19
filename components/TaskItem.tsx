@@ -56,7 +56,7 @@ const TaskItemComponent: React.FC<TaskItemProps> = ({
     >
       {/* Priority Indicator Dot (Left Edge) - HIGH always visible, others on hover */}
       {!task.completed && (
-          <div className={`absolute left-2 top-1/2 -translate-y-1/2 h-8 w-1 rounded-full ${priorityColor[task.priority]} ${task.priority === Priority.HIGH ? 'opacity-40 group-hover:opacity-90' : 'opacity-0 group-hover:opacity-90'} transition-opacity duration-300`} />
+          <div className={`absolute left-2 top-1/2 -translate-y-1/2 h-8 w-1 rounded-full ${priorityColor[task.priority]} ${task.priority === Priority.HIGH ? 'opacity-60 group-hover:opacity-90' : 'opacity-0 group-hover:opacity-90'} transition-opacity duration-300`} />
       )}
 
       {/* Custom Checkbox */}
@@ -68,7 +68,7 @@ const TaskItemComponent: React.FC<TaskItemProps> = ({
             }}
             aria-label={task.completed ? 'Mark task as active' : 'Mark task as completed'}
             className={`
-              relative w-6 h-6 rounded-full border-[1.5px] transition-all duration-300 flex items-center justify-center overflow-hidden
+              relative w-6 h-6 rounded-full border-2 transition-all duration-300 flex items-center justify-center overflow-hidden
               ${task.completed 
                  ? 'bg-primary-900 dark:bg-primary-200 border-primary-900 dark:border-primary-200 scale-100'
                  : `border-primary-300 dark:border-dark-muted hover:border-primary-400 dark:hover:border-dark-muted bg-transparent`}
@@ -103,7 +103,7 @@ const TaskItemComponent: React.FC<TaskItemProps> = ({
         </div>
         
         {/* Metadata Row */}
-        <div className="flex flex-wrap items-center gap-2.5 mt-3">
+        <div className="flex flex-wrap items-center gap-2 mt-3">
            
            {/* Date Badge - Softer look */}
            {dateDisplay && !task.completed && (

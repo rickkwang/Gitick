@@ -45,7 +45,7 @@ const normalizeTags = (value: unknown): string[] => {
     });
 };
 
-export const normalizeTask = (raw: unknown): Task | null => {
+const normalizeTask = (raw: unknown): Task | null => {
   if (!raw || typeof raw !== 'object') return null;
   const item = raw as Record<string, unknown>;
 

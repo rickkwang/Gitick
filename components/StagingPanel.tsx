@@ -122,7 +122,7 @@ export const StagingPanel: React.FC<StagingPanelProps> = ({ task, onClose, onUpd
         {/* Mobile Handle */}
         {variant === 'modal' && (
            <div className="w-full flex justify-center pt-3 pb-1" onClick={onClose}>
-              <div className="w-12 h-1.5 rounded-full bg-primary-200 dark:bg-dark-border"></div>
+              <div className="w-12 h-2 rounded-full bg-primary-200 dark:bg-dark-border"></div>
            </div>
         )}
 
@@ -190,7 +190,7 @@ export const StagingPanel: React.FC<StagingPanelProps> = ({ task, onClose, onUpd
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-bold uppercase tracking-wide transition-all ${priorityColors[task.priority]}`}
                   title="Click to cycle priority"
               >
-                  <Icons.Activity />
+                  <Icons.Flag />
                   <span>{task.priority}</span>
               </button>
 
@@ -199,6 +199,7 @@ export const StagingPanel: React.FC<StagingPanelProps> = ({ task, onClose, onUpd
                   <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border bg-primary-50 dark:bg-dark-surface border-primary-200 dark:border-dark-border text-primary-700 dark:text-dark-text text-xs font-medium hover:border-primary-300 dark:hover:border-dark-muted transition-all">
                       <Icons.Folder />
                       <span>{task.list || 'Inbox'}</span>
+                      <Icons.ChevronDown />
                       <select 
                         value={task.list || 'Inbox'} 
                         onChange={(e) => onUpdate({...task, list: e.target.value})}
@@ -214,7 +215,7 @@ export const StagingPanel: React.FC<StagingPanelProps> = ({ task, onClose, onUpd
 
               {/* Tags Chips */}
               {task.tags.map(tag => (
-                 <span key={tag} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary-100 dark:bg-dark-surface border border-primary-200 dark:border-dark-border text-primary-600 dark:text-dark-muted text-xs font-medium group cursor-default">
+                 <span key={tag} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary-100 dark:bg-dark-border/60 border border-primary-200/80 dark:border-dark-border/80 text-primary-600 dark:text-dark-muted text-xs font-medium group cursor-default">
                     <Icons.Tag />
                     {tag}
                     <button 
@@ -243,7 +244,7 @@ export const StagingPanel: React.FC<StagingPanelProps> = ({ task, onClose, onUpd
           {/* Description Section - Fluid */}
           <div className="flex gap-4 group">
              <div className="mt-1 text-primary-300 dark:text-dark-muted group-hover:text-primary-400 dark:group-hover:text-dark-muted transition-colors">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+<Icons.FileText />
              </div>
              <div className="flex-1 space-y-1">
                 <textarea 
@@ -259,7 +260,7 @@ export const StagingPanel: React.FC<StagingPanelProps> = ({ task, onClose, onUpd
           {/* Subtasks Section - Fluid */}
           <div className="flex gap-4">
              <div className="mt-1 text-primary-300 dark:text-dark-muted">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><polyline points="3 6 3.01 6"></polyline><polyline points="3 12 3.01 12"></polyline><polyline points="3 18 3.01 18"></polyline></svg>
+<Icons.List />
              </div>
              <div className="flex-1 space-y-2">
                  {/* Progress Bar if tasks exist */}
@@ -300,7 +301,7 @@ export const StagingPanel: React.FC<StagingPanelProps> = ({ task, onClose, onUpd
                  </div>
 
                  <form onSubmit={addSubtask} className="flex items-center gap-3 mt-2 opacity-60 focus-within:opacity-100 transition-opacity">
-                   <div className="scale-90 text-primary-300 dark:text-dark-muted"><Icons.Plus /></div>
+                   <div className="text-primary-300 dark:text-dark-muted"><Icons.Plus /></div>
                    <input
                      type="text"
                      value={newSubtaskTitle}

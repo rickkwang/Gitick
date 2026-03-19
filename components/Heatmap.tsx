@@ -5,7 +5,7 @@ import { toLocalIsoDate } from '../utils/date';
 const DAYS_PER_WEEK = 7;
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 const MIN_MONTH_LABEL_GAP = 3;
-const CELL_PX = 10;
+const CELL_PX = 11;
 const CELL_GAP_PX = 2;
 
 interface HeatmapProps {
@@ -175,112 +175,89 @@ export const Heatmap: React.FC<HeatmapProps> = ({ tasks }) => {
   }, [weeks]);
 
   const getColor = (count: number) => {
-    if (count <= 0) return 'bg-primary-200/50 dark:bg-dark-border';
+    if (count <= 0) return 'bg-[#ebedf0] dark:bg-[#161b22]';
 
     if (intensityCeiling <= 4) {
-      if (count === 1) return 'bg-teal-200 dark:bg-teal-700';
-      if (count === 2) return 'bg-teal-400 dark:bg-teal-600';
-      if (count === 3) return 'bg-teal-500 dark:bg-teal-500';
-      return 'bg-teal-700 dark:bg-teal-400';
+      if (count === 1) return 'bg-[#9be9a8] dark:bg-[#0e4429]';
+      if (count === 2) return 'bg-[#40c463] dark:bg-[#006d32]';
+      if (count === 3) return 'bg-[#30a14e] dark:bg-[#26a641]';
+      return 'bg-[#216e39] dark:bg-[#39d353]';
     }
 
     const ratio = count / intensityCeiling;
-    if (ratio <= 0.25) return 'bg-teal-200 dark:bg-teal-700';
-    if (ratio <= 0.5) return 'bg-teal-400 dark:bg-teal-600';
-    if (ratio <= 0.75) return 'bg-teal-500 dark:bg-teal-500';
-    return 'bg-teal-700 dark:bg-teal-400';
+    if (ratio <= 0.25) return 'bg-[#9be9a8] dark:bg-[#0e4429]';
+    if (ratio <= 0.5) return 'bg-[#40c463] dark:bg-[#006d32]';
+    if (ratio <= 0.75) return 'bg-[#30a14e] dark:bg-[#26a641]';
+    return 'bg-[#216e39] dark:bg-[#39d353]';
   };
 
-  const CELL_SIZE = 'w-[10px] h-[10px]';
+  const CELL_SIZE = 'w-[11px] h-[11px]';
   const GAP = 'gap-[2px]';
   const COL_WIDTH = CELL_PX + CELL_GAP_PX;
   const todayKey = toLocalIsoDate(new Date());
 
   return (
-    <div className="w-full overflow-hidden flex flex-col gap-4">
-      <div className="grid grid-cols-3 divide-x divide-primary-200/80 dark:divide-dark-border border-b border-primary-200/80 dark:border-dark-border pb-3">
-        <div className="px-2 md:px-5 text-center">
-          <div className="text-[10px] uppercase tracking-wider text-primary-400 dark:text-dark-muted font-bold mb-1">
-            Total
-          </div>
-          <div className="text-lg md:text-xl font-mono font-medium text-primary-900 dark:text-dark-text">{visibleContributions}</div>
-          <div className="text-[8px] text-primary-400 dark:text-dark-muted mt-1">{allTimeContributions} all-time</div>
+    <div className="w-full overflow-hidden flex flex-col gap-5">
+      <div className="flex items-baseline gap-8 px-3">
+        <div className="flex items-baseline gap-2">
+          <span className="text-2xl font-display font-semibold text-primary-900 dark:text-dark-text">{visibleContributions}</span>
+          <span className="text-[11px] text-primary-400 dark:text-dark-muted">completed</span>
         </div>
-        <div className="px-2 md:px-5 text-center">
-          <div className="text-[10px] uppercase tracking-wider text-primary-400 dark:text-dark-muted font-bold mb-1">
-            Streak
+        {currentStreak > 0 && (
+          <div className="flex items-baseline gap-2">
+            <span className="text-2xl font-display font-semibold text-primary-900 dark:text-dark-text">{currentStreak}</span>
+            <span className="text-[11px] text-primary-400 dark:text-dark-muted">day streak</span>
           </div>
-          <div className="text-lg md:text-xl font-mono font-medium text-primary-900 dark:text-dark-text">{maxStreak}</div>
-        </div>
-        <div className="px-2 md:px-5 text-center">
-          <div className="text-[10px] uppercase tracking-wider text-primary-400 dark:text-dark-muted font-bold mb-1">
-            Current
-          </div>
-          <div className="text-lg md:text-xl font-mono font-medium text-primary-900 dark:text-dark-text">{currentStreak}</div>
-        </div>
+        )}
       </div>
 
-      <div className="w-full pb-2 overflow-x-auto no-scrollbar">
-        <div className="flex gap-2 md:gap-3 px-2 w-max md:w-fit md:mx-auto">
-          <div className={`flex flex-col ${GAP} pt-[18px] text-[9px] font-mono text-primary-300 dark:text-dark-muted`}>
-            <div className="h-2.5 flex items-center opacity-0">Sun</div>
-            <div className="h-2.5 flex items-center">Mon</div>
-            <div className="h-2.5 flex items-center opacity-0">Tue</div>
-            <div className="h-2.5 flex items-center">Wed</div>
-            <div className="h-2.5 flex items-center opacity-0">Thu</div>
-            <div className="h-2.5 flex items-center">Fri</div>
-            <div className="h-2.5 flex items-center opacity-0">Sat</div>
+      <div className="w-full overflow-x-auto no-scrollbar">
+        <div className="px-3 w-max md:w-fit md:mx-auto">
+          <div className="relative mb-1.5 h-4 text-[10px] text-primary-400 dark:text-dark-muted">
+            {monthLabels.map((month) => (
+              <div
+                key={`${month.label}-${month.index}`}
+                className="absolute top-0 transition-all duration-300"
+                style={{ left: `${month.index * COL_WIDTH}px` }}
+              >
+                {month.label}
+              </div>
+            ))}
           </div>
 
-          <div className="shrink-0">
-            <div className="relative h-4 mb-0 text-[9px] font-mono text-primary-400 dark:text-dark-muted">
-              {monthLabels.map((month) => (
-                <div
-                  key={`${month.label}-${month.index}`}
-                  className="absolute top-0 transition-all duration-300"
-                  style={{ left: `${month.index * COL_WIDTH}px` }}
-                >
-                  {month.label}
-                </div>
-              ))}
-            </div>
+          <div className={`flex ${GAP}`}>
+            {weeks.map((week, weekIndex) => (
+              <div key={weekIndex} className={`flex flex-col ${GAP} shrink-0`}>
+                {week.map((cell) => {
+                  const count = completionMap[cell.key] ?? 0;
+                  const isFuture = cell.key > todayKey;
 
-            <div className={`flex ${GAP}`}>
-              {weeks.map((week, weekIndex) => (
-                <div key={weekIndex} className={`flex flex-col ${GAP} shrink-0`}>
-                  {week.map((cell) => {
-                    const count = completionMap[cell.key] ?? 0;
-                    const isFuture = cell.key > todayKey;
+                  if (isFuture) {
+                    return <div key={cell.key} className={`${CELL_SIZE}`} />;
+                  }
 
-                    if (isFuture) {
-                      return <div key={cell.key} className={`${CELL_SIZE} opacity-0`} />;
-                    }
-
-                    return (
-                      <div
-                        key={cell.key}
-                        title={`${count} ${count === 1 ? 'task' : 'tasks'} on ${cell.date.toLocaleDateString()}`}
-                        className={`${CELL_SIZE} rounded-sm transition-colors ${getColor(count)}`}
-                      />
-                    );
-                  })}
-                </div>
-              ))}
-            </div>
+                  return (
+                    <div
+                      key={cell.key}
+                      title={`${count} ${count === 1 ? 'task' : 'tasks'} on ${cell.date.toLocaleDateString()}`}
+                      className={`${CELL_SIZE} rounded-[2px] transition-colors ${getColor(count)}`}
+                    />
+                  );
+                })}
+              </div>
+            ))}
           </div>
         </div>
       </div>
 
-      <div className="flex items-center justify-between pt-1.5 px-3 border-t border-transparent dark:border-dark-border">
-        <div className="text-[9px] text-primary-400 dark:text-dark-muted italic">{currentStreak > 0 ? 'On fire! 🔥' : 'Just start.'}</div>
-
-        <div className="flex items-center gap-1 text-[8px] text-primary-400 font-mono">
+      <div className="flex items-center justify-end px-3">
+        <div className="flex items-center gap-1.5 text-[10px] text-primary-400 dark:text-dark-muted">
           <span>Less</span>
-          <div className={`${CELL_SIZE} rounded-sm bg-primary-200/50 dark:bg-dark-border`} />
-          <div className={`${CELL_SIZE} rounded-sm bg-teal-200 dark:bg-teal-700`} />
-          <div className={`${CELL_SIZE} rounded-sm bg-teal-400 dark:bg-teal-600`} />
-          <div className={`${CELL_SIZE} rounded-sm bg-teal-500 dark:bg-teal-500`} />
-          <div className={`${CELL_SIZE} rounded-sm bg-teal-700 dark:bg-teal-400`} />
+          <div className={`${CELL_SIZE} rounded-[2px] bg-[#ebedf0] dark:bg-[#161b22]`} />
+          <div className={`${CELL_SIZE} rounded-[2px] bg-[#9be9a8] dark:bg-[#0e4429]`} />
+          <div className={`${CELL_SIZE} rounded-[2px] bg-[#40c463] dark:bg-[#006d32]`} />
+          <div className={`${CELL_SIZE} rounded-[2px] bg-[#30a14e] dark:bg-[#26a641]`} />
+          <div className={`${CELL_SIZE} rounded-[2px] bg-[#216e39] dark:bg-[#39d353]`} />
           <span>More</span>
         </div>
       </div>

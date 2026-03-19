@@ -30,9 +30,3 @@ export const formatIsoDateForDisplay = (dateStr?: string, locale = 'en-US'): str
     day: 'numeric',
   });
 };
-
-export const isWithinNextDays = (dateStr: string | undefined, days: number): boolean => {
-  if (!dateStr) return false;
-  const end = addDaysLocalIsoDate(days);
-  return dateStr <= end;
-};
