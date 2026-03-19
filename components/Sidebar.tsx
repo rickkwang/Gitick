@@ -5,20 +5,14 @@ import { Icons, PROJECTS as DEFAULT_PROJECTS } from '../constants';
 interface SidebarProps {
   activeFilter: FilterType;
   onFilterChange: (filter: FilterType) => void;
-  isOpen: boolean;
-  onCloseMobile: () => void;
   taskCounts: Record<string, number>;
   onOpenSettings: () => void;
-  // Focus Props
   isFocusActive: boolean;
   focusTimeLeft: number;
-  // Dynamic Projects
   projects: string[];
   onAddProject: (name: string) => void;
   onDeleteProject: (name: string) => void;
-  // User Profile
   userProfile: UserProfile;
-  // Collapse State
   isCollapsed: boolean;
   toggleCollapse: () => void;
   isDesktopMac: boolean;
@@ -27,13 +21,12 @@ interface SidebarProps {
 type IconComponent = React.ComponentType;
 
 interface NavItemProps {
-  id: string; 
-  label: string; 
-  icon: IconComponent; 
+  id: string;
+  label: string;
+  icon: IconComponent;
   canDelete?: boolean;
   activeFilter: FilterType;
   onFilterChange: (id: string) => void;
-  onCloseMobile: () => void;
   taskCount: number;
   isFocusItem?: boolean;
   isFocusActive?: boolean;
@@ -42,14 +35,13 @@ interface NavItemProps {
   isCollapsed: boolean;
 }
 
-const NavItemComponent: React.FC<NavItemProps> = ({ 
-  id, 
-  label, 
-  icon: Icon, 
-  canDelete, 
-  activeFilter, 
-  onFilterChange, 
-  onCloseMobile, 
+const NavItemComponent: React.FC<NavItemProps> = ({
+  id,
+  label,
+  icon: Icon,
+  canDelete,
+  activeFilter,
+  onFilterChange,
   taskCount,
   isFocusItem,
   isFocusActive,
@@ -58,7 +50,7 @@ const NavItemComponent: React.FC<NavItemProps> = ({
   isCollapsed
 }) => {
   const isActive = activeFilter === id;
-  const rootClasses = 'px-[8px] md:px-0';
+  const rootClasses = 'px-0';
   
   const formatTimeMini = (seconds: number) => {
     const m = Math.floor(seconds / 60);
@@ -73,7 +65,6 @@ const NavItemComponent: React.FC<NavItemProps> = ({
           title={isCollapsed ? label : undefined}
           onClick={() => {
             onFilterChange(id);
-            onCloseMobile();
           }}
           className={`
             relative flex items-center text-sm font-medium rounded-xl outline-none select-none
@@ -95,8 +86,8 @@ const NavItemComponent: React.FC<NavItemProps> = ({
           <span
             className={`
               shrink-0 flex items-center justify-center transition-colors duration-200
-              w-[44px] h-[40px] md:absolute md:top-0
-              ${isCollapsed ? 'md:left-1/2 md:-translate-x-1/2' : 'md:left-0'}
+              w-[44px] h-[40px] absolute top-0
+              ${isCollapsed ? 'left-1/2 -translate-x-1/2' : 'left-0'}
             `}
           >
             <span
@@ -115,13 +106,10 @@ const NavItemComponent: React.FC<NavItemProps> = ({
           </span>
           
           {/* Text Container */}
-          {/* CRITICAL FIX: Always visible on Mobile (default classes), only conditionally hidden on Desktop (md: prefix) */}
           <div className={`
-            flex items-center flex-1 min-w-0 overflow-hidden whitespace-nowrap pl-1
+            flex items-center flex-1 min-w-0 overflow-hidden whitespace-nowrap pl-[52px]
             transition-opacity duration-200 ease-linear
-            opacity-100
-            md:pl-[52px]
-            ${isCollapsed ? 'md:opacity-0 md:pointer-events-none' : 'md:opacity-100'}
+            ${isCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}
           `}>
             <span className="truncate pr-2">{label}</span>
             
@@ -150,7 +138,7 @@ const NavItemComponent: React.FC<NavItemProps> = ({
 
         {/* Collapsed Indicator Dot - Desktop Only */}
         {!isFocusItem && taskCount > 0 && isCollapsed && (
-             <span className="hidden md:block absolute top-3 left-1/2 translate-x-[10px] w-2 h-2 rounded-full bg-primary-900 dark:bg-dark-text ring-2 ring-primary-50 dark:ring-dark-bg pointer-events-none animate-in fade-in zoom-in duration-200" />
+             <span className="absolute top-3 left-1/2 translate-x-[10px] w-2 h-2 rounded-full bg-primary-900 dark:bg-dark-text ring-2 ring-primary-50 dark:ring-dark-bg pointer-events-none animate-in fade-in zoom-in duration-200" />
         )}
         
         {/* Delete Button */}
@@ -190,12 +178,10 @@ const navItemPropsEqual = (prev: NavItemProps, next: NavItemProps) => {
 
 const NavItem = React.memo(NavItemComponent, navItemPropsEqual);
 
-export const Sidebar: React.FC<SidebarProps> = ({ 
-  activeFilter, 
-  onFilterChange, 
-  isOpen, 
-  onCloseMobile, 
-  taskCounts, 
+export const Sidebar: React.FC<SidebarProps> = ({
+  activeFilter,
+  onFilterChange,
+  taskCounts,
   onOpenSettings,
   isFocusActive,
   focusTimeLeft,
@@ -211,9 +197,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const [newProjectName, setNewProjectName] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Logic: renderCollapsed applies MAINLY to Desktop. 
-  // On Mobile, we force visual expansion via CSS regardless of this bool to prevent flickering.
-  const renderCollapsed = isCollapsed && !isOpen;
+  const renderCollapsed = isCollapsed;
 
   useEffect(() => {
     if (isAddingProject) {
@@ -250,65 +234,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
   // Optimized for "Silky" feel (ChatGPT/Obsidian style)
   // Using a custom spring-like bezier for more natural movement
   const sidebarClasses = `
-    fixed inset-y-0 left-0 z-[60] ${activeFilter === 'focus' ? 'bg-transparent' : 'bg-[var(--app-bg)]'} flex flex-col
-    
-    /* MOBILE CONFIGURATION */
-    w-[268px]
-    transform-gpu will-change-transform
-    /* Smoother, slightly faster transition for mobile drawer feel (500ms) */
-    transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]
-    ${isOpen ? 'translate-x-0 shadow-[20px_0_50px_-10px_rgba(0,0,0,0.15)]' : '-translate-x-full'}
-    
-    /* DESKTOP CONFIGURATION (Overrides) */
-    md:translate-x-0 md:shadow-none md:relative md:z-30 
-    md:transition-[width] md:duration-300 md:ease-[cubic-bezier(0.2,0,0,1)]
-    ${renderCollapsed ? 'md:w-[84px]' : 'md:w-[260px]'}
+    relative z-30 ${activeFilter === 'focus' ? 'bg-transparent' : 'bg-[var(--app-bg)]'} flex flex-col
+    transition-[width] duration-300 ease-[cubic-bezier(0.2,0,0,1)]
+    ${renderCollapsed ? 'w-[84px]' : 'w-[260px]'}
   `;
 
   return (
-    <>
-      {/* Mobile Backdrop - Persistent for smooth exit animation */}
-      <div 
-        className={`
-          fixed inset-0 bg-primary-900/30 dark:bg-primary-950/60 z-50 md:hidden
-          transition-opacity duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]
-          ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}
-        `}
-        onClick={onCloseMobile}
-        aria-hidden="true"
-      />
-      
       <aside className={sidebarClasses}>
-        <div className="flex flex-col h-full w-full p-2 md:p-2.5 pt-safe md:pt-2.5">
+        <div className="flex flex-col h-full w-full p-2.5 pt-2.5">
           <div className="relative flex flex-col h-full overflow-hidden rounded-[calc(var(--app-radius)+4px)] border border-primary-200/60 dark:border-dark-border/70 bg-primary-100 dark:bg-dark-surface shadow-[0_4px_20px_rgba(20,20,19,0.12),0_1px_4px_rgba(20,20,19,0.06)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.4),0_1px_4px_rgba(0,0,0,0.2)]">
-          {/* Header - Completely Refactored for Zero-Flicker */}
-          <div className={`h-[72px] md:h-[102px] relative flex items-center shrink-0 select-none w-full ${isDesktopMac ? 'md:pt-[54px]' : ''}`}>
-             
-             {/* 1. MOBILE HEADER: Static, Always Visible on Mobile (md:hidden) */}
-             {/* This separates mobile logic from desktop state, preventing logo flicker during open */}
-             <div className="md:hidden absolute inset-0 px-6 flex items-center justify-between">
-                <div className="flex items-center gap-3.5">
-                    <span className="shrink-0 w-7 h-7 flex items-center justify-center [&>svg]:w-6 [&>svg]:h-6 text-primary-900 dark:text-dark-text">
-                        <Icons.GitickLogo />
-                    </span>
-                    <span className="text-lg leading-none font-semibold tracking-tight whitespace-nowrap font-display brand-text">
-                        Gitick
-                    </span>
-                </div>
-                {/* Mobile Close Button */}
-                <button 
-                  onClick={onCloseMobile} 
-                  aria-label="Close sidebar"
-                  className="flex items-center justify-center p-2 -mr-2 rounded-lg text-primary-400 hover:text-primary-900 dark:hover:text-dark-text transition-colors active:scale-95 transform"
-                  title="Close Sidebar"
-               >
-                  <Icons.SidebarLeft />
-               </button>
-             </div>
+          {/* Header */}
+          <div className={`h-[102px] relative flex items-center shrink-0 select-none w-full ${isDesktopMac ? 'pt-[54px]' : ''}`}>
 
-             {/* 2. DESKTOP HEADER - EXPANDED (hidden on mobile) */}
+             {/* EXPANDED HEADER */}
              <div className={`
-                hidden md:flex absolute inset-0 px-6 items-center justify-between
+                flex absolute inset-0 px-6 items-center justify-between
                 transition-opacity duration-200 ease-linear
                 ${renderCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}
              `}>
@@ -331,9 +271,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                </button>
              </div>
 
-             {/* 3. DESKTOP HEADER - COLLAPSED (hidden on mobile) */}
+             {/* COLLAPSED HEADER */}
              <div className={`
-                hidden md:flex absolute inset-0 items-center justify-center
+                flex absolute inset-0 items-center justify-center
                 transition-opacity duration-200 ease-linear
                 ${renderCollapsed ? 'opacity-100' : 'opacity-0 pointer-events-none'}
              `}>
@@ -359,34 +299,32 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <div className="flex-1 overflow-y-auto no-scrollbar py-2.5 space-y-5 px-2.5">
             {/* Section: Overview */}
             <div>
-              {/* CRITICAL: md: prefix ensures collapse logic only affects desktop. Mobile is always visible (h-6) */}
               <div className={`
                  overflow-hidden px-2.5 h-5 mb-1.5 flex items-center
                  transition-opacity duration-200
-                 opacity-100
-                 ${renderCollapsed ? 'md:opacity-0 md:pointer-events-none' : 'md:opacity-100'}
+                 ${renderCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}
               `}>
                 <h3 className="text-[10px] font-bold text-primary-900 dark:text-dark-text uppercase tracking-widest whitespace-nowrap pl-1">Overview</h3>
               </div>
               <nav className="space-y-0.5">
                 <NavItem 
                   id="next7days" label="Dashboard" icon={Icons.Dashboard} 
-                  activeFilter={activeFilter} onFilterChange={onFilterChange} onCloseMobile={onCloseMobile} taskCount={taskCounts['next7days']} 
+                  activeFilter={activeFilter} onFilterChange={onFilterChange} taskCount={taskCounts['next7days']} 
                   isCollapsed={renderCollapsed}
                 />
                 <NavItem 
                   id="inbox" label="Inbox" icon={Icons.Inbox} 
-                  activeFilter={activeFilter} onFilterChange={onFilterChange} onCloseMobile={onCloseMobile} taskCount={taskCounts['inbox']} 
+                  activeFilter={activeFilter} onFilterChange={onFilterChange} taskCount={taskCounts['inbox']} 
                   isCollapsed={renderCollapsed}
                 />
                 <NavItem 
                   id="today" label="Today" icon={Icons.Calendar} 
-                  activeFilter={activeFilter} onFilterChange={onFilterChange} onCloseMobile={onCloseMobile} taskCount={taskCounts['today']} 
+                  activeFilter={activeFilter} onFilterChange={onFilterChange} taskCount={taskCounts['today']} 
                   isCollapsed={renderCollapsed}
                 />
                 <NavItem 
                   id="focus" label="Focus Mode" icon={Icons.Clock} 
-                  activeFilter={activeFilter} onFilterChange={onFilterChange} onCloseMobile={onCloseMobile} taskCount={0} 
+                  activeFilter={activeFilter} onFilterChange={onFilterChange} taskCount={0} 
                   isFocusItem={true} isFocusActive={isFocusActive} focusTimeLeft={focusTimeLeft}
                   isCollapsed={renderCollapsed}
                 />
@@ -398,8 +336,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <div className={`
                  flex items-center justify-between px-2.5 group overflow-hidden whitespace-nowrap h-5 mb-1.5
                  transition-opacity duration-200
-                 opacity-100
-                 ${renderCollapsed ? 'md:opacity-0 md:pointer-events-none' : 'md:opacity-100'}
+                 ${renderCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}
               `}>
                   <h3 className="text-[10px] font-bold text-primary-900 dark:text-dark-text uppercase tracking-widest pl-1">Projects</h3>
                   <button
@@ -423,8 +360,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     onDeleteProject={onDeleteProject}
                     activeFilter={activeFilter} 
                     onFilterChange={onFilterChange} 
-                    onCloseMobile={onCloseMobile} 
-                    taskCount={taskCounts[project] || 0} 
+                                       taskCount={taskCounts[project] || 0} 
                     isCollapsed={renderCollapsed}
                   />
                 ))}
@@ -456,15 +392,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
                <div className={`
                   overflow-hidden px-3 h-6 mb-2 flex items-center
                   transition-opacity duration-200
-                  opacity-100
-                  ${renderCollapsed ? 'md:opacity-0 md:pointer-events-none' : 'md:opacity-100'}
+                  ${renderCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}
                `}>
                  <h3 className="text-[10px] font-bold text-primary-900 dark:text-dark-text uppercase tracking-widest whitespace-nowrap pl-1">History</h3>
                </div>
                  <nav className="space-y-0.5">
                   <NavItem 
                     id="completed" label="Repository" icon={Icons.CheckCircle} 
-                    activeFilter={activeFilter} onFilterChange={onFilterChange} onCloseMobile={onCloseMobile} taskCount={0} 
+                    activeFilter={activeFilter} onFilterChange={onFilterChange} taskCount={0} 
                     isCollapsed={renderCollapsed}
                   />
                </nav>
@@ -472,7 +407,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
           
           {/* User Profile Footer (Unified Design) */}
-          <div className="mt-auto px-2.5 pb-safe md:pb-3 pt-1.5 shrink-0">
+          <div className="mt-auto px-2.5 pb-3 pt-1.5 shrink-0">
              {/* Subtle Divider */}
              <div className="mx-2 mb-1.5 h-px bg-primary-200/80 dark:bg-dark-border/80" />
              
@@ -503,7 +438,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       flex items-center justify-between flex-1 min-w-0 overflow-hidden pr-2.5 pl-1
                       transition-opacity duration-200
                       opacity-100
-                      ${renderCollapsed ? 'md:hidden' : 'md:opacity-100'}
+                      ${renderCollapsed ? 'hidden' : 'opacity-100'}
                   `}>
                       <div className="flex flex-col items-start leading-tight">
                           <span className="text-sm font-bold text-primary-900 dark:text-dark-text truncate max-w-[120px]">{userProfile.name}</span>
@@ -521,6 +456,5 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
         </div>
       </aside>
-    </>
   );
 };

@@ -56,7 +56,6 @@ const App: React.FC = () => {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   
   // Sidebar states
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Mobile toggle
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() =>
     readStoredJson<boolean>(
       [STORAGE_KEYS.sidebarCollapsed, LEGACY_STORAGE_KEYS.sidebarCollapsed],
@@ -128,7 +127,6 @@ const App: React.FC = () => {
   
   const showSettingsRef = useRef(showSettings);
   const selectedTaskRef = useRef(selectedTask);
-  const isSidebarOpenRef = useRef(isSidebarOpen);
 
   // Undo / Toast State
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
@@ -151,11 +149,6 @@ const App: React.FC = () => {
   useEffect(() => {
     selectedTaskRef.current = selectedTask;
   }, [selectedTask]);
-
-  useEffect(() => {
-    isSidebarOpenRef.current = isSidebarOpen;
-  }, [isSidebarOpen]);
-
 
   const toggleThemeMode = useCallback(() => {
     if (typeof window === 'undefined') {
@@ -397,9 +390,6 @@ const App: React.FC = () => {
     const task = tasksRef.current.find(t => t.id === id);
     if (task && !task.completed) {
       playSuccessSound();
-      if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
-        navigator.vibrate(20);
-      }
     }
 
     const shouldGenerateNext = Boolean(task && !task.completed && task.recurrence);
@@ -508,9 +498,6 @@ const App: React.FC = () => {
   const handleSidebarToggleCollapse = useCallback(() => {
     setIsSidebarCollapsed((prev) => !prev);
   }, []);
-  const handleSidebarCloseMobile = useCallback(() => {
-    setIsSidebarOpen(false);
-  }, []);
   const handleOpenSettings = useCallback(() => {
     setShowSettings(true);
   }, []);
@@ -588,8 +575,6 @@ const App: React.FC = () => {
           setShowSettings(false);
         } else if (selectedTaskRef.current) {
           setSelectedTask(null);
-        } else if (isSidebarOpenRef.current) {
-          setIsSidebarOpen(false);
         }
         return;
       }
@@ -612,12 +597,10 @@ const App: React.FC = () => {
      if (groupName === 'Today') headerClass = "text-[var(--status-info-text)]";
 
      return (
-        <div className="mb-8">
+        <div className="mb-6">
            {groupName && (
-              // OPTICAL FIX: Added px-5 md:px-6 to align header text with TaskItem content (checkbox)
-              // This fixes the "floating header" look relative to the rounded cards
-              <div className={`sticky top-0 bg-[var(--app-bg)] z-10 py-4 mb-3 flex items-center gap-3 transition-colors ${headerClass} px-5 md:px-6`}>
-                  <span className="text-xs font-black uppercase tracking-widest opacity-90 transform translate-y-[1px]">{groupName}</span>
+              <div className={`sticky top-0 bg-[var(--app-bg)] z-10 py-3 mb-2 flex items-center gap-2.5 transition-colors ${headerClass} px-6`}>
+                  <span className="text-[11px] font-black uppercase tracking-widest opacity-90">{groupName}</span>
                   <span className="text-[10px] font-bold font-mono opacity-60 bg-primary-200/40 dark:bg-dark-border px-2 py-0.5 rounded-full text-primary-900 dark:text-dark-text min-w-[1.5rem] text-center">{taskList.length}</span>
               </div>
            )}
@@ -638,41 +621,19 @@ const App: React.FC = () => {
 
   return (
     <div
-      className={`[--app-radius:16px] flex flex-col h-dvh md:rounded-[var(--app-radius)] font-sans text-primary-900 dark:text-dark-text bg-[var(--app-bg)] overflow-hidden transition-colors duration-300 selection:bg-primary-900 selection:text-white dark:selection:bg-primary-100 dark:selection:text-primary-900 ${
+      className={`[--app-radius:16px] flex flex-col h-dvh rounded-[var(--app-radius)] font-sans text-primary-900 dark:text-dark-text bg-[var(--app-bg)] overflow-hidden transition-colors duration-300 selection:bg-primary-900 selection:text-white dark:selection:bg-primary-100 dark:selection:text-primary-900 ${
         isStartupStatic ? 'startup-static' : ''
       }`}
-    > 
-      {/* Mobile Header with Safe Area Padding */}
-      <header className="md:hidden bg-[var(--app-bg)] border-b border-primary-200/80 dark:border-dark-border shrink-0 z-50 pt-safe transition-colors duration-300">
-         <div className="h-14 flex items-center px-4 justify-between">
-            <div className="flex items-center gap-3">
-               <button
-                 onClick={() => setIsSidebarOpen(true)}
-                 aria-label="Open sidebar"
-                 className="text-primary-900 dark:text-dark-text p-1"
-               >
-                 <Icons.Menu />
-               </button>
-               <span className="font-display font-bold tracking-tight brand-text">Gitick</span>
-            </div>
-            {/* Mobile context indicator */}
-            <div className="text-[10px] font-mono text-primary-400 dark:text-dark-muted px-2 py-1 bg-primary-100 dark:bg-dark-bg rounded-md">
-               {filter === 'next7days' ? 'Dashboard' : filter}
-            </div>
-         </div>
-      </header>
-
+    >
       {/* Main Layout Container */}
       <div className="flex-1 flex w-full relative overflow-hidden">
         
         {/* COL 1: Sidebar */}
-        <Sidebar 
-          activeFilter={filter} 
-          onFilterChange={handleSidebarFilterChange} 
-          isOpen={isSidebarOpen}
+        <Sidebar
+          activeFilter={filter}
+          onFilterChange={handleSidebarFilterChange}
           isCollapsed={isSidebarCollapsed}
           toggleCollapse={handleSidebarToggleCollapse}
-          onCloseMobile={handleSidebarCloseMobile}
           taskCounts={taskCounts}
           onOpenSettings={handleOpenSettings}
           isFocusActive={isFocusActive}
@@ -687,7 +648,7 @@ const App: React.FC = () => {
         {/* COL 2: Main Content */}
         <main className="flex-1 flex flex-col min-w-0 h-full bg-[var(--app-bg)] relative z-0 transition-colors duration-300">
            
-           <div className={`h-full flex flex-col ${filter === 'focus' ? '' : 'animate-view-breathe'}`}>
+           <div className={`h-full flex flex-col ${filter === 'focus' || isSidebarCollapsed ? '' : 'animate-view-breathe'}`}>
              
              {filter === 'focus' ? (
                <FocusMode
@@ -706,52 +667,52 @@ const App: React.FC = () => {
                   {/* Desktop drag region for macOS title bar */}
                   {isDesktopMac && (
                     <div
-                      className="hidden md:block absolute top-0 left-0 right-0 h-10 z-10 pointer-events-none"
+                      className="absolute top-0 left-0 right-0 h-10 z-10 pointer-events-none"
                       style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
                     />
                   )}
 
                   {/* Scrollable List Area */}
                   <div className="flex-1 overflow-y-auto main-scroll scroll-smooth">
-                      <div className="max-w-[1180px] mx-auto w-full px-5 md:px-11 py-8 md:py-11">
+                      <div className="max-w-[1400px] mx-auto w-full px-8 py-6">
                           {filter !== 'focus' && (
-                            <div className="mb-7">
-                              <div className="flex flex-col gap-3 md:flex-row md:items-center">
-                                <div className="flex-1 min-w-0 rounded-2xl border border-primary-200/80 dark:border-dark-border bg-primary-50 dark:bg-dark-surface px-4 py-3.5 shadow-sm">
-                                  <div className="flex items-center gap-2.5">
-                                    <span className="text-primary-400 dark:text-dark-muted">
+                            <div className="mb-4">
+                              <div className="flex items-center gap-2 max-w-2xl">
+                                <div className="flex-1 min-w-0 rounded-lg border border-primary-200/80 dark:border-dark-border bg-primary-50 dark:bg-dark-surface px-3 py-2 shadow-sm">
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="text-primary-400 dark:text-dark-muted shrink-0 flex items-center justify-center w-4 h-4">
                                       <Icons.Search />
                                     </span>
                                     <input
                                       value={searchQuery}
                                       onChange={(event) => setSearchQuery(event.target.value)}
-                                      placeholder="Search title, tag, project..."
-                                      className="w-full bg-transparent outline-none text-sm text-primary-900 dark:text-dark-text placeholder:text-primary-400 dark:placeholder:text-dark-muted"
+                                      placeholder="Search..."
+                                      className="w-full bg-transparent outline-none text-xs text-primary-900 dark:text-dark-text placeholder:text-primary-400 dark:placeholder:text-dark-muted"
                                     />
                                   </div>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-3 md:flex md:items-center md:gap-3">
-                                  <div className="rounded-2xl border border-primary-200/80 dark:border-dark-border bg-primary-50 dark:bg-dark-surface px-3 py-2.5 shadow-sm">
+                                <div className="flex items-center gap-1.5 shrink-0">
+                                  <div className="rounded-lg border border-primary-200/80 dark:border-dark-border bg-primary-50 dark:bg-dark-surface px-2 py-1.5 shadow-sm">
                                     <select
                                       value={searchPriority}
                                       onChange={(event) => setSearchPriority(event.target.value as 'all' | 'high' | 'medium' | 'low')}
-                                      className="min-w-[8.75rem] bg-transparent text-sm text-primary-700 dark:text-dark-text outline-none"
+                                      className="bg-transparent text-[11px] font-medium text-primary-700 dark:text-dark-text outline-none"
                                     >
-                                      <option value="all">Any Priority</option>
+                                      <option value="all">All</option>
                                       <option value="high">High</option>
-                                      <option value="medium">Medium</option>
+                                      <option value="medium">Med</option>
                                       <option value="low">Low</option>
                                     </select>
                                   </div>
 
-                                  <div className="rounded-2xl border border-primary-200/80 dark:border-dark-border bg-primary-50 dark:bg-dark-surface px-3 py-2.5 shadow-sm">
+                                  <div className="rounded-lg border border-primary-200/80 dark:border-dark-border bg-primary-50 dark:bg-dark-surface px-2 py-1.5 shadow-sm">
                                     <select
                                       value={searchProject}
                                       onChange={(event) => setSearchProject(event.target.value as 'all' | string)}
-                                      className="min-w-[9.25rem] bg-transparent text-sm text-primary-700 dark:text-dark-text outline-none"
+                                      className="bg-transparent text-[11px] font-medium text-primary-700 dark:text-dark-text outline-none"
                                     >
-                                      <option value="all">Any Project</option>
+                                      <option value="all">All</option>
                                       <option value="Inbox">Inbox</option>
                                       {projects.map((project) => (
                                         <option key={project} value={project}>
@@ -767,18 +728,14 @@ const App: React.FC = () => {
                           
                           {/* Heatmap Section */}
                           {filter === 'next7days' && (
-                             <div className="mb-12">
-                                <div className="p-5 md:p-6 bg-primary-50 dark:bg-dark-surface rounded-xl shadow-sm border border-primary-200/80 dark:border-dark-border/80">
-                                   <div className="flex items-center justify-between mb-4">
-                                      <div className="flex items-center gap-2">
-                                         <Icons.Flame />
-                                         <h3 className="text-xs font-bold text-primary-900 dark:text-dark-text uppercase tracking-widest">Contribution Graph</h3>
-                                      </div>
-                                      <div className="text-[10px] font-mono text-primary-400">
-                                         Activity Log
-                                      </div>
+                             <div className="mb-6">
+                                <div className="p-4 bg-primary-50 dark:bg-dark-surface rounded-lg shadow-sm border border-primary-200/80 dark:border-dark-border/80">
+                                   <div className="flex items-center justify-between mb-2">
+                                      <h3 className="text-[10px] font-bold text-primary-900 dark:text-dark-text uppercase tracking-wider flex items-center gap-1.5">
+                                         <Icons.Flame /> Contributions
+                                      </h3>
                                    </div>
-                                   <Suspense fallback={<div className="h-44 animate-pulse rounded-xl bg-primary-200/50 dark:bg-dark-surface/70" />}>
+                                   <Suspense fallback={<div className="h-24 animate-pulse rounded-lg bg-primary-200/50 dark:bg-dark-surface/70" />}>
                                      <Heatmap tasks={tasks} />
                                    </Suspense>
                                 </div>
@@ -791,7 +748,7 @@ const App: React.FC = () => {
                                <GitGraph tasks={filteredTasks} onDelete={deleteTask} userProfile={userProfile} />
                              </Suspense>
                           ) : (
-                            <div className="pb-36">
+                            <div className="pb-28">
                               {/* Grouped View for Dashboard (TickTick Style) */}
                               {filter === 'next7days' && taskGroups ? (
                                   Object.values(taskGroups).flat().length === 0 ? (
@@ -807,7 +764,7 @@ const App: React.FC = () => {
                               ) : (
                                   /* Flat List for other views */
                                   filteredTasks.length > 0 ? (
-                                    <div className="space-y-5">
+                                    <div className="space-y-2.5">
                                       {filteredTasks.map(task => (
                                           <TaskItem 
                                             key={task.id}
@@ -830,12 +787,12 @@ const App: React.FC = () => {
                   {/* GLOBAL COMMAND BAR (Floating Bottom with Gradient Mask) */}
                   {showTaskInput && (
                      <div className="absolute bottom-0 left-0 right-0 z-20 pointer-events-none">
-                        {/* Gradient Mask to catch scrolling text - Taller and solid at bottom */}
-                        <div className="absolute bottom-0 left-0 right-0 h-56 bg-[var(--app-bg)]/92 dark:bg-[var(--app-bg)]/88" />
+                        {/* Gradient Mask */}
+                        <div className="absolute bottom-0 left-0 right-0 h-40 bg-[var(--app-bg)]/92 dark:bg-[var(--app-bg)]/88" />
 
                         {/* Input Container - Padded from bottom including Safe Area */}
-                        <div className="relative z-10 w-full flex justify-center px-4 pt-10 pb-safe">
-                           <div className="max-w-3xl w-full pointer-events-auto mb-8 md:mb-9">
+                        <div className="relative z-10 w-full flex justify-center px-4 pt-10 pb-4">
+                           <div className="max-w-3xl w-full pointer-events-auto mb-9">
                               <TaskInput onAddTask={addTask} activeList={filter} projects={projects} />
                            </div>
                         </div>
@@ -848,17 +805,16 @@ const App: React.FC = () => {
         </main>
 
         {/* COL 3: Staging Area */}
-        <aside 
+        <aside
           className={`
-             hidden lg:flex flex-col h-full bg-primary-50 dark:bg-dark-surface overflow-hidden border-l border-primary-200/70 dark:border-dark-border
-             transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)] 
+             flex flex-col h-full bg-primary-50 dark:bg-dark-surface overflow-hidden border-l border-primary-200/70 dark:border-dark-border
+             transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)]
              ${isRightSidebarOpen && filter !== 'focus' ? 'w-96 translate-x-0 opacity-100' : 'w-0 translate-x-10 opacity-0'}
           `}
         >
           <div className="w-96 h-full flex flex-col min-w-[24rem]">
             {selectedTask ? (
-               <StagingPanel 
-                  variant="sidebar"
+               <StagingPanel
                   task={selectedTask}
                   onClose={() => {
                     setSelectedTask(null);
@@ -876,21 +832,6 @@ const App: React.FC = () => {
             )}
           </div>
         </aside>
-
-        {/* Mobile Detail Modal -> Now Bottom Sheet in StagingPanel */}
-        {selectedTask && (
-           <div className="lg:hidden">
-              <StagingPanel 
-                variant="modal"
-                task={selectedTask} 
-                onClose={() => setSelectedTask(null)}
-                onUpdate={updateTask}
-                onDelete={deleteTask}
-                onCommit={requestToggleTask}
-                projects={projects}
-              />
-           </div>
-        )}
 
       </div>
 

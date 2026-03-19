@@ -67,10 +67,10 @@ export const FocusMode: React.FC<FocusModeProps> = ({
 
   return (
     <div className="flex flex-col h-full bg-[var(--app-bg)] relative overflow-hidden transition-colors duration-300">
-      <div className="max-w-[960px] mx-auto w-full h-full px-6 md:px-10 py-8 md:py-12 flex flex-col">
+      <div className="max-w-[960px] mx-auto w-full h-full px-10 py-12 flex flex-col">
       {/* Top Section: Timer Visualization */}
-      <div className="flex-[1.15] flex flex-col items-center justify-center p-6 md:p-8 min-h-[360px]">
-        <div className="relative w-64 h-64 md:w-80 md:h-80 flex items-center justify-center">
+      <div className="flex-[1.15] flex flex-col items-center justify-center p-8 min-h-[360px]">
+        <div className="relative w-80 h-80 flex items-center justify-center">
           {/* SVG Ring */}
           <svg className="w-full h-full transform -rotate-90 drop-shadow-sm">
              {/* Background Circle */}
@@ -95,7 +95,7 @@ export const FocusMode: React.FC<FocusModeProps> = ({
 
           {/* Centered Time Display (No buttons inside to prevent overlap) */}
           <div className="absolute flex flex-col items-center justify-center w-full z-10">
-            <span className="text-[4rem] md:text-[5rem] leading-none font-light text-primary-900 dark:text-dark-text tabular-nums tracking-tighter select-none font-sans">
+            <span className="text-[5rem] leading-none font-light text-primary-900 dark:text-dark-text tabular-nums tracking-tighter select-none font-sans">
                 {formatTime(timeLeft)}
             </span>
             <span className="text-xs font-bold text-primary-400 dark:text-dark-muted uppercase tracking-[0.2em] mt-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
@@ -106,15 +106,15 @@ export const FocusMode: React.FC<FocusModeProps> = ({
       </div>
 
       {/* Bottom Section: Controls */}
-      <div className="shrink-0 mt-2 md:mt-4 p-4 md:p-6 pb-safe md:pb-10 flex flex-col items-center gap-6 md:gap-7 z-20">
+      <div className="shrink-0 mt-4 p-6 pb-10 flex flex-col items-center gap-7 z-20">
           
           {/* Main Action Buttons */}
-          <div className="w-full max-w-md grid grid-cols-3 gap-2 md:gap-3">
+          <div className="w-full max-w-md grid grid-cols-3 gap-3">
              <button
               onClick={onStart}
               disabled={isActive}
               className={`
-                h-12 rounded-lg text-xs md:text-sm font-semibold uppercase tracking-wide border transition-all duration-200
+                h-12 rounded-lg text-sm font-semibold uppercase tracking-wide border transition-all duration-200
                 ${isActive
                   ? 'bg-primary-200/50 dark:bg-dark-bg text-primary-300 dark:text-dark-muted border-primary-200 dark:border-dark-border cursor-not-allowed'
                   : 'bg-[var(--accent)] text-white border-transparent hover:shadow-lg hover:shadow-black/15'}
@@ -127,7 +127,7 @@ export const FocusMode: React.FC<FocusModeProps> = ({
               onClick={onPause}
               disabled={!isActive}
               className={`
-                h-12 rounded-lg text-xs md:text-sm font-semibold uppercase tracking-wide border transition-colors duration-200
+                h-12 rounded-lg text-sm font-semibold uppercase tracking-wide border transition-colors duration-200
                 ${isActive
                   ? 'bg-primary-50 dark:bg-dark-bg text-primary-900 dark:text-dark-text border-primary-300 dark:border-dark-border hover:bg-primary-100 dark:hover:bg-dark-border'
                   : 'bg-primary-200/50 dark:bg-dark-bg text-primary-300 dark:text-dark-muted border-primary-200 dark:border-dark-border cursor-not-allowed'}
@@ -140,7 +140,7 @@ export const FocusMode: React.FC<FocusModeProps> = ({
               onClick={resetTimer}
               disabled={!canReset}
               className={`
-                h-12 rounded-lg text-xs md:text-sm font-semibold uppercase tracking-wide border transition-colors duration-200 flex items-center justify-center gap-1.5
+                h-12 rounded-lg text-sm font-semibold uppercase tracking-wide border transition-colors duration-200 flex items-center justify-center gap-1.5
                 ${canReset
                   ? 'bg-primary-50 dark:bg-dark-bg text-primary-600 dark:text-dark-text border-primary-300 dark:border-dark-border hover:text-[var(--status-danger-text)] hover:border-[var(--status-danger-border)]'
                   : 'bg-primary-200/50 dark:bg-dark-bg text-primary-300 dark:text-dark-muted border-primary-200 dark:border-dark-border cursor-not-allowed'}
@@ -155,7 +155,7 @@ export const FocusMode: React.FC<FocusModeProps> = ({
           <div className={`flex flex-col items-center gap-6 transition-all duration-300 ${isActive ? 'opacity-0 translate-y-4 pointer-events-none h-0 overflow-hidden' : 'opacity-100 translate-y-0 h-auto'}`}>
              
              {/* Presets Row with Flanking +/- */}
-             <div className="flex items-center gap-2 md:gap-3 p-1.5 bg-primary-100 dark:bg-dark-bg rounded-lg border border-primary-200/80 dark:border-dark-border">
+             <div className="flex items-center gap-3 p-1.5 bg-primary-100 dark:bg-dark-bg rounded-lg border border-primary-200/80 dark:border-dark-border">
                 <button 
                    onClick={() => adjustTime(-5)}
                    className="w-10 h-10 flex items-center justify-center rounded-xl text-primary-400 hover:text-primary-900 dark:hover:text-dark-text hover:bg-primary-50 dark:hover:bg-dark-border transition-colors"
@@ -171,7 +171,7 @@ export const FocusMode: React.FC<FocusModeProps> = ({
                           key={min}
                           onClick={() => setPreset(min)}
                           className={`
-                            px-2 md:px-4 py-2 rounded-xl text-xs font-mono font-medium transition-all
+                            px-4 py-2 rounded-xl text-xs font-mono font-medium transition-all
                             ${timeLeft === min * 60
                                ? 'bg-primary-50 dark:bg-dark-border text-primary-900 dark:text-dark-text shadow-sm font-bold'
                                : 'text-primary-400 dark:text-dark-muted hover:text-primary-600 dark:hover:text-dark-muted'}

@@ -142,25 +142,22 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   ];
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-3 md:p-7">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-7">
       <div className="absolute inset-0 bg-black/20 dark:bg-black/60" onClick={onClose} />
       
-      <div className="relative w-full max-w-5xl bg-primary-50 dark:bg-dark-bg rounded-2xl shadow-lg border border-primary-200/80 dark:border-dark-border overflow-hidden flex flex-col md:flex-row h-[96dvh] md:h-[min(810px,90vh)] animate-in fade-in zoom-in-95 duration-200">
+      <div className="relative w-full max-w-5xl bg-primary-50 dark:bg-dark-bg rounded-2xl shadow-lg border border-primary-200/80 dark:border-dark-border overflow-hidden flex flex-row h-[min(810px,90vh)] animate-in fade-in zoom-in-95 duration-200">
         
         {/* Sidebar Nav - Horizontal on Mobile */}
-        <div className="w-full md:w-80 bg-primary-100 dark:bg-dark-surface border-b md:border-b-0 md:border-r border-primary-200/80 dark:border-dark-border px-4 py-4 md:px-7 md:py-8 flex flex-col shrink-0 pt-safe md:pt-8">
-          <div className="flex items-center justify-between mb-5 md:mb-8">
+        <div className="w-80 bg-primary-100 dark:bg-dark-surface border-r border-primary-200/80 dark:border-dark-border px-7 py-8 flex flex-col shrink-0">
+          <div className="flex items-center justify-between mb-8">
              <h2 className="text-lg font-bold text-primary-900 dark:text-dark-text">Settings</h2>
-             <button onClick={onClose} aria-label="Close settings" className="md:hidden text-primary-500 p-1">
-               <Icons.X />
-             </button>
           </div>
-          <nav className="grid grid-cols-2 md:grid-cols-1 gap-2.5 md:gap-3">
+          <nav className="grid grid-cols-1 gap-3">
             {tabs.map(tab => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`whitespace-nowrap flex items-center justify-center md:justify-start gap-2 md:gap-3 px-3.5 py-3 rounded-xl text-sm font-medium transition-colors ${
+                className={`whitespace-nowrap flex items-center justify-start gap-3 px-3.5 py-3 rounded-xl text-sm font-medium transition-colors ${
                   activeTab === tab.id
                     ? 'bg-primary-50 dark:bg-dark-border text-primary-900 dark:text-dark-text shadow-sm border border-transparent'
                     : 'text-primary-500 dark:text-dark-muted hover:text-primary-900 dark:hover:text-dark-text hover:bg-primary-200/50 dark:hover:bg-dark-border/50 border border-transparent'
@@ -172,7 +169,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             ))}
           </nav>
           
-          <div className="mt-5 md:mt-auto hidden md:block">
+          <div className="mt-auto">
              <div className="rounded-xl border border-primary-200 dark:border-dark-border bg-primary-50 dark:bg-dark-bg/70 px-3 py-2 text-[10px] text-primary-500 dark:text-dark-muted font-mono">
                 App Version: {desktopAppVersion || 'Web'}
              </div>
@@ -180,8 +177,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 flex flex-col min-h-0 bg-primary-50 dark:bg-dark-bg pb-safe">
-           <div className="hidden md:flex items-center justify-between px-11 py-8 border-b border-primary-200/80 dark:border-dark-border shrink-0">
+        <div className="flex-1 flex flex-col min-h-0 bg-primary-50 dark:bg-dark-bg">
+           <div className="flex items-center justify-between px-11 py-8 border-b border-primary-200/80 dark:border-dark-border shrink-0">
               <h3 className="font-semibold text-xl text-primary-900 dark:text-dark-text">
                 {tabs.find(t => t.id === activeTab)?.label}
               </h3>
@@ -190,13 +187,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               </button>
            </div>
 
-           <div className="flex-1 overflow-y-auto px-6 py-6 md:px-11 md:py-9 space-y-12">
+           <div className="flex-1 overflow-y-auto px-11 py-9 space-y-12">
              
              {/* --- PROFILE TAB --- */}
              {activeTab === 'profile' && (
                <div className="space-y-8">
-                 <div className="rounded-xl border border-primary-200 dark:border-dark-border bg-primary-50 dark:bg-dark-surface p-6 md:p-7">
-                   <div className="flex flex-col md:flex-row items-center md:items-start gap-7">
+                 <div className="rounded-xl border border-primary-200 dark:border-dark-border bg-primary-50 dark:bg-dark-surface p-7">
+                   <div className="flex flex-row items-start gap-7">
                    <button
                      type="button"
                      onClick={() => avatarInputRef.current?.click()}
@@ -215,7 +212,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       )}
                       <span className="pointer-events-none absolute inset-0 bg-black/0 group-hover:bg-black/10 group-focus-visible:bg-black/10 transition-colors" />
                    </button>
-                   <div className="space-y-1 pt-1 text-center md:text-left flex-1 min-w-0">
+                   <div className="space-y-1 pt-1 text-left flex-1 min-w-0">
                      <p className="font-medium text-primary-900 dark:text-dark-text">Profile Photo</p>
                      <p className="text-xs text-primary-400 dark:text-dark-muted">Click your avatar to upload or replace image. You can also keep initials with a background color.</p>
                      <div className="mt-4 space-y-3.5">
@@ -226,7 +223,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                           onChange={handleAvatarUpload}
                           className="hidden"
                         />
-                        <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
+                        <div className="flex flex-wrap items-center justify-start gap-3">
                           {localProfile.avatarImage && (
                             <button
                               onClick={handleRemoveAvatar}
@@ -256,7 +253,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                  </div>
                  </div>
 
-                 <div className="rounded-xl border border-primary-200 dark:border-dark-border bg-primary-50 dark:bg-dark-surface p-6 md:p-7 space-y-5">
+                 <div className="rounded-xl border border-primary-200 dark:border-dark-border bg-primary-50 dark:bg-dark-surface p-7 space-y-5">
                     <div className="space-y-1">
                        <label className="text-xs font-bold text-primary-500 dark:text-dark-muted uppercase tracking-wider">Full Name</label>
                        <input 
@@ -267,7 +264,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                          className="w-full bg-primary-100 dark:bg-dark-border/50 border border-primary-200 dark:border-dark-border rounded-xl px-4 py-3 text-sm text-primary-900 dark:text-dark-text outline-none focus:border-primary-900 dark:focus:border-dark-text transition-colors"
                        />
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-2 gap-6">
                       <div className="space-y-1">
                         <label className="text-xs font-bold text-primary-500 dark:text-dark-muted uppercase tracking-wider">Title / Role</label>
                         <input 
@@ -296,7 +293,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
              {/* --- GENERAL / APPEARANCE TAB --- */}
              {activeTab === 'general' && (
                <div className="space-y-8">
-                 <div className="rounded-xl border border-primary-200 dark:border-dark-border bg-primary-50 dark:bg-dark-surface p-6 md:p-7 space-y-6">
+                 <div className="rounded-xl border border-primary-200 dark:border-dark-border bg-primary-50 dark:bg-dark-surface p-7 space-y-6">
                     <h4 className="text-sm font-medium text-primary-900 dark:text-dark-text border-b border-primary-200/80 dark:border-dark-border pb-3">Theme</h4>
                     <div className="flex items-center justify-between p-5 bg-primary-100 dark:bg-dark-bg/70 rounded-xl border border-primary-200/80 dark:border-dark-border">
                       <div className="flex items-center gap-3">
@@ -317,7 +314,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     </div>
                  </div>
 
-                 <div className="rounded-xl border border-primary-200 dark:border-dark-border bg-primary-50 dark:bg-dark-surface p-6 md:p-7 space-y-5">
+                 <div className="rounded-xl border border-primary-200 dark:border-dark-border bg-primary-50 dark:bg-dark-surface p-7 space-y-5">
                     <h4 className="text-sm font-medium text-primary-900 dark:text-dark-text border-b border-primary-200/80 dark:border-dark-border pb-3">Text Size (Desktop)</h4>
                     <div className="flex items-center justify-between p-5 bg-primary-100 dark:bg-dark-bg/70 rounded-xl border border-primary-200/80 dark:border-dark-border">
                       <div>
@@ -347,7 +344,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
              {/* --- DATA TAB --- */}
              {activeTab === 'data' && (
                <div className="space-y-8">
-                 <div className="p-5 md:p-6 bg-primary-100 dark:bg-dark-border/40 rounded-xl border border-primary-200/80 dark:border-dark-border">
+                 <div className="p-6 bg-primary-100 dark:bg-dark-border/40 rounded-xl border border-primary-200/80 dark:border-dark-border">
                     <div className="flex gap-3">
                        <Icons.Briefcase />
                        <div className="space-y-1">
@@ -357,7 +354,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     </div>
                  </div>
 
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                 <div className="grid grid-cols-2 gap-6">
                     <button 
                       onClick={handleExport}
                       className="flex flex-col items-center justify-center gap-2.5 p-7 rounded-xl border border-primary-200 dark:border-dark-border hover:border-primary-900 dark:hover:border-dark-text hover:bg-primary-100 dark:hover:bg-dark-border transition-all text-sm font-medium text-primary-600 dark:text-dark-text hover:text-primary-900 dark:hover:text-dark-text"

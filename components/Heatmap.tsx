@@ -197,22 +197,22 @@ export const Heatmap: React.FC<HeatmapProps> = ({ tasks }) => {
   const todayKey = toLocalIsoDate(new Date());
 
   return (
-    <div className="w-full overflow-hidden flex flex-col gap-5">
-      <div className="flex items-baseline gap-8 px-3">
-        <div className="flex items-baseline gap-2">
-          <span className="text-2xl font-display font-semibold text-primary-900 dark:text-dark-text">{visibleContributions}</span>
-          <span className="text-xs text-primary-400 dark:text-dark-muted">completed</span>
+    <div className="w-full overflow-hidden flex flex-col gap-2">
+      <div className="flex items-baseline gap-4 px-2">
+        <div className="flex items-baseline gap-1.5">
+          <span className="text-lg font-display font-semibold text-primary-900 dark:text-dark-text">{visibleContributions}</span>
+          <span className="text-[10px] text-primary-400 dark:text-dark-muted">completed</span>
         </div>
         {currentStreak > 0 && (
-          <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-display font-semibold text-primary-900 dark:text-dark-text">{currentStreak}</span>
-            <span className="text-xs text-primary-400 dark:text-dark-muted">day streak</span>
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-lg font-display font-semibold text-primary-900 dark:text-dark-text">{currentStreak}</span>
+            <span className="text-[10px] text-primary-400 dark:text-dark-muted">streak</span>
           </div>
         )}
       </div>
 
       <div className="w-full overflow-x-auto no-scrollbar">
-        <div className="px-3 w-max md:w-fit md:mx-auto">
+        <div className="px-2 w-max md:w-fit md:mx-auto">
           <div className="relative mb-1.5 h-4 text-[10px] text-primary-400 dark:text-dark-muted">
             {monthLabels.map((month) => (
               <div
@@ -250,8 +250,8 @@ export const Heatmap: React.FC<HeatmapProps> = ({ tasks }) => {
         </div>
       </div>
 
-      <div className="flex items-center justify-end px-3">
-        <div className="flex items-center gap-1.5 text-[10px] text-primary-400 dark:text-dark-muted">
+      <div className="flex items-center justify-end px-2">
+        <div className="flex items-center gap-1 text-[9px] text-primary-400 dark:text-dark-muted">
           <span>Less</span>
           <div className={`${CELL_SIZE} rounded-sm bg-[var(--heat-0)]`} />
           <div className={`${CELL_SIZE} rounded-sm bg-[var(--heat-1)]`} />

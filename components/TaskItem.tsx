@@ -47,7 +47,7 @@ const TaskItemComponent: React.FC<TaskItemProps> = ({
     <div 
       onClick={() => onSelect(task)}
       className={`
-        group relative flex items-start gap-4 p-4 px-5 md:py-5 md:px-6 rounded-lg md:rounded-xl cursor-pointer transition-all duration-200 border active:scale-[0.995]
+        group relative flex items-start gap-4 py-5 px-6 rounded-xl cursor-pointer transition-all duration-200 border active:scale-[0.995]
         ${selected
           ? 'bg-primary-50 dark:bg-dark-surface border-transparent shadow-md dark:shadow-none z-10'
           : 'bg-primary-50 dark:bg-dark-surface border-primary-200/75 dark:border-dark-border/85 hover:bg-primary-50 dark:hover:bg-dark-surface'}
@@ -87,12 +87,12 @@ const TaskItemComponent: React.FC<TaskItemProps> = ({
       {/* Main Content */}
       <div className="flex-1 min-w-0 pt-1">
         <div className="flex items-start justify-between gap-4">
-            <span className={`text-base md:text-base font-medium transition-all duration-300 break-words leading-6 md:leading-7 ${task.completed ? 'text-primary-400 dark:text-dark-muted line-through decoration-primary-300 dark:decoration-dark-border' : 'text-primary-900 dark:text-dark-text'}`}>
+            <span className={`text-base font-medium transition-all duration-300 break-words leading-7 ${task.completed ? 'text-primary-400 dark:text-dark-muted line-through decoration-primary-300 dark:decoration-dark-border' : 'text-primary-900 dark:text-dark-text'}`}>
               {task.title}
             </span>
             
             {/* Right side compact meta for Desktop */}
-            <div className="hidden md:flex shrink-0 items-center gap-2">
+            <div className="flex shrink-0 items-center gap-2">
                  {task.priority === Priority.HIGH && !task.completed && (
                     <span className="text-[10px] font-bold text-[var(--status-danger-text)] bg-[var(--status-danger-bg)] border border-[var(--status-danger-border)] px-2 py-0.5 rounded-full uppercase tracking-wider">High</span>
                  )}

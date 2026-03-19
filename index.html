@@ -2,9 +2,7 @@
 <html lang="en" class="light">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-
-    <meta name="format-detection" content="telephone=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <!-- App Icons -->
     <link rel="icon" type="image/png" href="/icons/favicon-64.png">
@@ -81,9 +79,6 @@
     </script>
     <style>
       :root {
-        --sat: env(safe-area-inset-top);
-        --sab: env(safe-area-inset-bottom);
-        --sal: env(safe-area-inset-left);
         --app-bg: #f7f6f1;
         --app-fg: #141413;
         --ui-border: rgba(237, 235, 226, 0.92);
@@ -169,16 +164,10 @@
       }
 
 
-      /* Safe Area Utilities */
-      .pb-safe { padding-bottom: var(--sab); }
-      .pt-safe { padding-top: var(--sat); }
-      .pl-safe { padding-left: var(--sal); }
-
       /* Cross-browser Minimal Scrollbar */
       * {
         scrollbar-width: thin;
         scrollbar-color: #d9d6cc transparent;
-        -webkit-tap-highlight-color: transparent;
       }
       .dark * {
         scrollbar-color: #3a3129 transparent;

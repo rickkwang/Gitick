@@ -117,10 +117,7 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
         setSelectedProject('Inbox');
     }
     
-    // Re-focus on desktop only
-    if (window.innerWidth > 768) {
-        inputRef.current?.focus();
-    }
+    inputRef.current?.focus();
   }
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -145,13 +142,13 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
   }
   
   // Auto-focus logic: Only on desktop
-  const shouldAutoFocus = typeof window !== 'undefined' && window.innerWidth > 768;
+  const shouldAutoFocus = typeof window !== 'undefined';
 
   return (
     <div className="w-full relative z-30 max-w-3xl mx-auto">
       <form onSubmit={handleSubmit} className="group transition-all duration-300">
         <div className="relative bg-primary-50 dark:bg-dark-surface border border-primary-200/80 dark:border-dark-border rounded-xl shadow-sm dark:shadow-none overflow-visible transition-all duration-200 ease-out flex flex-col justify-center min-h-[3.25rem] focus-within:shadow-md dark:focus-within:shadow-none">
-            <div className="flex items-center pl-5 md:pl-6 pr-2.5 h-[52px] shrink-0">
+            <div className="flex items-center pl-6 pr-2.5 h-[52px] shrink-0">
                 <div className="text-primary-400 shrink-0">
                    <Icons.Plus />
                 </div>
@@ -204,7 +201,7 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
                       onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                       aria-label="Select project"
                       className={`
-                        h-9 px-4 md:px-4.5 flex items-center gap-2 rounded-full transition-all duration-200
+                        h-9 px-4 flex items-center gap-2 rounded-full transition-all duration-200
                         bg-primary-200/50 dark:bg-dark-border/30
                         ${isDropdownOpen
                           ? 'bg-primary-200/50 dark:bg-dark-border/50'
@@ -250,7 +247,7 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
 
             {/* Smart Parsed Attributes (Pills) Row */}
             {(parsedPreview.priority || parsedPreview.tags.length > 0 || parsedPreview.dueDate || recurrence) && (
-                <div className="flex items-center gap-2 px-6 md:px-8 pb-2.5 pt-0 animate-in fade-in slide-in-from-top-1 duration-200 overflow-x-auto no-scrollbar">
+                <div className="flex items-center gap-2 px-8 pb-2.5 pt-0 animate-in fade-in slide-in-from-top-1 duration-200 overflow-x-auto no-scrollbar">
                     <div className="h-px w-4 bg-primary-200 dark:bg-dark-border mr-1 shrink-0"></div>
                     
                     {parsedPreview.dueDate && (

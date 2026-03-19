@@ -9,11 +9,10 @@ interface StagingPanelProps {
   onUpdate: (task: Task) => void;
   onDelete: (id: string) => void;
   onCommit: (task: Task) => void;
-  variant: 'modal' | 'sidebar';
   projects: string[];
 }
 
-export const StagingPanel: React.FC<StagingPanelProps> = ({ task, onClose, onUpdate, onDelete, onCommit, variant, projects }) => {
+export const StagingPanel: React.FC<StagingPanelProps> = ({ task, onClose, onUpdate, onDelete, onCommit, projects }) => {
   const [newSubtaskTitle, setNewSubtaskTitle] = useState('');
   const [newTag, setNewTag] = useState('');
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -119,17 +118,7 @@ export const StagingPanel: React.FC<StagingPanelProps> = ({ task, onClose, onUpd
           : 'Weekdays'
     : 'No Repeat';
 
-  // Mobile Variant acts as Bottom Sheet
-  const containerClasses = variant === 'modal' 
-    ? "fixed inset-x-0 bottom-0 z-50 h-[85dvh] bg-primary-50 dark:bg-dark-surface rounded-t-xl shadow-[0_-10px_40px_rgba(0,0,0,0.2)] flex flex-col transform transition-transform duration-300 ease-out animate-in slide-in-from-bottom-full pb-safe"
-    : "h-full flex flex-col bg-transparent";
-
-  const Backdrop = () => variant === 'modal' ? (
-    <div
-      className="fixed inset-0 bg-black/40 dark:bg-black/60 z-40 transition-opacity"
-      onClick={onClose}
-    />
-  ) : null;
+  const containerClasses = "h-full flex flex-col bg-transparent";
 
   const priorityColors = {
     [Priority.HIGH]: 'text-[var(--status-danger-text)] bg-[var(--status-danger-bg)] border-[var(--status-danger-border)]',
@@ -138,20 +127,9 @@ export const StagingPanel: React.FC<StagingPanelProps> = ({ task, onClose, onUpd
   };
 
   return (
-    <>
-      <Backdrop />
-      
       <div className={containerClasses}>
-        
-        {/* Mobile Handle */}
-        {variant === 'modal' && (
-           <div className="w-full flex justify-center pt-3 pb-1" onClick={onClose}>
-              <div className="w-12 h-2 rounded-full bg-primary-200 dark:bg-dark-border"></div>
-           </div>
-        )}
-
-        {/* Minimal Header */}
-        <div className={`h-14 flex items-center justify-between px-6 md:px-8 ${variant === 'modal' ? '' : 'bg-primary-50 dark:bg-dark-surface'} shrink-0`}>
+        {/* Header */}
+        <div className="h-14 flex items-center justify-between px-8 bg-primary-50 dark:bg-dark-surface shrink-0">
            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-primary-400 dark:text-dark-muted">
              <Icons.GitCommit />
              <span>Details</span>
@@ -164,7 +142,7 @@ export const StagingPanel: React.FC<StagingPanelProps> = ({ task, onClose, onUpd
            </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-6 md:px-8 py-4 space-y-6 custom-scroll bg-primary-50 dark:bg-dark-surface">
+        <div className="flex-1 overflow-y-auto px-8 py-4 space-y-6 custom-scroll bg-primary-50 dark:bg-dark-surface">
           
           {/* Title - Clean & Large */}
           <div className="flex items-start gap-3">
@@ -174,8 +152,8 @@ export const StagingPanel: React.FC<StagingPanelProps> = ({ task, onClose, onUpd
              >
                 {task.completed ? <div className="scale-125"><Icons.Checked /></div> : <div className="scale-125"><Icons.Circle /></div>}
              </button>
-             <textarea 
-                className="w-full text-xl md:text-2xl font-bold text-primary-900 dark:text-dark-text bg-transparent border-none p-0 outline-none resize-none focus:ring-0 placeholder:text-primary-300 dark:placeholder:text-dark-muted leading-snug font-sans"
+             <textarea
+                className="w-full text-2xl font-bold text-primary-900 dark:text-dark-text bg-transparent border-none p-0 outline-none resize-none focus:ring-0 placeholder:text-primary-300 dark:placeholder:text-dark-muted leading-snug font-sans"
                 value={task.title}
                 onChange={(e) => onUpdate({...task, title: e.target.value})}
                 rows={2}
@@ -352,7 +330,7 @@ export const StagingPanel: React.FC<StagingPanelProps> = ({ task, onClose, onUpd
         </div>
 
         {/* Footer Actions */}
-        <div className={`p-4 md:p-6 ${variant === 'modal' ? 'bg-primary-50 dark:bg-dark-surface border-t border-primary-100 dark:border-dark-border' : 'bg-transparent'} flex gap-3`}>
+        <div className="p-6 bg-transparent flex gap-3">
            <button 
              onClick={() => onCommit(task)}
              className={`flex-1 py-3.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-all shadow-sm
@@ -373,6 +351,5 @@ export const StagingPanel: React.FC<StagingPanelProps> = ({ task, onClose, onUpd
         </div>
 
       </div>
-    </>
   );
 };
