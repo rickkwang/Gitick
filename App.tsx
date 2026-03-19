@@ -739,44 +739,46 @@ const App: React.FC = () => {
                           )}
                           
                           {/* LIST RENDERING */}
-                          {filter === 'completed' ? (
-                             <Suspense fallback={<div className="h-40 animate-pulse rounded-xl bg-primary-200/50 dark:bg-dark-border/60" />}>
-                               <GitGraph tasks={filteredTasks} onDelete={deleteTask} userProfile={userProfile} />
-                             </Suspense>
-                          ) : (
-                            <div className="pb-28">
-                              {/* Grouped View for Dashboard (TickTick Style) */}
-                              {filter === 'next7days' && taskGroups ? (
-                                  Object.values(taskGroups).flat().length === 0 ? (
+                          <div className="w-full max-w-[1040px] mx-auto">
+                            {filter === 'completed' ? (
+                               <Suspense fallback={<div className="h-40 animate-pulse rounded-xl bg-primary-200/50 dark:bg-dark-border/60" />}>
+                                 <GitGraph tasks={filteredTasks} onDelete={deleteTask} userProfile={userProfile} />
+                               </Suspense>
+                            ) : (
+                              <div className="pb-28">
+                                {/* Grouped View for Dashboard (TickTick Style) */}
+                                {filter === 'next7days' && taskGroups ? (
+                                    Object.values(taskGroups).flat().length === 0 ? (
+                                        renderEmptyState()
+                                    ) : (
+                                      <>
+                                          {renderTaskList(taskGroups['Overdue'], 'Overdue')}
+                                          {renderTaskList(taskGroups['Today'], 'Today')}
+                                          {renderTaskList(taskGroups['Tomorrow'], 'Tomorrow')}
+                                          {renderTaskList(taskGroups['Next 7 Days'], 'Next 7 Days')}
+                                      </>
+                                    )
+                                ) : (
+                                    /* Flat List for other views */
+                                    filteredTasks.length > 0 ? (
+                                      <div className="space-y-2.5">
+                                        {filteredTasks.map(task => (
+                                            <TaskItem 
+                                              key={task.id}
+                                              task={task}
+                                              onToggle={requestToggleTask}
+                                              selected={selectedTask?.id === task.id}
+                                              onSelect={setSelectedTask}
+                                            />
+                                        ))}
+                                      </div>
+                                    ) : (
                                       renderEmptyState()
-                                  ) : (
-                                    <>
-                                        {renderTaskList(taskGroups['Overdue'], 'Overdue')}
-                                        {renderTaskList(taskGroups['Today'], 'Today')}
-                                        {renderTaskList(taskGroups['Tomorrow'], 'Tomorrow')}
-                                        {renderTaskList(taskGroups['Next 7 Days'], 'Next 7 Days')}
-                                    </>
-                                  )
-                              ) : (
-                                  /* Flat List for other views */
-                                  filteredTasks.length > 0 ? (
-                                    <div className="space-y-2.5">
-                                      {filteredTasks.map(task => (
-                                          <TaskItem 
-                                            key={task.id}
-                                            task={task}
-                                            onToggle={requestToggleTask}
-                                            selected={selectedTask?.id === task.id}
-                                            onSelect={setSelectedTask}
-                                          />
-                                      ))}
-                                    </div>
-                                  ) : (
-                                    renderEmptyState()
-                                  )
-                              )}
-                            </div>
-                          )}
+                                    )
+                                )}
+                              </div>
+                            )}
+                          </div>
                       </div>
                   </div>
 
