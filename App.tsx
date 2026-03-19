@@ -717,6 +717,21 @@ const App: React.FC = () => {
                     />
                   )}
 
+                  {isSidebarCollapsed && (
+                    <div className={`hidden md:flex absolute top-3 z-20 ${isDesktopMac ? 'left-[92px]' : 'left-4'}`}>
+                      <button
+                        type="button"
+                        onClick={handleSidebarToggleCollapse}
+                        aria-label="Expand sidebar"
+                        className="w-8 h-8 rounded-md transition-colors flex items-center justify-center text-primary-500 dark:text-dark-muted hover:text-primary-900 dark:hover:text-dark-text hover:bg-primary-200/35 dark:hover:bg-dark-border/45"
+                        title="Expand Sidebar"
+                        style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+                      >
+                        <Icons.SidebarRight />
+                      </button>
+                    </div>
+                  )}
+
                   {/* Scrollable List Area */}
                   <div className="flex-1 overflow-y-auto main-scroll scroll-smooth">
                       <div className="max-w-[1180px] mx-auto w-full px-5 md:px-11 py-8 md:py-11">
