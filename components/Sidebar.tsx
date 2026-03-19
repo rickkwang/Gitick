@@ -266,43 +266,49 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </button>
               </div>
 
-              <div className={`hidden md:flex absolute top-3 items-center gap-2 ${isDesktopMac ? 'left-[88px]' : 'left-4'}`}>
+              <div className={`hidden md:flex absolute top-3 items-center gap-2.5 ${isDesktopMac ? 'left-[88px]' : 'left-4'}`}>
                 <button
                   type="button"
                   onClick={toggleCollapse}
                   aria-label="Collapse sidebar"
-                  className="w-8 h-8 rounded-md transition-colors flex items-center justify-center text-primary-500 dark:text-dark-muted hover:text-primary-900 dark:hover:text-dark-text hover:bg-primary-200/35 dark:hover:bg-dark-border/45"
+                  className="w-9 h-9 rounded-xl border border-primary-200/85 dark:border-dark-border/80 bg-primary-50/70 dark:bg-dark-surface/70 transition-colors flex items-center justify-center text-primary-500 dark:text-dark-muted hover:text-primary-900 dark:hover:text-dark-text hover:bg-primary-100 dark:hover:bg-dark-border/70"
                   title="Collapse Sidebar"
                 >
-                  <Icons.SidebarLeft />
+                  <span className="[&>svg]:w-[17px] [&>svg]:h-[17px]">
+                    <Icons.SidebarLeft />
+                  </span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => toggleUtilityPanel('search')}
                   aria-label="Search tasks"
-                  className={`w-8 h-8 rounded-md transition-colors flex items-center justify-center ${
+                  className={`w-9 h-9 rounded-xl border transition-colors flex items-center justify-center ${
                     activeUtilityPanel === 'search'
-                      ? 'text-primary-900 dark:text-dark-text bg-primary-200/55 dark:bg-dark-border/55'
-                      : 'text-primary-500 dark:text-dark-muted hover:text-primary-900 dark:hover:text-dark-text hover:bg-primary-200/35 dark:hover:bg-dark-border/45'
+                      ? 'border-primary-300/90 dark:border-dark-border bg-primary-200/65 dark:bg-dark-border/70 text-primary-900 dark:text-dark-text'
+                      : 'border-primary-200/85 dark:border-dark-border/80 bg-primary-50/70 dark:bg-dark-surface/70 text-primary-500 dark:text-dark-muted hover:text-primary-900 dark:hover:text-dark-text hover:bg-primary-100 dark:hover:bg-dark-border/70'
                   }`}
                   title="Search"
                 >
-                  <Icons.Search />
+                  <span className="[&>svg]:w-[17px] [&>svg]:h-[17px]">
+                    <Icons.Search />
+                  </span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => toggleUtilityPanel('category')}
                   aria-label="Filter by category"
-                  className={`w-8 h-8 rounded-md transition-colors flex items-center justify-center ${
+                  className={`w-9 h-9 rounded-xl border transition-colors flex items-center justify-center ${
                     activeUtilityPanel === 'category'
-                      ? 'text-primary-900 dark:text-dark-text bg-primary-200/55 dark:bg-dark-border/55'
-                      : 'text-primary-500 dark:text-dark-muted hover:text-primary-900 dark:hover:text-dark-text hover:bg-primary-200/35 dark:hover:bg-dark-border/45'
+                      ? 'border-primary-300/90 dark:border-dark-border bg-primary-200/65 dark:bg-dark-border/70 text-primary-900 dark:text-dark-text'
+                      : 'border-primary-200/85 dark:border-dark-border/80 bg-primary-50/70 dark:bg-dark-surface/70 text-primary-500 dark:text-dark-muted hover:text-primary-900 dark:hover:text-dark-text hover:bg-primary-100 dark:hover:bg-dark-border/70'
                   }`}
                   title="Category"
                 >
-                  <Icons.Tag />
+                  <span className="[&>svg]:w-[17px] [&>svg]:h-[17px]">
+                    <Icons.Tag />
+                  </span>
                 </button>
               </div>
 
