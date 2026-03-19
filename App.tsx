@@ -29,6 +29,14 @@ const SettingsModal = lazy(() =>
   import('./components/SettingsModal').then((module) => ({ default: module.SettingsModal })),
 );
 const TASKS_PERSIST_DEBOUNCE_MS = 800;
+const DESKTOP_FONT_SIZE_OPTIONS = [10, 12, 14, 16, 18] as const;
+
+const normalizeDesktopFontSize = (value: number): number => {
+  if (!Number.isFinite(value)) return 12;
+  return DESKTOP_FONT_SIZE_OPTIONS.reduce((nearest, candidate) =>
+    Math.abs(candidate - value) < Math.abs(nearest - value) ? candidate : nearest
+  );
+};
 
 const App: React.FC = () => {
   // Initialize tasks with Onboarding data if localStorage is empty
@@ -61,12 +69,11 @@ const App: React.FC = () => {
      return window.matchMedia('(prefers-color-scheme: dark)').matches;
   });
   const [desktopFontSize, setDesktopFontSize] = useState(() => {
-    if (typeof window === 'undefined') return 13;
+    if (typeof window === 'undefined') return 12;
     const saved =
       readStoredValue(STORAGE_KEYS.desktopFontSize) ?? readStoredValue(LEGACY_STORAGE_KEYS.desktopFontSize);
     const parsed = Number(saved);
-    if (!Number.isFinite(parsed)) return 13;
-    return Math.min(15, Math.max(12, parsed));
+    return normalizeDesktopFontSize(parsed);
   });
   
   const [showSettings, setShowSettings] = useState(false);
@@ -607,7 +614,7 @@ const App: React.FC = () => {
                   {/* Desktop drag region for macOS title bar */}
                   {isDesktopMac && (
                     <div
-                      className="hidden md:block h-10 shrink-0"
+                      className="hidden md:block absolute top-0 left-0 right-0 h-10 z-10 pointer-events-none"
                       style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
                     />
                   )}
@@ -753,7 +760,7 @@ const App: React.FC = () => {
             isDarkMode={isDarkMode}
             onToggleTheme={toggleThemeMode}
             desktopFontSize={desktopFontSize}
-            onChangeDesktopFontSize={setDesktopFontSize}
+            onChangeDesktopFontSize={(size) => setDesktopFontSize(normalizeDesktopFontSize(size))}
             userProfile={userProfile}
             onUpdateProfile={setUserProfile}
             tasks={tasks}

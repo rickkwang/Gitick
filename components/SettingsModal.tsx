@@ -325,7 +325,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                         <p className="text-xs text-primary-500 dark:text-dark-muted">Affects desktop layout only</p>
                       </div>
                       <div className="flex items-center gap-2">
-                        {[12, 13, 14, 15].map((size) => (
+                        {[10, 12, 14, 16, 18].map((size) => (
                           <button
                             key={size}
                             onClick={() => onChangeDesktopFontSize(size)}
