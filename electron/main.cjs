@@ -517,6 +517,8 @@ ipcMain.handle('updater:check', async () => {
   if (updaterCheckTask) {
     return { ok: true, reason: 'in-progress' };
   }
+  const currentVersion = app.getVersion();
+  let resolvedAvailableVersion = null;
   updaterCheckTask = autoUpdater.checkForUpdates()
     .finally(() => {
       updaterCheckTask = null;
@@ -524,19 +526,23 @@ ipcMain.handle('updater:check', async () => {
   try {
     const result = await updaterCheckTask;
     const directVersion = result?.updateInfo?.version;
-    if (directVersion && compareSemver(directVersion, app.getVersion()) > 0) {
-      latestAvailableVersion = directVersion;
-      sendUpdaterStatus({ type: 'available', version: directVersion });
+    if (directVersion && compareSemver(directVersion, currentVersion) > 0) {
+      resolvedAvailableVersion = directVersion;
     }
     if (!directVersion) {
       const latestYml = await fetchText(RELEASE_METADATA_URL);
       const metadataVersion = parseVersionFromLatestMacYml(latestYml);
-      if (metadataVersion && compareSemver(metadataVersion, app.getVersion()) > 0) {
-        latestAvailableVersion = metadataVersion;
-        sendUpdaterStatus({ type: 'available', version: metadataVersion });
+      if (metadataVersion && compareSemver(metadataVersion, currentVersion) > 0) {
+        resolvedAvailableVersion = metadataVersion;
       }
     }
-    return { ok: true };
+    if (resolvedAvailableVersion) {
+      latestAvailableVersion = resolvedAvailableVersion;
+      sendUpdaterStatus({ type: 'available', version: resolvedAvailableVersion });
+      return { ok: true, reason: 'available', version: resolvedAvailableVersion };
+    }
+    sendUpdaterStatus({ type: 'not-available' });
+    return { ok: true, reason: 'not-available' };
   } catch (error) {
     return {
       ok: false,
