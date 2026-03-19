@@ -128,7 +128,7 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
   const shouldAutoFocus = typeof window !== 'undefined';
 
   return (
-    <div className="w-full relative z-30 max-w-4xl mx-auto">
+    <div className="w-full relative z-30">
       <form onSubmit={handleSubmit} className="group transition-all duration-300">
         <div className="relative overflow-visible rounded-[14px] border border-primary-200/90 dark:border-dark-border/80 bg-primary-50/98 dark:bg-dark-surface shadow-[0_2px_14px_rgba(20,20,19,0.05)] dark:shadow-none transition-all duration-200 ease-out focus-within:shadow-[0_6px_22px_rgba(20,20,19,0.08)]">
             <div className="flex min-h-[52px] items-center gap-2 pl-4 pr-3">

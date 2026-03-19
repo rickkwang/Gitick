@@ -227,7 +227,7 @@ export const Heatmap: React.FC<HeatmapProps> = ({ tasks }) => {
     return 'bg-[var(--heat-4)]';
   };
 
-  const CELL_SIZE = 'w-[11px] h-[11px]';
+  const CELL_SIZE = 'w-[10px] h-[10px]';
   const GAP = 'gap-[2px]';
   const COL_WIDTH = CELL_PX + CELL_GAP_PX;
   const todayKey = toLocalIsoDate(new Date());

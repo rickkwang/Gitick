@@ -19,7 +19,7 @@
     "ci:local": "npm run typecheck && npm run build:stable",
     "preview": "vite preview",
     "desktop:dev": "concurrently -k \"vite --host 127.0.0.1 --port 3000\" \"wait-on tcp:3000 && VITE_DEV_SERVER_URL=http://127.0.0.1:3000 electron .\"",
-    "desktop:pack": "npm run build && electron-builder --dir",
+    "desktop:pack": "npm run build:stable && electron-builder --dir",
     "desktop:dmg": "npm run build:stable && electron-builder --mac",
     "desktop:release": "npm run desktop:dmg && node scripts/verify-mac-signatures.mjs && node scripts/publish-desktop-release.mjs",
     "test": "vitest",

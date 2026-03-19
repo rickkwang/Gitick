@@ -664,14 +664,6 @@ const App: React.FC = () => {
              ) : (
                <div className="flex-1 flex flex-col h-full relative">
                   
-                  {/* Desktop drag region for macOS title bar */}
-                  {isDesktopMac && (
-                    <div
-                      className="absolute top-0 left-0 right-0 h-10 z-10 pointer-events-none"
-                      style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
-                    />
-                  )}
-
                   {/* Scrollable List Area */}
                   <div className="flex-1 overflow-y-auto main-scroll scroll-smooth">
                       <div className="max-w-[1400px] mx-auto w-full px-8 py-6">
@@ -796,7 +788,7 @@ const App: React.FC = () => {
 
                         {/* Input Container - Padded from bottom including Safe Area */}
                         <div className="relative z-10 w-full flex justify-center px-4 pt-10 pb-4">
-                           <div className="max-w-3xl w-full pointer-events-auto mb-9">
+                           <div className="max-w-[1040px] w-full pointer-events-auto mb-9">
                               <TaskInput onAddTask={addTask} activeList={filter} projects={projects} />
                            </div>
                         </div>
