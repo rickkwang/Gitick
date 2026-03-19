@@ -33,6 +33,7 @@ const SettingsModal = lazy(() =>
 );
 const TASKS_PERSIST_DEBOUNCE_MS = 800;
 const DESKTOP_FONT_SIZE_OPTIONS = [10, 12, 14, 16, 18] as const;
+const DESKTOP_TOPBAR_HEIGHT = 44;
 
 const normalizeDesktopFontSize = (value: number): number => {
   if (!Number.isFinite(value)) return 12;
@@ -528,10 +529,10 @@ const App: React.FC = () => {
   const desktopToolbarLeft = isDesktopMac
     ? isSidebarCollapsed
       ? 146
-      : 210
+      : 346
     : isSidebarCollapsed
       ? 16
-      : 84;
+      : 276;
 
   const createTaskFromCommand = useCallback(
     (title: string) => {
@@ -682,54 +683,60 @@ const App: React.FC = () => {
 
       {filter !== 'focus' && (
         <div
-          className="hidden md:flex absolute top-[9px] z-[120] items-center gap-1.5 pointer-events-auto"
-          style={{
-            left: `${desktopToolbarLeft}px`,
-            transition: 'left 300ms cubic-bezier(0.2,0,0,1)',
-            WebkitAppRegion: 'no-drag',
-          } as React.CSSProperties}
+          className="hidden md:block shrink-0 border-b border-primary-200/70 dark:border-dark-border/70 bg-[var(--app-bg)]/94 backdrop-blur-sm z-[70]"
+          style={{ height: `${DESKTOP_TOPBAR_HEIGHT}px`, WebkitAppRegion: 'drag' } as React.CSSProperties}
         >
-          <button
-            type="button"
-            onClick={handleSidebarToggleCollapse}
-            aria-label={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            className="w-8 h-8 transition-colors flex items-center justify-center text-primary-500 dark:text-dark-muted hover:text-primary-900 dark:hover:text-dark-text"
-            title={isSidebarCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
+          <div
+            className="absolute z-[120] flex items-center gap-1.5 pointer-events-auto"
+            style={{
+              top: '8px',
+              left: `${desktopToolbarLeft}px`,
+              transition: 'left 300ms cubic-bezier(0.2,0,0,1)',
+              WebkitAppRegion: 'no-drag',
+            } as React.CSSProperties}
           >
-            <span className="[&>svg]:w-[15px] [&>svg]:h-[15px]">
-              {isSidebarCollapsed ? <Icons.SidebarRight /> : <Icons.SidebarLeft />}
-            </span>
-          </button>
-          <button
-            type="button"
-            onClick={() => handleDesktopUtilityToggle('search')}
-            aria-label="Search tasks"
-            className={`w-8 h-8 transition-colors flex items-center justify-center ${
-              desktopUtilityPanel === 'search'
-                ? 'text-primary-900 dark:text-dark-text'
-                : 'text-primary-500 dark:text-dark-muted hover:text-primary-900 dark:hover:text-dark-text'
-            }`}
-            title="Search"
-          >
-            <span className="[&>svg]:w-[15px] [&>svg]:h-[15px]">
-              <Icons.Search />
-            </span>
-          </button>
-          <button
-            type="button"
-            onClick={() => handleDesktopUtilityToggle('category')}
-            aria-label="Filter by category"
-            className={`w-8 h-8 transition-colors flex items-center justify-center ${
-              desktopUtilityPanel === 'category'
-                ? 'text-primary-900 dark:text-dark-text'
-                : 'text-primary-500 dark:text-dark-muted hover:text-primary-900 dark:hover:text-dark-text'
-            }`}
-            title="Category"
-          >
-            <span className="[&>svg]:w-[15px] [&>svg]:h-[15px]">
-              <Icons.Tag />
-            </span>
-          </button>
+            <button
+              type="button"
+              onClick={handleSidebarToggleCollapse}
+              aria-label={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              className="w-8 h-8 transition-colors flex items-center justify-center text-primary-500 dark:text-dark-muted hover:text-primary-900 dark:hover:text-dark-text"
+              title={isSidebarCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
+            >
+              <span className="[&>svg]:w-[15px] [&>svg]:h-[15px]">
+                {isSidebarCollapsed ? <Icons.SidebarRight /> : <Icons.SidebarLeft />}
+              </span>
+            </button>
+            <button
+              type="button"
+              onClick={() => handleDesktopUtilityToggle('search')}
+              aria-label="Search tasks"
+              className={`w-8 h-8 transition-colors flex items-center justify-center ${
+                desktopUtilityPanel === 'search'
+                  ? 'text-primary-900 dark:text-dark-text'
+                  : 'text-primary-500 dark:text-dark-muted hover:text-primary-900 dark:hover:text-dark-text'
+              }`}
+              title="Search"
+            >
+              <span className="[&>svg]:w-[15px] [&>svg]:h-[15px]">
+                <Icons.Search />
+              </span>
+            </button>
+            <button
+              type="button"
+              onClick={() => handleDesktopUtilityToggle('category')}
+              aria-label="Filter by category"
+              className={`w-8 h-8 transition-colors flex items-center justify-center ${
+                desktopUtilityPanel === 'category'
+                  ? 'text-primary-900 dark:text-dark-text'
+                  : 'text-primary-500 dark:text-dark-muted hover:text-primary-900 dark:hover:text-dark-text'
+              }`}
+              title="Category"
+            >
+              <span className="[&>svg]:w-[15px] [&>svg]:h-[15px]">
+                <Icons.Tag />
+              </span>
+            </button>
+          </div>
         </div>
       )}
 
@@ -777,16 +784,7 @@ const App: React.FC = () => {
                  setMode={handleFocusModeChange}
                />
              ) : (
-               <div className="flex-1 flex flex-col h-full relative">
-                  
-                  {/* Desktop drag region for macOS title bar */}
-                  {isDesktopMac && (
-                    <div
-                      className="hidden md:block absolute top-0 left-0 right-0 h-10 z-10 pointer-events-none"
-                      style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
-                    />
-                  )}
-
+              <div className="flex-1 flex flex-col h-full relative">
                   {/* Scrollable List Area */}
                   <div className="flex-1 overflow-y-auto main-scroll scroll-smooth">
                       <div className="max-w-[1180px] mx-auto w-full px-5 md:px-11 py-8 md:py-11">
