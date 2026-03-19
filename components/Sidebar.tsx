@@ -73,9 +73,11 @@ const NavItemComponent: React.FC<NavItemProps> = ({
             w-full justify-start
               ${
                 isActive
-                  ? 'bg-primary-200/50 dark:bg-dark-border/60 text-primary-900 dark:text-dark-text font-bold border border-transparent'
+                  ? isCollapsed
+                  ? 'text-primary-900 dark:text-dark-text border border-transparent'
+                  : 'bg-primary-200/50 dark:bg-dark-border/60 text-primary-900 dark:text-dark-text font-bold border border-transparent'
                 : isCollapsed
-                  ? 'text-primary-900 dark:text-dark-text border border-transparent hover:bg-primary-100 dark:hover:bg-dark-border/50 hover:border-primary-200/80 dark:hover:border-dark-border hover:text-primary-900 dark:hover:text-dark-text'
+                  ? 'text-primary-900 dark:text-dark-text border border-transparent hover:text-primary-900 dark:hover:text-dark-text'
                   : 'text-primary-900 dark:text-dark-text border border-transparent hover:bg-primary-100 dark:hover:bg-dark-border/50 hover:border-primary-200/80 dark:hover:border-dark-border hover:text-primary-900 dark:hover:text-dark-text'
             }
           `}
