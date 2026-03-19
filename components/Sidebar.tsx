@@ -290,7 +290,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     /* DESKTOP CONFIGURATION (Overrides) */
     md:translate-x-0 md:shadow-none md:relative md:z-30 
     md:transition-[width] md:duration-300 md:ease-[cubic-bezier(0.2,0,0,1)]
-    ${renderCollapsed ? 'md:w-[108px]' : 'md:w-[268px]'}
+    md:w-[268px]
   `;
 
   return (
@@ -330,15 +330,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </div>
 
             <div
-              className={`hidden md:flex absolute top-3 right-3 items-center gap-1.5 ${
-                isDesktopMac ? (renderCollapsed ? 'left-[56px]' : 'left-[74px]') : 'left-3'
+              className={`hidden md:flex absolute top-3 items-center gap-2 ${
+                isDesktopMac ? 'left-[88px]' : 'left-4'
               }`}
             >
               <button
                 type="button"
                 onClick={toggleCollapse}
                 aria-label={renderCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-                className="w-8 h-8 rounded-lg border border-primary-200/90 dark:border-dark-border/80 bg-primary-50/90 dark:bg-dark-surface/90 text-primary-500 dark:text-dark-muted hover:text-primary-900 dark:hover:text-dark-text hover:bg-primary-100 dark:hover:bg-dark-bg transition-colors flex items-center justify-center"
+                className={`w-8 h-8 rounded-md transition-colors flex items-center justify-center ${
+                  renderCollapsed
+                    ? 'text-primary-700 dark:text-dark-text bg-primary-200/45 dark:bg-dark-border/45'
+                    : 'text-primary-500 dark:text-dark-muted hover:text-primary-900 dark:hover:text-dark-text hover:bg-primary-200/35 dark:hover:bg-dark-border/45'
+                }`}
                 title={renderCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
               >
                 {renderCollapsed ? <Icons.SidebarRight /> : <Icons.SidebarLeft />}
@@ -353,10 +357,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   type="button"
                   onClick={() => toggleUtilityPanel('search')}
                   aria-label="Search tasks"
-                  className={`w-8 h-8 rounded-lg border transition-colors flex items-center justify-center ${
+                  className={`w-8 h-8 rounded-md transition-colors flex items-center justify-center ${
                     activeUtilityPanel === 'search'
-                      ? 'border-primary-300 dark:border-dark-border bg-primary-200/70 dark:bg-dark-border text-primary-900 dark:text-dark-text'
-                      : 'border-primary-200/90 dark:border-dark-border/80 bg-primary-50/90 dark:bg-dark-surface/90 text-primary-500 dark:text-dark-muted hover:text-primary-900 dark:hover:text-dark-text hover:bg-primary-100 dark:hover:bg-dark-bg'
+                      ? 'text-primary-900 dark:text-dark-text bg-primary-200/55 dark:bg-dark-border/55'
+                      : 'text-primary-500 dark:text-dark-muted hover:text-primary-900 dark:hover:text-dark-text hover:bg-primary-200/35 dark:hover:bg-dark-border/45'
                   }`}
                   title="Search"
                 >
@@ -366,14 +370,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   type="button"
                   onClick={() => toggleUtilityPanel('category')}
                   aria-label="Filter by category"
-                  className={`w-8 h-8 rounded-lg border transition-colors flex items-center justify-center ${
+                  className={`w-8 h-8 rounded-md transition-colors flex items-center justify-center ${
                     activeUtilityPanel === 'category'
-                      ? 'border-primary-300 dark:border-dark-border bg-primary-200/70 dark:bg-dark-border text-primary-900 dark:text-dark-text'
-                      : 'border-primary-200/90 dark:border-dark-border/80 bg-primary-50/90 dark:bg-dark-surface/90 text-primary-500 dark:text-dark-muted hover:text-primary-900 dark:hover:text-dark-text hover:bg-primary-100 dark:hover:bg-dark-bg'
+                      ? 'text-primary-900 dark:text-dark-text bg-primary-200/55 dark:bg-dark-border/55'
+                      : 'text-primary-500 dark:text-dark-muted hover:text-primary-900 dark:hover:text-dark-text hover:bg-primary-200/35 dark:hover:bg-dark-border/45'
                   }`}
                   title="Category"
                 >
-                  <Icons.List />
+                  <Icons.Tag />
                 </button>
               </div>
             </div>
