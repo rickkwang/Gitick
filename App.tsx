@@ -612,11 +612,11 @@ const App: React.FC = () => {
      if (groupName === 'Today') headerClass = "text-[var(--status-info-text)]";
 
      return (
-        <div className="mb-6">
+        <div className="mb-8">
            {groupName && (
               // OPTICAL FIX: Added px-5 md:px-6 to align header text with TaskItem content (checkbox)
               // This fixes the "floating header" look relative to the rounded cards
-              <div className={`sticky top-0 bg-[var(--app-bg)] z-10 py-3 mb-2 flex items-center gap-3 transition-colors ${headerClass} px-5 md:px-6`}>
+              <div className={`sticky top-0 bg-[var(--app-bg)] z-10 py-4 mb-3 flex items-center gap-3 transition-colors ${headerClass} px-5 md:px-6`}>
                   <span className="text-xs font-black uppercase tracking-widest opacity-90 transform translate-y-[1px]">{groupName}</span>
                   <span className="text-[10px] font-bold font-mono opacity-60 bg-primary-200/40 dark:bg-dark-border px-2 py-0.5 rounded-full text-primary-900 dark:text-dark-text min-w-[1.5rem] text-center">{taskList.length}</span>
               </div>
@@ -713,49 +713,53 @@ const App: React.FC = () => {
 
                   {/* Scrollable List Area */}
                   <div className="flex-1 overflow-y-auto main-scroll scroll-smooth">
-                      <div className="max-w-[1100px] mx-auto w-full px-5 md:px-10 py-7 md:py-10">
+                      <div className="max-w-[1180px] mx-auto w-full px-5 md:px-11 py-8 md:py-11">
                           {filter !== 'focus' && (
-                            <div className="mb-6 flex flex-col md:flex-row gap-2.5 md:items-center">
-                              <div className="flex-1 flex items-center gap-2 px-3 py-2.5 rounded-xl border border-primary-200/80 dark:border-dark-border bg-primary-50 dark:bg-dark-surface">
-                                <span className="text-primary-400 dark:text-dark-muted">
-                                  <Icons.Search />
-                                </span>
-                                <input
-                                  value={searchQuery}
-                                  onChange={(event) => setSearchQuery(event.target.value)}
-                                  placeholder="Search title, tag, project..."
-                                  className="w-full bg-transparent outline-none text-sm text-primary-900 dark:text-dark-text placeholder:text-primary-400 dark:placeholder:text-dark-muted"
-                                />
+                            <div className="mb-7 rounded-2xl border border-primary-200/80 dark:border-dark-border bg-primary-50/90 dark:bg-dark-surface/95 p-3 md:p-4">
+                              <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-3.5">
+                                <div className="flex-1 flex items-center gap-2.5 px-3.5 py-3 rounded-xl border border-primary-200/80 dark:border-dark-border bg-primary-50 dark:bg-dark-surface">
+                                  <span className="text-primary-400 dark:text-dark-muted">
+                                    <Icons.Search />
+                                  </span>
+                                  <input
+                                    value={searchQuery}
+                                    onChange={(event) => setSearchQuery(event.target.value)}
+                                    placeholder="Search title, tag, project..."
+                                    className="w-full bg-transparent outline-none text-sm text-primary-900 dark:text-dark-text placeholder:text-primary-400 dark:placeholder:text-dark-muted"
+                                  />
+                                </div>
+                                <div className="grid grid-cols-2 gap-2.5 md:flex md:items-center md:gap-3">
+                                  <select
+                                    value={searchPriority}
+                                    onChange={(event) => setSearchPriority(event.target.value as 'all' | 'high' | 'medium' | 'low')}
+                                    className="min-w-[8.25rem] px-3.5 py-3 rounded-xl border border-primary-200/80 dark:border-dark-border bg-primary-50 dark:bg-dark-surface text-sm text-primary-700 dark:text-dark-text outline-none"
+                                  >
+                                    <option value="all">Any Priority</option>
+                                    <option value="high">High</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="low">Low</option>
+                                  </select>
+                                  <select
+                                    value={searchProject}
+                                    onChange={(event) => setSearchProject(event.target.value as 'all' | string)}
+                                    className="min-w-[9rem] px-3.5 py-3 rounded-xl border border-primary-200/80 dark:border-dark-border bg-primary-50 dark:bg-dark-surface text-sm text-primary-700 dark:text-dark-text outline-none"
+                                  >
+                                    <option value="all">Any Project</option>
+                                    <option value="Inbox">Inbox</option>
+                                    {projects.map((project) => (
+                                      <option key={project} value={project}>
+                                        {project}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </div>
                               </div>
-                              <select
-                                value={searchPriority}
-                                onChange={(event) => setSearchPriority(event.target.value as 'all' | 'high' | 'medium' | 'low')}
-                                className="px-3 py-2.5 rounded-xl border border-primary-200/80 dark:border-dark-border bg-primary-50 dark:bg-dark-surface text-sm text-primary-700 dark:text-dark-text outline-none"
-                              >
-                                <option value="all">Any Priority</option>
-                                <option value="high">High</option>
-                                <option value="medium">Medium</option>
-                                <option value="low">Low</option>
-                              </select>
-                              <select
-                                value={searchProject}
-                                onChange={(event) => setSearchProject(event.target.value as 'all' | string)}
-                                className="px-3 py-2.5 rounded-xl border border-primary-200/80 dark:border-dark-border bg-primary-50 dark:bg-dark-surface text-sm text-primary-700 dark:text-dark-text outline-none"
-                              >
-                                <option value="all">Any Project</option>
-                                <option value="Inbox">Inbox</option>
-                                {projects.map((project) => (
-                                  <option key={project} value={project}>
-                                    {project}
-                                  </option>
-                                ))}
-                              </select>
                             </div>
                           )}
                           
                           {/* Heatmap Section */}
                           {filter === 'next7days' && (
-                             <div className="mb-10">
+                             <div className="mb-12">
                                 <div className="p-5 md:p-6 bg-primary-50 dark:bg-dark-surface rounded-xl shadow-sm border border-primary-200/80 dark:border-dark-border/80">
                                    <div className="flex items-center justify-between mb-4">
                                       <div className="flex items-center gap-2">
@@ -795,7 +799,7 @@ const App: React.FC = () => {
                               ) : (
                                   /* Flat List for other views */
                                   filteredTasks.length > 0 ? (
-                                    <div className="space-y-4">
+                                    <div className="space-y-5">
                                       {filteredTasks.map(task => (
                                           <TaskItem 
                                             key={task.id}
