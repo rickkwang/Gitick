@@ -13,17 +13,19 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:stable": "node scripts/run-command-stable.mjs --label build --timeout 180000 --retries 1 --cleanup \"rm -rf node_modules/.vite\" -- \"vite build\"",
     "typecheck": "tsc --noEmit",
     "lint": "npm run typecheck",
-    "ci:local": "npm run typecheck && npm run build",
+    "ci:local": "npm run typecheck && npm run build:stable",
     "preview": "vite preview",
     "desktop:dev": "concurrently -k \"vite --host 127.0.0.1 --port 3000\" \"wait-on tcp:3000 && VITE_DEV_SERVER_URL=http://127.0.0.1:3000 electron .\"",
     "desktop:pack": "npm run build && electron-builder --dir",
-    "desktop:dmg": "npm run build && electron-builder --mac",
+    "desktop:dmg": "npm run build:stable && electron-builder --mac",
     "desktop:release": "npm run desktop:dmg && node scripts/verify-mac-signatures.mjs && node scripts/publish-desktop-release.mjs",
     "test": "vitest",
     "test:run": "vitest run",
-    "desktop:ci:smoke": "npm run build && electron-builder --mac zip --publish never",
+    "test:run:stable": "node scripts/run-command-stable.mjs --label test --timeout 180000 --retries 1 -- \"vitest run\"",
+    "desktop:ci:smoke": "npm run build:stable && electron-builder --mac zip --publish never",
     "desktop:ci:verify-artifacts": "node scripts/verify-mac-updater-artifacts.mjs"
   },
   "dependencies": {

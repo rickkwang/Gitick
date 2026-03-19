@@ -121,7 +121,7 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
   const getPlaceholder = () => {
       if (activeList === 'today') return 'For today...';
       if (activeList && projects.includes(activeList) && activeList !== 'Inbox') return `${activeList}...`;
-      return 'Add task... (e.g. Finish report !high #work)';
+      return 'Add task...';
   }
   
   // Auto-focus logic: Only on desktop
@@ -154,7 +154,7 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
                       const nextIndex = (currentIndex + 1) % RECURRENCE_OPTIONS.length;
                       setRecurrence(RECURRENCE_OPTIONS[nextIndex].value);
                     }}
-                    className={`flex h-7 items-center justify-center rounded-lg px-1.5 transition-colors ${
+                    className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
                       recurrence
                         ? 'bg-primary-200/70 text-primary-700 dark:bg-dark-border/70 dark:text-dark-text'
                         : 'hover:bg-primary-200/60 dark:hover:bg-dark-border/60'
@@ -162,7 +162,9 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
                     title="Repeat"
                     aria-label="Set repeat frequency"
                   >
-                    <Icons.Refresh />
+                    <span className="[&>svg]:w-[18px] [&>svg]:h-[18px]">
+                      <Icons.Refresh />
+                    </span>
                   </button>
 
                   <div className="relative z-40 shrink-0" ref={dropdownRef}>
@@ -171,14 +173,16 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
                       onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                       aria-label="Select project"
                       className={`
-                        flex h-7 items-center gap-1 rounded-lg px-1.5 text-[11px] font-semibold transition-colors
+                        flex h-8 items-center gap-1 rounded-lg px-2 text-[11px] font-semibold transition-colors
                         ${isDropdownOpen
                           ? 'bg-primary-200/70 text-primary-700 dark:bg-dark-border/70 dark:text-dark-text'
                           : 'text-primary-500 hover:bg-primary-200/60 dark:text-dark-muted dark:hover:bg-dark-border/60'}
                       `}
                       title="Select Project"
                     >
-                      <Icons.Folder />
+                      <span className="[&>svg]:w-[18px] [&>svg]:h-[18px]">
+                        <Icons.Folder />
+                      </span>
                       <span className="max-w-[90px] truncate">{selectedProject}</span>
                       <span className={`transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`}>
                         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
@@ -222,7 +226,9 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
                         : 'pointer-events-none opacity-45'
                     }`}
                 >
-                  <Icons.CornerDownLeft />
+                  <span className="[&>svg]:w-[18px] [&>svg]:h-[18px]">
+                    <Icons.CornerDownLeft />
+                  </span>
                 </button>
             </div>
 
