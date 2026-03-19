@@ -111,7 +111,7 @@ export const GitGraph: React.FC<GitGraphProps> = ({ tasks, onDelete, userProfile
                   </div>
                   <button
                     onClick={() => onDelete(task.id)}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity px-2 py-1 rounded-md border border-primary-200 dark:border-dark-border text-primary-500 hover:text-red-500 hover:border-red-300 dark:hover:border-red-500/40"
+                    className="opacity-0 group-hover:opacity-100 transition-opacity px-2 py-1 rounded-md border border-primary-200 dark:border-dark-border text-primary-500 hover:text-[var(--status-danger-text)] hover:border-[var(--status-danger-border)]"
                     title="Delete committed todo"
                     aria-label="Delete committed todo"
                   >

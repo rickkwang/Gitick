@@ -146,7 +146,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({ selectedDate, onSelect, 
             </button>
             <button 
                 onClick={() => handleQuickAction('clear')}
-                className="px-3 py-1.5 rounded-lg border border-transparent hover:border-red-100 dark:hover:border-red-900/30 text-[10px] font-bold text-primary-400 dark:text-dark-muted hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors ml-auto"
+                className="px-3 py-1.5 rounded-lg border border-transparent hover:border-[var(--status-danger-border)] text-[10px] font-bold text-primary-400 dark:text-dark-muted hover:text-[var(--status-danger-text)] hover:bg-[var(--status-danger-bg)] transition-colors ml-auto"
             >
                 Clear
             </button>

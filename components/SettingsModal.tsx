@@ -230,7 +230,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                           {localProfile.avatarImage && (
                             <button
                               onClick={handleRemoveAvatar}
-                              className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-primary-300 text-primary-600 hover:text-red-500 hover:border-red-300 dark:border-dark-border dark:text-dark-text dark:hover:text-red-400 dark:hover:border-red-900/50 transition-colors"
+                              className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-primary-300 text-primary-600 hover:text-[var(--status-danger-text)] hover:border-[var(--status-danger-border)] dark:border-dark-border dark:text-dark-text transition-colors"
                             >
                               Remove photo
                             </button>
@@ -250,7 +250,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                         </div>
                      </div>
                      {avatarError && (
-                       <p className="text-xs text-red-500 mt-2">{avatarError}</p>
+                       <p className="text-xs text-[var(--status-danger-text)] mt-2">{avatarError}</p>
                      )}
                    </div>
                  </div>

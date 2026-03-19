@@ -136,10 +136,10 @@ const NavItemComponent: React.FC<NavItemProps> = ({
               {isFocusItem && isFocusActive && focusTimeLeft !== undefined && (
                 <div className="flex items-center gap-2">
                    <span className="relative flex h-2 w-2">
-                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                     <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--status-danger-border)] opacity-75"></span>
+                     <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--status-danger-text)]"></span>
                    </span>
-                   <span className="text-[10px] font-mono font-bold text-red-500">
+                   <span className="text-[10px] font-mono font-bold text-[var(--status-danger-text)]">
                      {formatTimeMini(focusTimeLeft)}
                    </span>
                 </div>
@@ -163,7 +163,7 @@ const NavItemComponent: React.FC<NavItemProps> = ({
                onDeleteProject(id);
              }}
              aria-label={`Delete project ${label}`}
-             className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-primary-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-20"
+             className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-primary-400 hover:text-[var(--status-danger-text)] hover:bg-[var(--status-danger-bg)] rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-20"
              title="Delete Project"
           >
             <Icons.Trash />

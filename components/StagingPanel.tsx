@@ -108,9 +108,9 @@ export const StagingPanel: React.FC<StagingPanelProps> = ({ task, onClose, onUpd
   ) : null;
 
   const priorityColors = {
-    [Priority.HIGH]: 'text-red-600 bg-red-50 border-red-100 dark:bg-red-900/20 dark:border-red-900/30 dark:text-red-400',
-    [Priority.MEDIUM]: 'text-orange-600 bg-orange-50 border-orange-100 dark:bg-orange-900/20 dark:border-orange-900/30 dark:text-orange-400',
-    [Priority.LOW]: 'text-green-600 bg-green-50 border-green-100 dark:bg-green-900/20 dark:border-green-900/30 dark:text-green-400',
+    [Priority.HIGH]: 'text-[var(--status-danger-text)] bg-[var(--status-danger-bg)] border-[var(--status-danger-border)]',
+    [Priority.MEDIUM]: 'text-[var(--status-warn-text)] bg-[var(--status-warn-bg)] border-[var(--status-warn-border)]',
+    [Priority.LOW]: 'text-[var(--status-success-text)] bg-[var(--status-success-bg)] border-[var(--status-success-border)]',
   };
 
   return (
@@ -168,7 +168,7 @@ export const StagingPanel: React.FC<StagingPanelProps> = ({ task, onClose, onUpd
                       className={`
                           flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-all
                           ${task.dueDate 
-                              ? 'bg-blue-50 dark:bg-blue-900/10 border-blue-100 dark:border-blue-900/30 text-blue-700 dark:text-blue-300' 
+                              ? 'bg-[var(--status-info-bg)] border-[var(--status-info-border)] text-[var(--status-info-text)]' 
                               : 'bg-primary-50 dark:bg-dark-surface border-primary-200 dark:border-dark-border text-primary-500 dark:text-dark-muted hover:border-primary-300 dark:hover:border-dark-muted'}
                       `}
                   >
@@ -220,7 +220,7 @@ export const StagingPanel: React.FC<StagingPanelProps> = ({ task, onClose, onUpd
                     {tag}
                     <button 
                       onClick={() => removeTag(tag)}
-                      className="w-0 overflow-hidden group-hover:w-4 transition-all opacity-0 group-hover:opacity-100 hover:text-red-500"
+                      className="w-0 overflow-hidden group-hover:w-4 transition-all opacity-0 group-hover:opacity-100 hover:text-[var(--status-danger-text)]"
                     >
                       <Icons.X />
                     </button>
@@ -292,7 +292,7 @@ export const StagingPanel: React.FC<StagingPanelProps> = ({ task, onClose, onUpd
                         </span>
                         <button 
                           onClick={() => deleteSubtask(sub.id)}
-                          className="opacity-0 group-hover:opacity-100 p-0.5 text-primary-300 hover:text-red-500 transition-all"
+                          className="opacity-0 group-hover:opacity-100 p-0.5 text-primary-300 hover:text-[var(--status-danger-text)] transition-all"
                         >
                           <Icons.X />
                         </button>
@@ -328,7 +328,7 @@ export const StagingPanel: React.FC<StagingPanelProps> = ({ task, onClose, onUpd
            </button>
            <button 
              onClick={() => onDelete(task.id)}
-             className="px-4 py-3 rounded-xl border border-transparent text-primary-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+             className="px-4 py-3 rounded-xl border border-transparent text-primary-400 hover:text-[var(--status-danger-text)] hover:bg-[var(--status-danger-bg)] transition-colors"
              title="Delete Task"
            >
              <Icons.Trash />

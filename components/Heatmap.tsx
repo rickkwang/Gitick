@@ -175,20 +175,20 @@ export const Heatmap: React.FC<HeatmapProps> = ({ tasks }) => {
   }, [weeks]);
 
   const getColor = (count: number) => {
-    if (count <= 0) return 'bg-[#ebedf0] dark:bg-[#161b22]';
+    if (count <= 0) return 'bg-[var(--heat-0)]';
 
     if (intensityCeiling <= 4) {
-      if (count === 1) return 'bg-[#9be9a8] dark:bg-[#0e4429]';
-      if (count === 2) return 'bg-[#40c463] dark:bg-[#006d32]';
-      if (count === 3) return 'bg-[#30a14e] dark:bg-[#26a641]';
-      return 'bg-[#216e39] dark:bg-[#39d353]';
+      if (count === 1) return 'bg-[var(--heat-1)]';
+      if (count === 2) return 'bg-[var(--heat-2)]';
+      if (count === 3) return 'bg-[var(--heat-3)]';
+      return 'bg-[var(--heat-4)]';
     }
 
     const ratio = count / intensityCeiling;
-    if (ratio <= 0.25) return 'bg-[#9be9a8] dark:bg-[#0e4429]';
-    if (ratio <= 0.5) return 'bg-[#40c463] dark:bg-[#006d32]';
-    if (ratio <= 0.75) return 'bg-[#30a14e] dark:bg-[#26a641]';
-    return 'bg-[#216e39] dark:bg-[#39d353]';
+    if (ratio <= 0.25) return 'bg-[var(--heat-1)]';
+    if (ratio <= 0.5) return 'bg-[var(--heat-2)]';
+    if (ratio <= 0.75) return 'bg-[var(--heat-3)]';
+    return 'bg-[var(--heat-4)]';
   };
 
   const CELL_SIZE = 'w-[11px] h-[11px]';
@@ -253,11 +253,11 @@ export const Heatmap: React.FC<HeatmapProps> = ({ tasks }) => {
       <div className="flex items-center justify-end px-3">
         <div className="flex items-center gap-1.5 text-[10px] text-primary-400 dark:text-dark-muted">
           <span>Less</span>
-          <div className={`${CELL_SIZE} rounded-sm bg-[#ebedf0] dark:bg-[#161b22]`} />
-          <div className={`${CELL_SIZE} rounded-sm bg-[#9be9a8] dark:bg-[#0e4429]`} />
-          <div className={`${CELL_SIZE} rounded-sm bg-[#40c463] dark:bg-[#006d32]`} />
-          <div className={`${CELL_SIZE} rounded-sm bg-[#30a14e] dark:bg-[#26a641]`} />
-          <div className={`${CELL_SIZE} rounded-sm bg-[#216e39] dark:bg-[#39d353]`} />
+          <div className={`${CELL_SIZE} rounded-sm bg-[var(--heat-0)]`} />
+          <div className={`${CELL_SIZE} rounded-sm bg-[var(--heat-1)]`} />
+          <div className={`${CELL_SIZE} rounded-sm bg-[var(--heat-2)]`} />
+          <div className={`${CELL_SIZE} rounded-sm bg-[var(--heat-3)]`} />
+          <div className={`${CELL_SIZE} rounded-sm bg-[var(--heat-4)]`} />
           <span>More</span>
         </div>
       </div>

@@ -516,8 +516,8 @@ const App: React.FC = () => {
      
      // Determine group color/style
      let headerClass = "text-primary-900 dark:text-dark-text";
-     if (groupName === 'Overdue') headerClass = "text-red-500";
-     if (groupName === 'Today') headerClass = "text-blue-500";
+     if (groupName === 'Overdue') headerClass = "text-[var(--status-danger-text)]";
+     if (groupName === 'Today') headerClass = "text-[var(--status-info-text)]";
 
      return (
         <div className="mb-6">

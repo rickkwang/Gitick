@@ -57,7 +57,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             onClick={onConfirm}
             className={`rounded-xl px-4 py-2 text-sm font-semibold text-white transition-colors ${
               confirmTone === 'danger'
-                ? 'bg-red-600 hover:bg-red-700 dark:bg-red-400 dark:hover:bg-red-300'
+                ? 'bg-[var(--status-danger-text)] hover:brightness-95'
                 : 'bg-[var(--accent)] hover:bg-[var(--accent-strong)] dark:bg-[var(--accent)] dark:hover:bg-[var(--accent-strong)]'
             }`}
           >

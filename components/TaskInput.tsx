@@ -221,16 +221,16 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
                     <div className="h-px w-4 bg-primary-200 dark:bg-dark-border mr-1 shrink-0"></div>
                     
                     {parsedPreview.dueDate && (
-                        <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-900/20 text-[10px] font-bold text-blue-600 dark:text-blue-300 border border-blue-100 dark:border-blue-900/30 whitespace-nowrap">
+                        <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[var(--status-info-bg)] text-[10px] font-bold text-[var(--status-info-text)] border border-[var(--status-info-border)] whitespace-nowrap">
                             <Icons.Calendar /> {parsedPreview.dueDate}
                         </span>
                     )}
                     
                     {parsedPreview.priority && (
                         <span className={`flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase border whitespace-nowrap
-                            ${parsedPreview.priority === Priority.HIGH ? 'bg-red-50 dark:bg-red-900/20 text-red-600 border-red-100 dark:border-red-900/30' : 
-                              parsedPreview.priority === Priority.LOW ? 'bg-green-50 dark:bg-green-900/20 text-green-600 border-green-100 dark:border-green-900/30' : 
-                              'bg-orange-50 dark:bg-orange-900/20 text-orange-600 border-orange-100 dark:border-orange-900/30'}
+                            ${parsedPreview.priority === Priority.HIGH ? 'bg-[var(--status-danger-bg)] text-[var(--status-danger-text)] border-[var(--status-danger-border)]' : 
+                              parsedPreview.priority === Priority.LOW ? 'bg-[var(--status-success-bg)] text-[var(--status-success-text)] border-[var(--status-success-border)]' : 
+                              'bg-[var(--status-warn-bg)] text-[var(--status-warn-text)] border-[var(--status-warn-border)]'}
                         `}>
                             !{parsedPreview.priority}
                         </span>

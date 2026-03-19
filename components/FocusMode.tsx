@@ -142,7 +142,7 @@ export const FocusMode: React.FC<FocusModeProps> = ({
               className={`
                 h-12 rounded-lg text-xs md:text-sm font-semibold uppercase tracking-wide border transition-colors duration-200 flex items-center justify-center gap-1.5
                 ${canReset
-                  ? 'bg-primary-50 dark:bg-dark-bg text-primary-600 dark:text-dark-text border-primary-300 dark:border-dark-border hover:text-red-500 hover:border-red-300 dark:hover:text-red-400 dark:hover:border-red-800'
+                  ? 'bg-primary-50 dark:bg-dark-bg text-primary-600 dark:text-dark-text border-primary-300 dark:border-dark-border hover:text-[var(--status-danger-text)] hover:border-[var(--status-danger-border)]'
                   : 'bg-primary-200/50 dark:bg-dark-bg text-primary-300 dark:text-dark-muted border-primary-200 dark:border-dark-border cursor-not-allowed'}
               `}
             >

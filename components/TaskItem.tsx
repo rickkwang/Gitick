@@ -38,9 +38,9 @@ const TaskItemComponent: React.FC<TaskItemProps> = ({
   const isLate = task.dueDate && !task.completed && task.dueDate < todayLocalIsoDate();
 
   const priorityColor = {
-      [Priority.HIGH]: 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.2)]',
-      [Priority.MEDIUM]: 'bg-orange-400',
-      [Priority.LOW]: 'bg-green-400',
+      [Priority.HIGH]: 'bg-[var(--status-danger-text)] shadow-[0_0_8px_rgba(122,83,68,0.18)]',
+      [Priority.MEDIUM]: 'bg-[var(--status-warn-text)]',
+      [Priority.LOW]: 'bg-[var(--status-success-text)]',
   };
 
   return (
@@ -94,7 +94,7 @@ const TaskItemComponent: React.FC<TaskItemProps> = ({
             {/* Right side compact meta for Desktop */}
             <div className="hidden md:flex shrink-0 items-center gap-2">
                  {task.priority === Priority.HIGH && !task.completed && (
-                    <span className="text-[10px] font-bold text-red-500 bg-red-50 dark:bg-red-900/20 px-2 py-0.5 rounded-full uppercase tracking-wider">High</span>
+                    <span className="text-[10px] font-bold text-[var(--status-danger-text)] bg-[var(--status-danger-bg)] border border-[var(--status-danger-border)] px-2 py-0.5 rounded-full uppercase tracking-wider">High</span>
                  )}
                  {task.list && task.list !== 'Inbox' && (
                      <span className="text-[10px] font-bold text-primary-400 dark:text-dark-muted uppercase tracking-wider">{task.list}</span>
@@ -107,7 +107,7 @@ const TaskItemComponent: React.FC<TaskItemProps> = ({
            
            {/* Date Badge - Softer look */}
            {dateDisplay && !task.completed && (
-             <span className={`flex items-center gap-1.5 text-[10px] font-semibold px-2 py-0.5 rounded-full transition-colors border ${isLate ? 'text-red-500 bg-red-50 dark:bg-red-900/20 border-red-100 dark:border-red-900/30' : 'text-primary-500 dark:text-dark-muted bg-primary-200/50 dark:bg-dark-border border-primary-200/70 dark:border-dark-border/80'}`}>
+             <span className={`flex items-center gap-1.5 text-[10px] font-semibold px-2 py-0.5 rounded-full transition-colors border ${isLate ? 'text-[var(--status-danger-text)] bg-[var(--status-danger-bg)] border-[var(--status-danger-border)]' : 'text-primary-500 dark:text-dark-muted bg-primary-200/50 dark:bg-dark-border border-primary-200/70 dark:border-dark-border/80'}`}>
                <Icons.Calendar /> {dateDisplay}
              </span>
            )}
