@@ -84,6 +84,7 @@ const App: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchPriority, setSearchPriority] = useState<'all' | 'high' | 'medium' | 'low'>('all');
   const [searchProject, setSearchProject] = useState<'all' | string>('all');
+  const [desktopUtilityPanel, setDesktopUtilityPanel] = useState<'none' | 'search' | 'category'>('none');
   const desktopPlatform = typeof window !== 'undefined' ? window.gitickDesktop?.platform : undefined;
   const isDesktopMac = desktopPlatform === 'darwin';
   const isDesktopRuntime = typeof window !== 'undefined' && Boolean(window.gitickDesktop?.updater);
@@ -506,7 +507,17 @@ const App: React.FC = () => {
     setSelectedTask(null);
   }, []);
   const handleSidebarToggleCollapse = useCallback(() => {
-    setIsSidebarCollapsed((prev) => !prev);
+    setIsSidebarCollapsed((prev) => {
+      const next = !prev;
+      if (next) {
+        setDesktopUtilityPanel('none');
+      }
+      return next;
+    });
+  }, []);
+  const handleDesktopUtilityToggle = useCallback((panel: 'search' | 'category') => {
+    setIsSidebarCollapsed(false);
+    setDesktopUtilityPanel((prev) => (prev === panel ? 'none' : panel));
   }, []);
   const handleSidebarCloseMobile = useCallback(() => {
     setIsSidebarOpen(false);
@@ -638,7 +649,7 @@ const App: React.FC = () => {
 
   return (
     <div
-      className={`[--app-radius:16px] flex flex-col h-dvh md:rounded-[var(--app-radius)] font-sans text-primary-900 dark:text-dark-text bg-[var(--app-bg)] overflow-hidden transition-colors duration-300 selection:bg-primary-900 selection:text-white dark:selection:bg-primary-100 dark:selection:text-primary-900 ${
+      className={`[--app-radius:16px] relative flex flex-col h-dvh md:rounded-[var(--app-radius)] font-sans text-primary-900 dark:text-dark-text bg-[var(--app-bg)] overflow-hidden transition-colors duration-300 selection:bg-primary-900 selection:text-white dark:selection:bg-primary-100 dark:selection:text-primary-900 ${
         isStartupStatic ? 'startup-static' : ''
       }`}
     > 
@@ -662,6 +673,55 @@ const App: React.FC = () => {
          </div>
       </header>
 
+      {filter !== 'focus' && (
+        <div className={`hidden md:flex absolute top-3 z-[80] items-center gap-2.5 ${isDesktopMac ? 'left-[88px]' : 'left-4'}`}>
+          <button
+            type="button"
+            onClick={handleSidebarToggleCollapse}
+            aria-label={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            className="w-8 h-8 transition-colors flex items-center justify-center text-primary-500 dark:text-dark-muted hover:text-primary-900 dark:hover:text-dark-text"
+            title={isSidebarCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
+            style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+          >
+            <span className="[&>svg]:w-[17px] [&>svg]:h-[17px]">
+              <Icons.SidebarLeft />
+            </span>
+          </button>
+          <button
+            type="button"
+            onClick={() => handleDesktopUtilityToggle('search')}
+            aria-label="Search tasks"
+            className={`w-8 h-8 transition-colors flex items-center justify-center ${
+              desktopUtilityPanel === 'search'
+                ? 'text-primary-900 dark:text-dark-text'
+                : 'text-primary-500 dark:text-dark-muted hover:text-primary-900 dark:hover:text-dark-text'
+            }`}
+            title="Search"
+            style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+          >
+            <span className="[&>svg]:w-[17px] [&>svg]:h-[17px]">
+              <Icons.Search />
+            </span>
+          </button>
+          <button
+            type="button"
+            onClick={() => handleDesktopUtilityToggle('category')}
+            aria-label="Filter by category"
+            className={`w-8 h-8 transition-colors flex items-center justify-center ${
+              desktopUtilityPanel === 'category'
+                ? 'text-primary-900 dark:text-dark-text'
+                : 'text-primary-500 dark:text-dark-muted hover:text-primary-900 dark:hover:text-dark-text'
+            }`}
+            title="Category"
+            style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+          >
+            <span className="[&>svg]:w-[17px] [&>svg]:h-[17px]">
+              <Icons.Tag />
+            </span>
+          </button>
+        </div>
+      )}
+
       {/* Main Layout Container */}
       <div className="flex-1 flex w-full relative overflow-hidden">
         
@@ -671,7 +731,7 @@ const App: React.FC = () => {
           onFilterChange={handleSidebarFilterChange} 
           isOpen={isSidebarOpen}
           isCollapsed={isSidebarCollapsed}
-          toggleCollapse={handleSidebarToggleCollapse}
+          desktopUtilityPanel={desktopUtilityPanel}
           onCloseMobile={handleSidebarCloseMobile}
           taskCounts={taskCounts}
           onOpenSettings={handleOpenSettings}
@@ -681,7 +741,6 @@ const App: React.FC = () => {
           onAddProject={addProject}
           onDeleteProject={deleteProject}
           userProfile={userProfile}
-          isDesktopMac={isDesktopMac}
           searchQuery={searchQuery}
           onSearchQueryChange={setSearchQuery}
           searchPriority={searchPriority}
@@ -715,21 +774,6 @@ const App: React.FC = () => {
                       className="hidden md:block absolute top-0 left-0 right-0 h-10 z-10 pointer-events-none"
                       style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
                     />
-                  )}
-
-                  {isSidebarCollapsed && (
-                    <div className={`hidden md:flex absolute top-3 z-20 ${isDesktopMac ? 'left-[92px]' : 'left-4'}`}>
-                      <button
-                        type="button"
-                        onClick={handleSidebarToggleCollapse}
-                        aria-label="Expand sidebar"
-                        className="w-8 h-8 rounded-md transition-colors flex items-center justify-center text-primary-500 dark:text-dark-muted hover:text-primary-900 dark:hover:text-dark-text hover:bg-primary-200/35 dark:hover:bg-dark-border/45"
-                        title="Expand Sidebar"
-                        style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
-                      >
-                        <Icons.SidebarRight />
-                      </button>
-                    </div>
                   )}
 
                   {/* Scrollable List Area */}

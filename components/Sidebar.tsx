@@ -16,8 +16,7 @@ interface SidebarProps {
   onDeleteProject: (name: string) => void;
   userProfile: UserProfile;
   isCollapsed: boolean;
-  toggleCollapse: () => void;
-  isDesktopMac: boolean;
+  desktopUtilityPanel: 'none' | 'search' | 'category';
   searchQuery: string;
   onSearchQueryChange: (value: string) => void;
   searchPriority: 'all' | 'high' | 'medium' | 'low';
@@ -166,8 +165,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onDeleteProject,
   userProfile,
   isCollapsed,
-  toggleCollapse,
-  isDesktopMac,
+  desktopUtilityPanel,
   searchQuery,
   onSearchQueryChange,
   searchPriority,
@@ -177,7 +175,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const [isAddingProject, setIsAddingProject] = useState(false);
   const [newProjectName, setNewProjectName] = useState('');
-  const [activeUtilityPanel, setActiveUtilityPanel] = useState<'none' | 'search' | 'category'>('none');
   const inputRef = useRef<HTMLInputElement>(null);
 
   const renderCollapsed = isCollapsed && !isOpen;
@@ -190,7 +187,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   useEffect(() => {
     if (renderCollapsed) {
-      setActiveUtilityPanel('none');
       setIsAddingProject(false);
     }
   }, [renderCollapsed]);
@@ -202,10 +198,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
       setNewProjectName('');
       setIsAddingProject(false);
     }
-  };
-
-  const toggleUtilityPanel = (panel: 'search' | 'category') => {
-    setActiveUtilityPanel((prev) => (prev === panel ? 'none' : panel));
   };
 
   const getProjectIcon = (name: string) => {
@@ -266,52 +258,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </button>
               </div>
 
-              <div className={`hidden md:flex absolute top-3 items-center gap-2.5 ${isDesktopMac ? 'left-[88px]' : 'left-4'}`}>
-                <button
-                  type="button"
-                  onClick={toggleCollapse}
-                  aria-label="Collapse sidebar"
-                  className="w-8 h-8 transition-colors flex items-center justify-center text-primary-500 dark:text-dark-muted hover:text-primary-900 dark:hover:text-dark-text"
-                  title="Collapse Sidebar"
-                >
-                  <span className="[&>svg]:w-[17px] [&>svg]:h-[17px]">
-                    <Icons.SidebarLeft />
-                  </span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => toggleUtilityPanel('search')}
-                  aria-label="Search tasks"
-                  className={`w-8 h-8 transition-colors flex items-center justify-center ${
-                    activeUtilityPanel === 'search'
-                      ? 'text-primary-900 dark:text-dark-text'
-                      : 'text-primary-500 dark:text-dark-muted hover:text-primary-900 dark:hover:text-dark-text'
-                  }`}
-                  title="Search"
-                >
-                  <span className="[&>svg]:w-[17px] [&>svg]:h-[17px]">
-                    <Icons.Search />
-                  </span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => toggleUtilityPanel('category')}
-                  aria-label="Filter by category"
-                  className={`w-8 h-8 transition-colors flex items-center justify-center ${
-                    activeUtilityPanel === 'category'
-                      ? 'text-primary-900 dark:text-dark-text'
-                      : 'text-primary-500 dark:text-dark-muted hover:text-primary-900 dark:hover:text-dark-text'
-                  }`}
-                  title="Category"
-                >
-                  <span className="[&>svg]:w-[17px] [&>svg]:h-[17px]">
-                    <Icons.Tag />
-                  </span>
-                </button>
-              </div>
-
               <div className="hidden md:flex absolute left-4 right-4 bottom-3 items-center gap-3 transition-all duration-220">
                 <span className="shrink-0 w-9 h-9 flex items-center justify-center [&>svg]:w-5 [&>svg]:h-5 text-primary-900 dark:text-dark-text">
                   <Icons.GitickLogo />
@@ -323,10 +269,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <div className="hidden md:block px-2.5 pb-2 transition-all duration-200">
               <div
                 className={`rounded-2xl border border-primary-200/80 dark:border-dark-border/80 bg-primary-50/85 dark:bg-dark-bg/80 shadow-sm overflow-hidden transition-all duration-200 ${
-                  activeUtilityPanel === 'none' ? 'max-h-0 opacity-0 p-0 border-transparent' : 'max-h-52 opacity-100 p-3'
+                  desktopUtilityPanel === 'none' ? 'max-h-0 opacity-0 p-0 border-transparent' : 'max-h-52 opacity-100 p-3'
                 }`}
               >
-                {activeUtilityPanel === 'search' && (
+                {desktopUtilityPanel === 'search' && (
                   <div className="flex items-center gap-2 rounded-xl border border-primary-200/90 dark:border-dark-border/80 bg-primary-100/70 dark:bg-dark-surface px-3 py-2">
                     <span className="text-primary-400 dark:text-dark-muted">
                       <Icons.Search />
@@ -340,7 +286,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   </div>
                 )}
 
-                {activeUtilityPanel === 'category' && (
+                {desktopUtilityPanel === 'category' && (
                   <div className="grid grid-cols-1 gap-2">
                     <div className="rounded-xl border border-primary-200/90 dark:border-dark-border/80 bg-primary-100/70 dark:bg-dark-surface px-3 py-2">
                       <select
