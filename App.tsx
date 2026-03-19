@@ -687,7 +687,7 @@ const App: React.FC = () => {
                                       <input
                                         value={searchQuery}
                                         onChange={(event) => setSearchQuery(event.target.value)}
-                                        placeholder="Search tasks, tags, or project..."
+                                        placeholder="Search"
                                         className="w-full bg-transparent outline-none text-xs font-medium text-primary-900 dark:text-dark-text placeholder:text-primary-400 dark:placeholder:text-dark-muted"
                                       />
                                     </div>
