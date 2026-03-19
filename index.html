@@ -11,8 +11,8 @@
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 
     <!-- Dynamic Theme Color for Safari/Chrome UI blending -->
-    <meta name="theme-color" content="#f5f4ed" media="(prefers-color-scheme: light)">
-    <meta name="theme-color" content="#1a1a19" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#fbf6ea" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#1f1a16" media="(prefers-color-scheme: dark)">
 
     <!-- Fonts: Source Serif 4 for display, Work Sans for body -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -33,36 +33,36 @@
             },
             colors: {
               primary: {
-                50: '#faf9f5',
-                100: '#f5f4ed',
-                200: '#e8e6dc',
-                300: '#d4d2c8',
-                400: '#a3a29e',
-                500: '#8b8b87',
-                600: '#6b6b67',
-                700: '#5a5a58',
-                800: '#333330',
-                900: '#141413',
-                950: '#0a0a09',
+                50: '#fffdf7',
+                100: '#fbf6ea',
+                200: '#efe6d3',
+                300: '#decfb6',
+                400: '#bfae90',
+                500: '#9f8d73',
+                600: '#7e6f5a',
+                700: '#675948',
+                800: '#4a4034',
+                900: '#2e2720',
+                950: '#1a150f',
               },
               gray: {
-                50: '#faf9f5',
-                100: '#f5f4ed',
-                200: '#e8e6dc',
-                300: '#d4d2c8',
-                400: '#a3a29e',
-                500: '#8b8b87',
-                600: '#6b6b67',
-                700: '#5a5a58',
-                800: '#333330',
-                900: '#1a1a19',
+                50: '#fffdf7',
+                100: '#fbf6ea',
+                200: '#efe6d3',
+                300: '#decfb6',
+                400: '#bfae90',
+                500: '#9f8d73',
+                600: '#7e6f5a',
+                700: '#675948',
+                800: '#4a4034',
+                900: '#2e2720',
               },
               dark: {
-                bg: '#1a1a19',
-                surface: '#222220',
-                border: '#333330',
-                text: '#e8e6dc',
-                muted: '#a3a29e'
+                bg: '#1f1a16',
+                surface: '#27211c',
+                border: '#3a3129',
+                text: '#efe6d3',
+                muted: '#bfae90'
               }
             },
             borderRadius: {
@@ -84,15 +84,15 @@
         --sat: env(safe-area-inset-top);
         --sab: env(safe-area-inset-bottom);
         --sal: env(safe-area-inset-left);
-        --app-bg: #f5f4ed;
-        --app-fg: #141413;
-        --ui-border: rgba(232, 230, 220, 0.9);
-        --ui-shadow: 0 1px 3px rgba(20, 20, 19, 0.04);
+        --app-bg: #fbf6ea;
+        --app-fg: #2e2720;
+        --ui-border: rgba(239, 230, 211, 0.92);
+        --ui-shadow: 0 1px 3px rgba(46, 39, 32, 0.06);
         --desktop-font-size: 12px;
-        --accent: #d97757;
-        --accent-strong: #c4623f;
-        --accent-soft: rgba(217, 119, 87, 0.12);
-        --accent-border: rgba(217, 119, 87, 0.28);
+        --accent: #c68a5a;
+        --accent-strong: #a86f43;
+        --accent-soft: rgba(198, 138, 90, 0.14);
+        --accent-border: rgba(198, 138, 90, 0.32);
       }
 
       @media (min-width: 1024px) {
@@ -112,15 +112,15 @@
         font-feature-settings: "cv11", "ss01";
       }
       .dark body {
-        --app-bg: #1a1a19;
-        --app-fg: #e8e6dc;
-        --ui-border: rgba(51, 51, 48, 0.9);
+        --app-bg: #1f1a16;
+        --app-fg: #efe6d3;
+        --ui-border: rgba(58, 49, 41, 0.92);
         --ui-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-        color: #e8e6dc;
-        --accent: #e8916d;
-        --accent-strong: #d97757;
-        --accent-soft: rgba(217, 119, 87, 0.16);
-        --accent-border: rgba(217, 119, 87, 0.38);
+        color: #efe6d3;
+        --accent: #d39b6f;
+        --accent-strong: #c68a5a;
+        --accent-soft: rgba(211, 155, 111, 0.18);
+        --accent-border: rgba(211, 155, 111, 0.4);
       }
 
       .brand-text {
@@ -143,11 +143,11 @@
       /* Cross-browser Minimal Scrollbar */
       * {
         scrollbar-width: thin;
-        scrollbar-color: #d4d2c8 transparent;
+        scrollbar-color: #decfb6 transparent;
         -webkit-tap-highlight-color: transparent;
       }
       .dark * {
-        scrollbar-color: #333330 transparent;
+        scrollbar-color: #3a3129 transparent;
       }
 
       ::-webkit-scrollbar {
@@ -158,17 +158,17 @@
         background: transparent;
       }
       ::-webkit-scrollbar-thumb {
-        background: #d4d2c8;
+        background: #decfb6;
         border-radius: 99px;
       }
       .dark ::-webkit-scrollbar-thumb {
-         background: #333330;
+         background: #3a3129;
       }
       *:hover::-webkit-scrollbar-thumb {
-        background: #c4c2b8;
+        background: #ccbca2;
       }
       .dark *:hover::-webkit-scrollbar-thumb {
-        background: #444440;
+        background: #4a4034;
       }
 
       @keyframes fadeInUp {
