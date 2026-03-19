@@ -1,0 +1,32 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <rect x="0" y="0" width="1024" height="1024" rx="180" fill="#f3f2ef"/>
+
+  <!-- main hub -->
+  <circle cx="385" cy="290" r="168" fill="none" stroke="#1f2024" stroke-width="18"/>
+  <circle cx="385" cy="290" r="95" fill="#ddd7bf"/>
+
+  <!-- right node -->
+  <line x1="553" y1="276" x2="716" y2="276" stroke="#1f2024" stroke-width="18" stroke-linecap="round"/>
+  <circle cx="737" cy="276" r="52" fill="#f3f2ef" stroke="#1f2024" stroke-width="16"/>
+
+  <!-- left lower branch -->
+  <line x1="300" y1="420" x2="170" y2="575" stroke="#1f2024" stroke-width="18" stroke-linecap="round"/>
+  <circle cx="147" cy="603" r="52" fill="#f3f2ef" stroke="#1f2024" stroke-width="16"/>
+
+  <!-- mid branch -->
+  <line x1="192" y1="620" x2="355" y2="655" stroke="#1f2024" stroke-width="18" stroke-linecap="round"/>
+  <circle cx="388" cy="666" r="52" fill="#f3f2ef" stroke="#1f2024" stroke-width="16"/>
+
+  <!-- lower node -->
+  <line x1="351" y1="714" x2="275" y2="806" stroke="#1f2024" stroke-width="18" stroke-linecap="round"/>
+  <circle cx="257" cy="829" r="52" fill="#f3f2ef" stroke="#1f2024" stroke-width="16"/>
+
+  <!-- check board and connector -->
+  <line x1="505" y1="430" x2="726" y2="705" stroke="#1f2024" stroke-width="18" stroke-linecap="round"/>
+  <polygon points="490,505 575,440 770,690 690,745" fill="#f3f2ef" stroke="#1f2024" stroke-width="16" stroke-linejoin="round"/>
+
+  <path d="M 612 705 L 612 885 Q 612 925 652 925 L 815 925 Q 855 925 855 885 L 855 765"
+        fill="none" stroke="#1f2024" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <path d="M 678 808 L 717 845 L 797 761" fill="none" stroke="#ddd7bf" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
