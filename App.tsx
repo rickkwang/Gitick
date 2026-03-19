@@ -715,43 +715,51 @@ const App: React.FC = () => {
                   <div className="flex-1 overflow-y-auto main-scroll scroll-smooth">
                       <div className="max-w-[1180px] mx-auto w-full px-5 md:px-11 py-8 md:py-11">
                           {filter !== 'focus' && (
-                            <div className="mb-7 rounded-2xl border border-primary-200/80 dark:border-dark-border bg-primary-50/90 dark:bg-dark-surface/95 p-3 md:p-4">
-                              <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-3.5">
-                                <div className="flex-1 flex items-center gap-2.5 px-3.5 py-3 rounded-xl border border-primary-200/80 dark:border-dark-border bg-primary-50 dark:bg-dark-surface">
-                                  <span className="text-primary-400 dark:text-dark-muted">
-                                    <Icons.Search />
-                                  </span>
-                                  <input
-                                    value={searchQuery}
-                                    onChange={(event) => setSearchQuery(event.target.value)}
-                                    placeholder="Search title, tag, project..."
-                                    className="w-full bg-transparent outline-none text-sm text-primary-900 dark:text-dark-text placeholder:text-primary-400 dark:placeholder:text-dark-muted"
-                                  />
+                            <div className="mb-7">
+                              <div className="flex flex-col gap-3 md:flex-row md:items-center">
+                                <div className="flex-1 min-w-0 rounded-2xl border border-primary-200/80 dark:border-dark-border bg-primary-50 dark:bg-dark-surface px-4 py-3.5 shadow-sm">
+                                  <div className="flex items-center gap-2.5">
+                                    <span className="text-primary-400 dark:text-dark-muted">
+                                      <Icons.Search />
+                                    </span>
+                                    <input
+                                      value={searchQuery}
+                                      onChange={(event) => setSearchQuery(event.target.value)}
+                                      placeholder="Search title, tag, project..."
+                                      className="w-full bg-transparent outline-none text-sm text-primary-900 dark:text-dark-text placeholder:text-primary-400 dark:placeholder:text-dark-muted"
+                                    />
+                                  </div>
                                 </div>
-                                <div className="grid grid-cols-2 gap-2.5 md:flex md:items-center md:gap-3">
-                                  <select
-                                    value={searchPriority}
-                                    onChange={(event) => setSearchPriority(event.target.value as 'all' | 'high' | 'medium' | 'low')}
-                                    className="min-w-[8.25rem] px-3.5 py-3 rounded-xl border border-primary-200/80 dark:border-dark-border bg-primary-50 dark:bg-dark-surface text-sm text-primary-700 dark:text-dark-text outline-none"
-                                  >
-                                    <option value="all">Any Priority</option>
-                                    <option value="high">High</option>
-                                    <option value="medium">Medium</option>
-                                    <option value="low">Low</option>
-                                  </select>
-                                  <select
-                                    value={searchProject}
-                                    onChange={(event) => setSearchProject(event.target.value as 'all' | string)}
-                                    className="min-w-[9rem] px-3.5 py-3 rounded-xl border border-primary-200/80 dark:border-dark-border bg-primary-50 dark:bg-dark-surface text-sm text-primary-700 dark:text-dark-text outline-none"
-                                  >
-                                    <option value="all">Any Project</option>
-                                    <option value="Inbox">Inbox</option>
-                                    {projects.map((project) => (
-                                      <option key={project} value={project}>
-                                        {project}
-                                      </option>
-                                    ))}
-                                  </select>
+
+                                <div className="grid grid-cols-2 gap-3 md:flex md:items-center md:gap-3">
+                                  <div className="rounded-2xl border border-primary-200/80 dark:border-dark-border bg-primary-50 dark:bg-dark-surface px-3 py-2.5 shadow-sm">
+                                    <select
+                                      value={searchPriority}
+                                      onChange={(event) => setSearchPriority(event.target.value as 'all' | 'high' | 'medium' | 'low')}
+                                      className="min-w-[8.75rem] bg-transparent text-sm text-primary-700 dark:text-dark-text outline-none"
+                                    >
+                                      <option value="all">Any Priority</option>
+                                      <option value="high">High</option>
+                                      <option value="medium">Medium</option>
+                                      <option value="low">Low</option>
+                                    </select>
+                                  </div>
+
+                                  <div className="rounded-2xl border border-primary-200/80 dark:border-dark-border bg-primary-50 dark:bg-dark-surface px-3 py-2.5 shadow-sm">
+                                    <select
+                                      value={searchProject}
+                                      onChange={(event) => setSearchProject(event.target.value as 'all' | string)}
+                                      className="min-w-[9.25rem] bg-transparent text-sm text-primary-700 dark:text-dark-text outline-none"
+                                    >
+                                      <option value="all">Any Project</option>
+                                      <option value="Inbox">Inbox</option>
+                                      {projects.map((project) => (
+                                        <option key={project} value={project}>
+                                          {project}
+                                        </option>
+                                      ))}
+                                    </select>
+                                  </div>
                                 </div>
                               </div>
                             </div>
