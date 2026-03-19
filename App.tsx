@@ -528,10 +528,10 @@ const App: React.FC = () => {
   const desktopToolbarLeft = isDesktopMac
     ? isSidebarCollapsed
       ? 146
-      : 222
+      : 210
     : isSidebarCollapsed
       ? 16
-      : 92;
+      : 84;
 
   const createTaskFromCommand = useCallback(
     (title: string) => {
@@ -682,16 +682,19 @@ const App: React.FC = () => {
 
       {filter !== 'focus' && (
         <div
-          className="hidden md:flex absolute top-[10px] z-[80] items-center gap-1.5"
-          style={{ left: `${desktopToolbarLeft}px`, transition: 'left 300ms cubic-bezier(0.2,0,0,1)' }}
+          className="hidden md:flex absolute top-[9px] z-[120] items-center gap-1.5 pointer-events-auto"
+          style={{
+            left: `${desktopToolbarLeft}px`,
+            transition: 'left 300ms cubic-bezier(0.2,0,0,1)',
+            WebkitAppRegion: 'no-drag',
+          } as React.CSSProperties}
         >
           <button
             type="button"
             onClick={handleSidebarToggleCollapse}
             aria-label={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            className="w-7 h-7 transition-colors flex items-center justify-center text-primary-500 dark:text-dark-muted hover:text-primary-900 dark:hover:text-dark-text"
+            className="w-8 h-8 transition-colors flex items-center justify-center text-primary-500 dark:text-dark-muted hover:text-primary-900 dark:hover:text-dark-text"
             title={isSidebarCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
-            style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
           >
             <span className="[&>svg]:w-[15px] [&>svg]:h-[15px]">
               {isSidebarCollapsed ? <Icons.SidebarRight /> : <Icons.SidebarLeft />}
@@ -701,13 +704,12 @@ const App: React.FC = () => {
             type="button"
             onClick={() => handleDesktopUtilityToggle('search')}
             aria-label="Search tasks"
-            className={`w-7 h-7 transition-colors flex items-center justify-center ${
+            className={`w-8 h-8 transition-colors flex items-center justify-center ${
               desktopUtilityPanel === 'search'
                 ? 'text-primary-900 dark:text-dark-text'
                 : 'text-primary-500 dark:text-dark-muted hover:text-primary-900 dark:hover:text-dark-text'
             }`}
             title="Search"
-            style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
           >
             <span className="[&>svg]:w-[15px] [&>svg]:h-[15px]">
               <Icons.Search />
@@ -717,13 +719,12 @@ const App: React.FC = () => {
             type="button"
             onClick={() => handleDesktopUtilityToggle('category')}
             aria-label="Filter by category"
-            className={`w-7 h-7 transition-colors flex items-center justify-center ${
+            className={`w-8 h-8 transition-colors flex items-center justify-center ${
               desktopUtilityPanel === 'category'
                 ? 'text-primary-900 dark:text-dark-text'
                 : 'text-primary-500 dark:text-dark-muted hover:text-primary-900 dark:hover:text-dark-text'
             }`}
             title="Category"
-            style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
           >
             <span className="[&>svg]:w-[15px] [&>svg]:h-[15px]">
               <Icons.Tag />
