@@ -733,7 +733,7 @@ const App: React.FC = () => {
                           {/* Heatmap Section */}
                           {filter === 'next7days' && (
                              <div className="mb-6">
-                                <div className="p-4 bg-primary-50 dark:bg-dark-surface rounded-lg shadow-sm border border-primary-200/80 dark:border-dark-border/80">
+                                <div className="w-full lg:w-[70%] max-w-[1040px] mx-auto p-4 bg-primary-50 dark:bg-dark-surface rounded-lg shadow-sm border border-primary-200/80 dark:border-dark-border/80">
                                    <div className="flex items-center justify-between mb-2">
                                       <h3 className="text-[10px] font-bold text-primary-900 dark:text-dark-text uppercase tracking-wider flex items-center gap-1.5">
                                          <Icons.Flame /> Contributions

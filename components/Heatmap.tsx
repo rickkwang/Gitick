@@ -4,8 +4,8 @@ import { toLocalIsoDate } from '../utils/date';
 
 const DAYS_PER_WEEK = 7;
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
-const MIN_MONTH_LABEL_GAP = 3;
-const CELL_PX = 11;
+const MIN_MONTH_LABEL_GAP = 4;
+const CELL_PX = 10;
 const CELL_GAP_PX = 2;
 
 interface HeatmapProps {
@@ -15,6 +15,13 @@ interface HeatmapProps {
 interface DayCell {
   date: Date;
   key: string;
+}
+
+interface PeriodStats {
+  current: number;
+  previous: number;
+  delta: number;
+  percent: number | null;
 }
 
 const isoDateToDayNumber = (isoDate: string): number => {
@@ -42,9 +49,9 @@ export const Heatmap: React.FC<HeatmapProps> = ({ tasks }) => {
     let resizeTimer: number | null = null;
 
     const resolveWeeksToShow = () => {
-      if (window.innerWidth < 640) return 21;
-      if (window.innerWidth < 1024) return 28;
-      return 36;
+      if (window.innerWidth < 640) return 16;
+      if (window.innerWidth < 1024) return 20;
+      return 26;
     };
 
     const updateWeeksToShow = () => {
@@ -86,7 +93,17 @@ export const Heatmap: React.FC<HeatmapProps> = ({ tasks }) => {
     );
   }, [weeksToShow]);
 
-  const { completionMap, visibleContributions, allTimeContributions, maxStreak, currentStreak, intensityCeiling } =
+  const {
+    completionMap,
+    visibleContributions,
+    allTimeContributions,
+    maxStreak,
+    currentStreak,
+    intensityCeiling,
+    bestDayCount,
+    last7Stats,
+    last30Stats,
+  } =
     useMemo(() => {
       const map: Record<string, number> = {};
       tasks.forEach((task) => {
@@ -137,6 +154,22 @@ export const Heatmap: React.FC<HeatmapProps> = ({ tasks }) => {
           }, 0)
         : 0;
 
+      const getPeriodStats = (periodDays: number): PeriodStats => {
+        let current = 0;
+        let previous = 0;
+        for (let i = 0; i < periodDays; i += 1) {
+          current += map[dayNumberToIsoDate(todayDayNumber - i)] ?? 0;
+        }
+        for (let i = periodDays; i < periodDays * 2; i += 1) {
+          previous += map[dayNumberToIsoDate(todayDayNumber - i)] ?? 0;
+        }
+        const delta = current - previous;
+        const percent = previous > 0 ? (delta / previous) * 100 : current > 0 ? 100 : null;
+        return { current, previous, delta, percent };
+      };
+
+      const bestDayCount = Object.values(map).reduce((best, count) => Math.max(best, count), 0);
+
       return {
         completionMap: map,
         visibleContributions: visible,
@@ -144,6 +177,9 @@ export const Heatmap: React.FC<HeatmapProps> = ({ tasks }) => {
         maxStreak: best,
         currentStreak: current,
         intensityCeiling: Math.max(1, visibleMax),
+        bestDayCount,
+        last7Stats: getPeriodStats(7),
+        last30Stats: getPeriodStats(30),
       };
     }, [tasks, weeks]);
 
@@ -195,70 +231,135 @@ export const Heatmap: React.FC<HeatmapProps> = ({ tasks }) => {
   const GAP = 'gap-[2px]';
   const COL_WIDTH = CELL_PX + CELL_GAP_PX;
   const todayKey = toLocalIsoDate(new Date());
+  const hasAnyActivity = allTimeContributions > 0;
+
+  const renderTrend = (stats: PeriodStats) => {
+    if (stats.percent === null) {
+      return <span className="text-[10px] text-primary-400 dark:text-dark-muted">No prior data</span>;
+    }
+
+    const direction = stats.delta > 0 ? '+' : '';
+    const trendClass =
+      stats.delta > 0
+        ? 'text-[var(--status-success-text)]'
+        : stats.delta < 0
+          ? 'text-[var(--status-danger-text)]'
+          : 'text-primary-400 dark:text-dark-muted';
+
+    return (
+      <span className={`text-[10px] font-semibold ${trendClass}`}>
+        {direction}
+        {Math.round(stats.percent)}%
+      </span>
+    );
+  };
 
   return (
-    <div className="w-full overflow-hidden flex flex-col gap-2">
-      <div className="flex items-baseline gap-4 px-2">
-        <div className="flex items-baseline gap-1.5">
-          <span className="text-lg font-display font-semibold text-primary-900 dark:text-dark-text">{visibleContributions}</span>
-          <span className="text-[10px] text-primary-400 dark:text-dark-muted">completed</span>
-        </div>
-        {currentStreak > 0 && (
-          <div className="flex items-baseline gap-1.5">
-            <span className="text-lg font-display font-semibold text-primary-900 dark:text-dark-text">{currentStreak}</span>
-            <span className="text-[10px] text-primary-400 dark:text-dark-muted">streak</span>
+    <div className="w-full overflow-hidden">
+      <div className="grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)] gap-4 items-start">
+        <div className="rounded-lg border border-primary-200/70 dark:border-dark-border/70 bg-primary-50 dark:bg-dark-bg/40 p-3">
+          <p className="text-[10px] uppercase tracking-wider font-bold text-primary-400 dark:text-dark-muted">Last 6 months activity</p>
+          <div className="mt-2 flex items-baseline gap-1.5">
+            <span className="text-xl font-display font-semibold text-primary-900 dark:text-dark-text">{visibleContributions}</span>
+            <span className="text-[10px] text-primary-400 dark:text-dark-muted">completed</span>
           </div>
-        )}
-      </div>
-
-      <div className="w-full overflow-x-auto no-scrollbar">
-        <div className="px-2 w-max md:w-fit md:mx-auto">
-          <div className="relative mb-1.5 h-4 text-[10px] text-primary-400 dark:text-dark-muted">
-            {monthLabels.map((month) => (
-              <div
-                key={`${month.label}-${month.index}`}
-                className="absolute top-0 transition-all duration-300"
-                style={{ left: `${month.index * COL_WIDTH}px` }}
-              >
-                {month.label}
+          <div className="mt-3 space-y-2">
+            <div className="flex items-center justify-between text-[11px]">
+              <span className="text-primary-500 dark:text-dark-muted">Last 7 days</span>
+              <span className="font-semibold text-primary-900 dark:text-dark-text">{last7Stats.current}</span>
+            </div>
+            <div className="flex items-center justify-between text-[10px]">
+              <span className="text-primary-400 dark:text-dark-muted">vs previous 7 days</span>
+              {renderTrend(last7Stats)}
+            </div>
+            <div className="h-px bg-primary-200/70 dark:bg-dark-border/70" />
+            <div className="flex items-center justify-between text-[11px]">
+              <span className="text-primary-500 dark:text-dark-muted">Last 30 days</span>
+              <span className="font-semibold text-primary-900 dark:text-dark-text">{last30Stats.current}</span>
+            </div>
+            <div className="flex items-center justify-between text-[10px]">
+              <span className="text-primary-400 dark:text-dark-muted">vs previous 30 days</span>
+              {renderTrend(last30Stats)}
+            </div>
+            <div className="h-px bg-primary-200/70 dark:bg-dark-border/70" />
+            <div className="grid grid-cols-2 gap-2 pt-0.5">
+              <div>
+                <p className="text-[10px] text-primary-400 dark:text-dark-muted">Current streak</p>
+                <p className="text-sm font-semibold text-primary-900 dark:text-dark-text">{currentStreak}d</p>
               </div>
-            ))}
-          </div>
-
-          <div className={`flex ${GAP}`}>
-            {weeks.map((week, weekIndex) => (
-              <div key={weekIndex} className={`flex flex-col ${GAP} shrink-0`}>
-                {week.map((cell) => {
-                  const count = completionMap[cell.key] ?? 0;
-                  const isFuture = cell.key > todayKey;
-
-                  if (isFuture) {
-                    return <div key={cell.key} className={`${CELL_SIZE}`} />;
-                  }
-
-                  return (
-                    <div
-                      key={cell.key}
-                      title={`${count} ${count === 1 ? 'task' : 'tasks'} on ${cell.date.toLocaleDateString()}`}
-                      className={`${CELL_SIZE} rounded-sm transition-colors ${getColor(count)}`}
-                    />
-                  );
-                })}
+              <div>
+                <p className="text-[10px] text-primary-400 dark:text-dark-muted">Best day</p>
+                <p className="text-sm font-semibold text-primary-900 dark:text-dark-text">{bestDayCount}</p>
               </div>
-            ))}
+              <div>
+                <p className="text-[10px] text-primary-400 dark:text-dark-muted">Best streak</p>
+                <p className="text-sm font-semibold text-primary-900 dark:text-dark-text">{maxStreak}d</p>
+              </div>
+              <div>
+                <p className="text-[10px] text-primary-400 dark:text-dark-muted">All-time</p>
+                <p className="text-sm font-semibold text-primary-900 dark:text-dark-text">{allTimeContributions}</p>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="flex items-center justify-end px-2">
-        <div className="flex items-center gap-1 text-[9px] text-primary-400 dark:text-dark-muted">
-          <span>Less</span>
-          <div className={`${CELL_SIZE} rounded-sm bg-[var(--heat-0)]`} />
-          <div className={`${CELL_SIZE} rounded-sm bg-[var(--heat-1)]`} />
-          <div className={`${CELL_SIZE} rounded-sm bg-[var(--heat-2)]`} />
-          <div className={`${CELL_SIZE} rounded-sm bg-[var(--heat-3)]`} />
-          <div className={`${CELL_SIZE} rounded-sm bg-[var(--heat-4)]`} />
-          <span>More</span>
+        <div className="min-w-0">
+          <div className="w-full overflow-x-auto no-scrollbar">
+            <div className="w-max mx-auto">
+              <div className="relative mb-1 h-4 text-[10px] text-primary-400 dark:text-dark-muted">
+                {monthLabels.map((month) => (
+                  <div
+                    key={`${month.label}-${month.index}`}
+                    className="absolute top-0 transition-all duration-300"
+                    style={{ left: `${month.index * COL_WIDTH}px` }}
+                  >
+                    {month.label}
+                  </div>
+                ))}
+              </div>
+
+              <div className={`flex ${GAP}`}>
+                {weeks.map((week, weekIndex) => (
+                  <div key={weekIndex} className={`flex flex-col ${GAP} shrink-0`}>
+                    {week.map((cell) => {
+                      const count = completionMap[cell.key] ?? 0;
+                      const isFuture = cell.key > todayKey;
+
+                      if (isFuture) {
+                        return <div key={cell.key} className={`${CELL_SIZE}`} />;
+                      }
+
+                      return (
+                        <div
+                          key={cell.key}
+                          title={`${count} ${count === 1 ? 'task' : 'tasks'} on ${cell.date.toLocaleDateString()}`}
+                          className={`${CELL_SIZE} rounded-sm transition-colors ${getColor(count)}`}
+                        />
+                      );
+                    })}
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-2 flex items-center justify-end">
+                <div className="flex items-center gap-1 text-[9px] text-primary-400 dark:text-dark-muted">
+                  <span>Less</span>
+                  <div className={`${CELL_SIZE} rounded-sm bg-[var(--heat-0)]`} />
+                  <div className={`${CELL_SIZE} rounded-sm bg-[var(--heat-1)]`} />
+                  <div className={`${CELL_SIZE} rounded-sm bg-[var(--heat-2)]`} />
+                  <div className={`${CELL_SIZE} rounded-sm bg-[var(--heat-3)]`} />
+                  <div className={`${CELL_SIZE} rounded-sm bg-[var(--heat-4)]`} />
+                  <span>More</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {!hasAnyActivity && (
+            <p className="mt-2 text-[10px] text-primary-400 dark:text-dark-muted text-center lg:text-left">
+              Complete one task to start your activity trail and streak.
+            </p>
+          )}
         </div>
       </div>
     </div>
