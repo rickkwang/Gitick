@@ -201,12 +201,12 @@ export const Heatmap: React.FC<HeatmapProps> = ({ tasks }) => {
       <div className="flex items-baseline gap-8 px-3">
         <div className="flex items-baseline gap-2">
           <span className="text-2xl font-display font-semibold text-primary-900 dark:text-dark-text">{visibleContributions}</span>
-          <span className="text-[11px] text-primary-400 dark:text-dark-muted">completed</span>
+          <span className="text-xs text-primary-400 dark:text-dark-muted">completed</span>
         </div>
         {currentStreak > 0 && (
           <div className="flex items-baseline gap-2">
             <span className="text-2xl font-display font-semibold text-primary-900 dark:text-dark-text">{currentStreak}</span>
-            <span className="text-[11px] text-primary-400 dark:text-dark-muted">day streak</span>
+            <span className="text-xs text-primary-400 dark:text-dark-muted">day streak</span>
           </div>
         )}
       </div>
@@ -240,7 +240,7 @@ export const Heatmap: React.FC<HeatmapProps> = ({ tasks }) => {
                     <div
                       key={cell.key}
                       title={`${count} ${count === 1 ? 'task' : 'tasks'} on ${cell.date.toLocaleDateString()}`}
-                      className={`${CELL_SIZE} rounded-[2px] transition-colors ${getColor(count)}`}
+                      className={`${CELL_SIZE} rounded-sm transition-colors ${getColor(count)}`}
                     />
                   );
                 })}
@@ -253,11 +253,11 @@ export const Heatmap: React.FC<HeatmapProps> = ({ tasks }) => {
       <div className="flex items-center justify-end px-3">
         <div className="flex items-center gap-1.5 text-[10px] text-primary-400 dark:text-dark-muted">
           <span>Less</span>
-          <div className={`${CELL_SIZE} rounded-[2px] bg-[#ebedf0] dark:bg-[#161b22]`} />
-          <div className={`${CELL_SIZE} rounded-[2px] bg-[#9be9a8] dark:bg-[#0e4429]`} />
-          <div className={`${CELL_SIZE} rounded-[2px] bg-[#40c463] dark:bg-[#006d32]`} />
-          <div className={`${CELL_SIZE} rounded-[2px] bg-[#30a14e] dark:bg-[#26a641]`} />
-          <div className={`${CELL_SIZE} rounded-[2px] bg-[#216e39] dark:bg-[#39d353]`} />
+          <div className={`${CELL_SIZE} rounded-sm bg-[#ebedf0] dark:bg-[#161b22]`} />
+          <div className={`${CELL_SIZE} rounded-sm bg-[#9be9a8] dark:bg-[#0e4429]`} />
+          <div className={`${CELL_SIZE} rounded-sm bg-[#40c463] dark:bg-[#006d32]`} />
+          <div className={`${CELL_SIZE} rounded-sm bg-[#30a14e] dark:bg-[#26a641]`} />
+          <div className={`${CELL_SIZE} rounded-sm bg-[#216e39] dark:bg-[#39d353]`} />
           <span>More</span>
         </div>
       </div>

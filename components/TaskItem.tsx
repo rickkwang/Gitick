@@ -87,17 +87,17 @@ const TaskItemComponent: React.FC<TaskItemProps> = ({
       {/* Main Content */}
       <div className="flex-1 min-w-0 pt-1">
         <div className="flex items-start justify-between gap-4">
-            <span className={`text-[15px] md:text-base font-medium transition-all duration-300 break-words leading-6 md:leading-7 ${task.completed ? 'text-primary-400 dark:text-dark-muted line-through decoration-primary-300 dark:decoration-dark-border' : 'text-primary-900 dark:text-dark-text'}`}>
+            <span className={`text-base md:text-base font-medium transition-all duration-300 break-words leading-6 md:leading-7 ${task.completed ? 'text-primary-400 dark:text-dark-muted line-through decoration-primary-300 dark:decoration-dark-border' : 'text-primary-900 dark:text-dark-text'}`}>
               {task.title}
             </span>
             
             {/* Right side compact meta for Desktop */}
             <div className="hidden md:flex shrink-0 items-center gap-2">
                  {task.priority === Priority.HIGH && !task.completed && (
-                    <span className="text-[9px] font-bold text-red-500 bg-red-50 dark:bg-red-900/20 px-2 py-0.5 rounded-full uppercase tracking-wider">High</span>
+                    <span className="text-[10px] font-bold text-red-500 bg-red-50 dark:bg-red-900/20 px-2 py-0.5 rounded-full uppercase tracking-wider">High</span>
                  )}
                  {task.list && task.list !== 'Inbox' && (
-                     <span className="text-[9px] font-bold text-primary-400 dark:text-dark-muted uppercase tracking-wider">{task.list}</span>
+                     <span className="text-[10px] font-bold text-primary-400 dark:text-dark-muted uppercase tracking-wider">{task.list}</span>
                  )}
             </div>
         </div>
@@ -114,7 +114,7 @@ const TaskItemComponent: React.FC<TaskItemProps> = ({
 
            {/* Tags - Redesigned as Chips */}
            {task.tags.map(tag => (
-              <span key={tag} className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-primary-100 dark:bg-dark-border/60 border border-primary-200/80 dark:border-dark-border/80 text-[9px] font-mono font-medium text-primary-500 dark:text-dark-muted">
+              <span key={tag} className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-primary-100 dark:bg-dark-border/60 border border-primary-200/80 dark:border-dark-border/80 text-[10px] font-mono font-medium text-primary-500 dark:text-dark-muted">
                 <Icons.Tag />
                 {tag}
               </span>
@@ -125,7 +125,7 @@ const TaskItemComponent: React.FC<TaskItemProps> = ({
              <div className="flex items-center gap-2 pl-1" title={`${completedSubtasks}/${totalSubtasks} subtasks`}>
                 <div className="w-10 h-1 bg-primary-200/50 dark:bg-dark-border rounded-full overflow-hidden">
                     <div 
-                        className="h-full bg-primary-400 dark:bg-dark-muted rounded-full transition-all duration-500"
+                        className="h-full bg-primary-400 dark:bg-dark-muted rounded-full transition-all duration-300"
                         style={{ width: `${progressPercent}%` }}
                     />
                 </div>
@@ -134,7 +134,7 @@ const TaskItemComponent: React.FC<TaskItemProps> = ({
 
            {/* Commit Time */}
            {task.completed && task.completedAt && (
-             <span className="flex items-center gap-1 text-primary-400 dark:text-dark-muted font-mono text-[9px]">
+             <span className="flex items-center gap-1 text-primary-400 dark:text-dark-muted font-mono text-[10px]">
                <Icons.GitCommit /> {getTimeAgo(task.completedAt)}
              </span>
            )}

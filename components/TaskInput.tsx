@@ -153,7 +153,7 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
                     onCompositionEnd={() => { isComposingRef.current = false; }}
                     onKeyDown={handleKeyDown}
                     placeholder={getPlaceholder()}
-                    className="w-full h-full pl-3 pr-3 bg-transparent text-primary-900 dark:text-dark-text placeholder:text-primary-400 dark:placeholder:text-dark-muted outline-none font-medium text-[15px] min-w-0"
+                    className="w-full h-full pl-3 pr-3 bg-transparent text-primary-900 dark:text-dark-text placeholder:text-primary-400 dark:placeholder:text-dark-muted outline-none font-medium text-base min-w-0"
                     autoFocus={shouldAutoFocus}
                 />
                 <button
@@ -179,7 +179,7 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
                       `}
                       title="Select Project"
                     >
-                        <span className="text-[11px] font-bold uppercase tracking-wide text-primary-400 dark:text-dark-muted">Project</span>
+                        <span className="text-xs font-bold uppercase tracking-wide text-primary-400 dark:text-dark-muted">Project</span>
                         <span className="text-xs font-bold text-primary-900 dark:text-dark-text max-w-[96px] truncate">{selectedProject}</span>
                         <span className={`text-primary-400 dark:text-dark-muted transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`}>
                           <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
@@ -237,7 +237,7 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
                     )}
                     
                     {parsedPreview.tags.map(tag => (
-                        <span key={tag} className="flex items-center gap-1 px-1.5 py-0.5 rounded-[5px] bg-primary-100 dark:bg-dark-border/60 border border-primary-200/80 dark:border-dark-border/80 text-[10px] font-mono font-medium text-primary-600 dark:text-dark-muted whitespace-nowrap">
+                        <span key={tag} className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-primary-100 dark:bg-dark-border/60 border border-primary-200/80 dark:border-dark-border/80 text-[10px] font-mono font-medium text-primary-600 dark:text-dark-muted whitespace-nowrap">
                             <Icons.Tag />
                             {tag}
                         </span>

@@ -78,7 +78,7 @@ export const FocusMode: React.FC<FocusModeProps> = ({
                cx="50%" cy="50%" r="48%"
                fill="none"
                stroke="currentColor"
-               className="text-primary-200 dark:text-dark-border transition-colors duration-500"
+               className="text-primary-200 dark:text-dark-border transition-colors duration-300"
                strokeWidth="3"
              />
              {/* Progress Circle */}
@@ -89,7 +89,7 @@ export const FocusMode: React.FC<FocusModeProps> = ({
                strokeDasharray="301%"
                strokeDashoffset={`${301 - (301 * (100 - progress)) / 100}%`} 
                strokeLinecap="round"
-               className={`transition-all duration-1000 ease-in-out ${mode === 'focus' ? 'text-primary-900 dark:text-dark-text' : 'text-primary-400 dark:text-dark-muted'}`}
+               className={`transition-all duration-300 ease-in-out ${mode === 'focus' ? 'text-primary-900 dark:text-dark-text' : 'text-primary-400 dark:text-dark-muted'}`}
              />
           </svg>
 
@@ -98,7 +98,7 @@ export const FocusMode: React.FC<FocusModeProps> = ({
             <span className="text-[4rem] md:text-[5rem] leading-none font-light text-primary-900 dark:text-dark-text tabular-nums tracking-tighter select-none font-sans">
                 {formatTime(timeLeft)}
             </span>
-            <span className="text-xs font-bold text-primary-400 dark:text-dark-muted uppercase tracking-[0.2em] mt-4 animate-in fade-in slide-in-from-bottom-2 duration-700">
+            <span className="text-xs font-bold text-primary-400 dark:text-dark-muted uppercase tracking-[0.2em] mt-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
               {isActive ? (mode === 'focus' ? 'Focusing' : 'Break Time') : 'Ready'}
             </span>
           </div>
@@ -152,7 +152,7 @@ export const FocusMode: React.FC<FocusModeProps> = ({
           </div>
 
           {/* Time Adjustment Controls (Hidden when active to reduce clutter) */}
-          <div className={`flex flex-col items-center gap-6 transition-all duration-500 ${isActive ? 'opacity-0 translate-y-4 pointer-events-none h-0 overflow-hidden' : 'opacity-100 translate-y-0 h-auto'}`}>
+          <div className={`flex flex-col items-center gap-6 transition-all duration-300 ${isActive ? 'opacity-0 translate-y-4 pointer-events-none h-0 overflow-hidden' : 'opacity-100 translate-y-0 h-auto'}`}>
              
              {/* Presets Row with Flanking +/- */}
              <div className="flex items-center gap-2 md:gap-3 p-1.5 bg-primary-100 dark:bg-dark-bg rounded-lg border border-primary-200/80 dark:border-dark-border">

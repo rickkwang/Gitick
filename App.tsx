@@ -525,8 +525,8 @@ const App: React.FC = () => {
               // OPTICAL FIX: Added px-5 md:px-6 to align header text with TaskItem content (checkbox)
               // This fixes the "floating header" look relative to the rounded cards
               <div className={`sticky top-0 bg-[var(--app-bg)] z-10 py-3 mb-2 flex items-center gap-3 transition-colors ${headerClass} px-5 md:px-6`}>
-                  <span className="text-[11px] font-black uppercase tracking-widest opacity-90 transform translate-y-[1px]">{groupName}</span>
-                  <span className="text-[9px] font-bold font-mono opacity-60 bg-primary-200/40 dark:bg-dark-border px-2 py-0.5 rounded-full text-primary-900 dark:text-dark-text min-w-[1.5rem] text-center">{taskList.length}</span>
+                  <span className="text-xs font-black uppercase tracking-widest opacity-90 transform translate-y-[1px]">{groupName}</span>
+                  <span className="text-[10px] font-bold font-mono opacity-60 bg-primary-200/40 dark:bg-dark-border px-2 py-0.5 rounded-full text-primary-900 dark:text-dark-text min-w-[1.5rem] text-center">{taskList.length}</span>
               </div>
            )}
            <div className="space-y-2">

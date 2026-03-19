@@ -76,7 +76,7 @@ const NavItemComponent: React.FC<NavItemProps> = ({
             onCloseMobile();
           }}
           className={`
-            relative flex items-center text-[13px] font-medium rounded-xl outline-none select-none
+            relative flex items-center text-sm font-medium rounded-xl outline-none select-none
             transition-colors duration-200
             h-[44px] px-0
             w-full justify-start
@@ -118,7 +118,7 @@ const NavItemComponent: React.FC<NavItemProps> = ({
           {/* CRITICAL FIX: Always visible on Mobile (default classes), only conditionally hidden on Desktop (md: prefix) */}
           <div className={`
             flex items-center flex-1 min-w-0 overflow-hidden whitespace-nowrap pl-1
-            transition-opacity duration-150 ease-linear
+            transition-opacity duration-200 ease-linear
             opacity-100
             md:pl-[58px]
             ${isCollapsed ? 'md:opacity-0 md:pointer-events-none' : 'md:opacity-100'}
@@ -256,7 +256,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     w-[280px]
     transform-gpu will-change-transform
     /* Smoother, slightly faster transition for mobile drawer feel (500ms) */
-    transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]
+    transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]
     ${isOpen ? 'translate-x-0 shadow-[20px_0_50px_-10px_rgba(0,0,0,0.15)]' : '-translate-x-full'}
     
     /* DESKTOP CONFIGURATION (Overrides) */
@@ -271,7 +271,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <div 
         className={`
           fixed inset-0 bg-primary-900/30 dark:bg-primary-950/60 z-50 md:hidden
-          transition-opacity duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]
+          transition-opacity duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]
           ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}
         `}
         onClick={onCloseMobile}
@@ -362,7 +362,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               {/* CRITICAL: md: prefix ensures collapse logic only affects desktop. Mobile is always visible (h-6) */}
               <div className={`
                  overflow-hidden px-3 h-6 mb-2 flex items-center
-                 transition-opacity duration-150
+                 transition-opacity duration-200
                  opacity-100
                  ${renderCollapsed ? 'md:opacity-0 md:pointer-events-none' : 'md:opacity-100'}
               `}>
@@ -397,7 +397,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <div>
               <div className={`
                  flex items-center justify-between px-3 group overflow-hidden whitespace-nowrap h-6 mb-2
-                 transition-opacity duration-150
+                 transition-opacity duration-200
                  opacity-100
                  ${renderCollapsed ? 'md:opacity-0 md:pointer-events-none' : 'md:opacity-100'}
               `}>
@@ -455,7 +455,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <div>
                <div className={`
                   overflow-hidden px-3 h-6 mb-2 flex items-center
-                  transition-opacity duration-150
+                  transition-opacity duration-200
                   opacity-100
                   ${renderCollapsed ? 'md:opacity-0 md:pointer-events-none' : 'md:opacity-100'}
                `}>
@@ -501,12 +501,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   {/* Text Container */}
                   <div className={`
                       flex items-center justify-between flex-1 min-w-0 overflow-hidden pr-3 pl-1
-                      transition-opacity duration-150
+                      transition-opacity duration-200
                       opacity-100
                       ${renderCollapsed ? 'md:hidden' : 'md:opacity-100'}
                   `}>
                       <div className="flex flex-col items-start leading-tight">
-                          <span className="text-[13px] font-bold text-primary-900 dark:text-dark-text truncate max-w-[120px]">{userProfile.name}</span>
+                          <span className="text-sm font-bold text-primary-900 dark:text-dark-text truncate max-w-[120px]">{userProfile.name}</span>
                           <span className="text-[10px] text-primary-400 dark:text-dark-muted font-medium">Settings</span>
                       </div>
                       

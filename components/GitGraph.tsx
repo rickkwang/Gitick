@@ -102,7 +102,7 @@ export const GitGraph: React.FC<GitGraphProps> = ({ tasks, onDelete, userProfile
                         {userProfile?.avatarImage ? (
                           <img src={userProfile.avatarImage} alt="" className="w-full h-full object-cover" />
                         ) : userProfile?.name ? (
-                          <span className="text-[7px] font-bold text-white">{userProfile.name.charAt(0).toUpperCase()}</span>
+                          <span className="text-[10px] font-bold text-white">{userProfile.name.charAt(0).toUpperCase()}</span>
                         ) : null}
                       </div>
                       <span className="font-medium">{userProfile?.name || 'Gitick User'}</span>
