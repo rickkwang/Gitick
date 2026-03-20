@@ -130,8 +130,8 @@ const TaskInputComponent: React.FC<TaskInputProps> = ({ onAddTask, activeList, p
   return (
     <div className="w-full relative z-30">
       <form onSubmit={handleSubmit} className="group transition-all duration-300">
-        <div className="relative overflow-visible rounded-[14px] border border-primary-200/90 dark:border-dark-border/80 bg-primary-50/98 dark:bg-dark-surface shadow-[0_2px_14px_rgba(20,20,19,0.05)] dark:shadow-none transition-all duration-200 ease-out focus-within:shadow-[0_6px_22px_rgba(20,20,19,0.08)]">
-            <div className="flex min-h-[52px] items-center gap-2 pl-4 pr-3">
+        <div className="relative overflow-visible rounded-[16px] border border-primary-200/90 dark:border-dark-border/80 bg-primary-50/98 dark:bg-dark-surface shadow-[0_2px_14px_rgba(20,20,19,0.05)] dark:shadow-none transition-all duration-200 ease-out focus-within:shadow-[0_6px_22px_rgba(20,20,19,0.08)]">
+            <div className="flex min-h-[60px] items-center gap-2.5 pl-4 pr-3.5">
                 <input
                     ref={inputRef}
                     type="text"
@@ -155,7 +155,7 @@ const TaskInputComponent: React.FC<TaskInputProps> = ({ onAddTask, activeList, p
                       const nextIndex = (currentIndex + 1) % RECURRENCE_OPTIONS.length;
                       setRecurrence(RECURRENCE_OPTIONS[nextIndex].value);
                     }}
-                    className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
+                    className={`flex h-9 w-9 items-center justify-center rounded-lg transition-colors ${
                       recurrence
                         ? 'bg-primary-200/70 text-primary-700 dark:bg-dark-border/70 dark:text-dark-text'
                         : 'hover:bg-primary-200/60 dark:hover:bg-dark-border/60'
@@ -173,8 +173,8 @@ const TaskInputComponent: React.FC<TaskInputProps> = ({ onAddTask, activeList, p
                       type="button"
                       onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                       aria-label="Select project"
-                      className={`
-                        flex h-8 items-center gap-1 rounded-lg px-2 text-[11px] font-semibold transition-colors
+                    className={`
+                        flex h-9 items-center gap-1.5 rounded-lg px-2.5 text-[11px] font-semibold transition-colors
                         ${isDropdownOpen
                           ? 'bg-primary-200/70 text-primary-700 dark:bg-dark-border/70 dark:text-dark-text'
                           : 'text-primary-500 hover:bg-primary-200/60 dark:text-dark-muted dark:hover:bg-dark-border/60'}
@@ -225,7 +225,7 @@ const TaskInputComponent: React.FC<TaskInputProps> = ({ onAddTask, activeList, p
                 <button
                     type="submit"
                     aria-label="Add task"
-                    className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-primary-200/80 bg-primary-100/80 text-primary-700 transition-all duration-200 dark:border-dark-border dark:bg-dark-border/50 dark:text-dark-text ${
+                    className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-primary-200/80 bg-primary-100/80 text-primary-700 transition-all duration-200 dark:border-dark-border dark:bg-dark-border/50 dark:text-dark-text ${
                       input.length > 0
                         ? 'opacity-100 hover:scale-105 hover:bg-primary-200/80 active:scale-95'
                         : 'pointer-events-none opacity-45'

@@ -777,8 +777,8 @@ const App: React.FC = () => {
                         <div className="absolute bottom-0 left-0 right-0 h-40 bg-[var(--app-bg)]/92 dark:bg-[var(--app-bg)]/88" />
 
                         {/* Input Container - Padded from bottom including Safe Area */}
-                        <div className="relative z-10 w-full flex justify-center px-4 md:px-6 lg:px-8 pt-10 pb-4">
-                           <div className="max-w-[1200px] w-full pointer-events-auto mb-9">
+                        <div className="relative z-10 w-full flex justify-center px-4 md:px-6 lg:px-8 pt-8 pb-3">
+                           <div className="max-w-[1200px] w-full pointer-events-auto">
                               <TaskInput onAddTask={addTask} activeList={filter} projects={projects} />
                            </div>
                         </div>
