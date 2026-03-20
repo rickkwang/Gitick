@@ -229,33 +229,42 @@ export const Heatmap: React.FC<HeatmapProps> = ({ tasks }) => {
 
   const renderTrend = (stats: PeriodStats) => {
     if (stats.percent === null) {
-      return <span className="text-[10px] text-primary-400 dark:text-dark-muted">—</span>;
+      return <span className="text-xs text-primary-400 dark:text-dark-muted">→0%</span>;
     }
 
-    const direction = stats.delta > 0 ? '+' : '';
+    const direction = stats.delta > 0 ? '↑' : stats.delta < 0 ? '↓' : '→';
     const trendClass =
       stats.delta > 0
-        ? 'text-[var(--accent-coral)]'
+        ? 'text-[var(--status-success-text)]'
         : stats.delta < 0
           ? 'text-[var(--status-danger-text)]'
           : 'text-primary-400 dark:text-dark-muted';
 
     return (
-      <span className={`text-[11px] font-medium ${trendClass}`}>
-        {direction}{Math.round(stats.percent)}%
+      <span className={`text-xs font-medium ${trendClass}`}>
+        {direction}{Math.abs(Math.round(stats.percent))}%
       </span>
     );
   };
 
-  const StatCard = ({ label, value, trend, sublabel }: { label: string; value: string | number; trend?: PeriodStats; sublabel?: string }) => (
-    <div className="flex flex-col">
-      <span className="text-[10px] uppercase tracking-wider text-primary-400 dark:text-dark-muted font-medium">{label}</span>
-      <span className="text-2xl font-semibold text-primary-900 dark:text-dark-text mt-0.5">{value}</span>
+  const MetricItem = ({
+    label,
+    value,
+    trend,
+    trendLabel,
+  }: {
+    label: string;
+    value: string | number;
+    trend?: PeriodStats;
+    trendLabel?: string;
+  }) => (
+    <div className="flex items-center gap-2">
+      <span className="text-sm text-primary-500 dark:text-dark-muted font-medium">{label}</span>
+      <span className="text-xl leading-none font-semibold text-primary-900 dark:text-dark-text">{value}</span>
       {trend && (
-        <div className="flex items-center gap-1.5 mt-0.5">
+        <span className="text-xs leading-none" title={trendLabel ? `${trendLabel}: ${trend.current} vs ${trend.previous}` : undefined}>
           {renderTrend(trend)}
-          {sublabel && <span className="text-[9px] text-primary-400 dark:text-dark-muted">{sublabel}</span>}
-        </div>
+        </span>
       )}
     </div>
   );
@@ -271,7 +280,7 @@ export const Heatmap: React.FC<HeatmapProps> = ({ tasks }) => {
       {/* Heatmap */}
       <div className="w-full overflow-x-auto no-scrollbar pb-2">
         <div className="w-max mx-auto">
-          <div className="relative mb-2 h-4 text-[10px] text-primary-400 dark:text-dark-muted">
+          <div className="relative mb-2 h-4 text-xs text-primary-400 dark:text-dark-muted">
             {monthLabels.map((month) => (
               <div
                 key={`${month.label}-${month.index}`}
@@ -307,7 +316,7 @@ export const Heatmap: React.FC<HeatmapProps> = ({ tasks }) => {
           </div>
 
           <div className="mt-2 flex items-center justify-end">
-            <div className="flex items-center gap-1.5 text-[9px] text-primary-400 dark:text-dark-muted/90">
+            <div className="flex items-center gap-1.5 text-xs text-primary-400 dark:text-dark-muted/90">
               <span>Less</span>
               <div className={`${CELL_SIZE} rounded-sm bg-[var(--heat-0)]`} />
               <div className={`${CELL_SIZE} rounded-sm bg-[var(--heat-1)]`} />
@@ -320,31 +329,25 @@ export const Heatmap: React.FC<HeatmapProps> = ({ tasks }) => {
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-4">
-        <div className="rounded-xl border border-primary-200/50 dark:border-dark-border/50 bg-primary-50/50 dark:bg-dark-bg/30 p-3">
-          <StatCard label="Last 7 days" value={last7Stats.current} trend={last7Stats} sublabel="vs prev week" />
-        </div>
-        <div className="rounded-xl border border-primary-200/50 dark:border-dark-border/50 bg-primary-50/50 dark:bg-dark-bg/30 p-3">
-          <StatCard label="Last 30 days" value={last30Stats.current} trend={last30Stats} sublabel="vs prev month" />
-        </div>
-        <div className="rounded-xl border border-primary-200/50 dark:border-dark-border/50 bg-primary-50/50 dark:bg-dark-bg/30 p-3">
-          <StatCard label="Current streak" value={`${currentStreak}d`} />
-        </div>
-        <div className="rounded-xl border border-primary-200/50 dark:border-dark-border/50 bg-primary-50/50 dark:bg-dark-bg/30 p-3">
-          <StatCard label="Best streak" value={`${maxStreak}d`} />
+      {/* Metrics Strip */}
+      <div className="mt-4 pt-3 border-t border-primary-200/70 dark:border-dark-border/70">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-3">
+          <MetricItem label="Last 7d" value={last7Stats.current} trend={last7Stats} trendLabel="vs previous week" />
+          <MetricItem label="Last 30d" value={last30Stats.current} trend={last30Stats} trendLabel="vs previous month" />
+          <MetricItem label="Current streak" value={`${currentStreak}d`} />
+          <MetricItem label="Best streak" value={`${maxStreak}d`} />
         </div>
       </div>
 
       {/* Secondary Stats */}
-      <div className="flex flex-wrap items-center gap-4 mt-3 text-[11px] text-primary-500 dark:text-dark-muted">
+      <div className="flex flex-wrap items-center gap-4 mt-3 text-sm text-primary-500 dark:text-dark-muted">
         <span>All-time: <span className="font-semibold text-primary-700 dark:text-dark-text">{allTimeContributions}</span></span>
         <span className="text-primary-200 dark:text-dark-border">·</span>
         <span>Best day: <span className="font-semibold text-primary-700 dark:text-dark-text">{bestDayCount}</span> tasks</span>
       </div>
 
       {!hasAnyActivity && (
-        <p className="mt-4 text-[11px] text-primary-400 dark:text-dark-muted text-center">
+        <p className="mt-4 text-sm text-primary-400 dark:text-dark-muted text-center">
           Complete a task to start building your activity trail.
         </p>
       )}

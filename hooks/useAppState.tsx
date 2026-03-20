@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type Dispatch, type MutableRefObject, type ReactNode, type SetStateAction } from 'react';
 import { FilterType, Priority, Task, UserProfile } from '../types';
 import { Icons, PROJECTS as DEFAULT_PROJECTS } from '../constants';
 import { useDesktopUpdater, type DesktopConfirmDialogRequest } from './useDesktopUpdater';
 import { playSuccessSound } from '../utils/audio';
 import { createOnboardingTasks, DEFAULT_USER_PROFILE } from '../utils/appDefaults';
 import { useFocusTimer } from './useFocusTimer';
+import { type FocusModeType } from '../utils/focusTimer';
 import { sanitizeTaskList } from '../utils/taskSanitizer';
 import { getFilteredTasks, getTaskCounts, groupDashboardTasks } from '../utils/taskView';
 import { getNextRecurringDueDate } from '../utils/recurrence';
@@ -51,14 +52,14 @@ export interface UseAppStateReturn {
   isStartupStatic: boolean;
   focusTimeLeft: number;
   isFocusActive: boolean;
-  focusModeType: 'pomodoro' | 'stopwatch';
+  focusModeType: FocusModeType;
   desktopAppVersion: string | undefined;
   desktopUpdateStatus: string | undefined;
   isCheckingDesktopUpdate: boolean;
   desktopPlatform: string | undefined;
   isDesktopMac: boolean;
   isDesktopRuntime: boolean;
-  emptyState: { icon: React.ReactNode; title: string; sub: string };
+  emptyState: { icon: ReactNode; title: string; sub: string };
   showTaskInput: boolean;
   isRightSidebarOpen: boolean;
   taskCounts: Record<string, number>;
@@ -66,19 +67,19 @@ export interface UseAppStateReturn {
   taskGroups: Record<string, Task[]> | null;
 
   // Actions
-  setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
-  setFilter: React.Dispatch<React.SetStateAction<FilterType>>;
-  setSelectedTask: React.Dispatch<React.SetStateAction<Task | null>>;
-  setIsSidebarCollapsed: React.Dispatch<React.SetStateAction<boolean>>;
-  setIsDarkMode: React.Dispatch<React.SetStateAction<boolean>>;
-  setDesktopFontSize: React.Dispatch<React.SetStateAction<number>>;
-  setShowSettings: React.Dispatch<React.SetStateAction<boolean>>;
-  setIsCommandPaletteOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
-  setSearchPriority: React.Dispatch<React.SetStateAction<'all' | 'high' | 'medium' | 'low'>>;
-  setSearchProject: React.Dispatch<React.SetStateAction<'all' | string>>;
-  setConfirmDialog: React.Dispatch<React.SetStateAction<DesktopConfirmDialogRequest | null>>;
-  setUserProfile: React.Dispatch<React.SetStateAction<UserProfile>>;
+  setTasks: Dispatch<SetStateAction<Task[]>>;
+  setFilter: Dispatch<SetStateAction<FilterType>>;
+  setSelectedTask: Dispatch<SetStateAction<Task | null>>;
+  setIsSidebarCollapsed: Dispatch<SetStateAction<boolean>>;
+  setIsDarkMode: Dispatch<SetStateAction<boolean>>;
+  setDesktopFontSize: Dispatch<SetStateAction<number>>;
+  setShowSettings: Dispatch<SetStateAction<boolean>>;
+  setIsCommandPaletteOpen: Dispatch<SetStateAction<boolean>>;
+  setSearchQuery: Dispatch<SetStateAction<string>>;
+  setSearchPriority: Dispatch<SetStateAction<'all' | 'high' | 'medium' | 'low'>>;
+  setSearchProject: Dispatch<SetStateAction<'all' | string>>;
+  setConfirmDialog: Dispatch<SetStateAction<DesktopConfirmDialogRequest | null>>;
+  setUserProfile: Dispatch<SetStateAction<UserProfile>>;
 
   // Callbacks
   addTask: (newTaskData: Omit<Task, 'id' | 'createdAt'>) => void;
@@ -103,7 +104,7 @@ export interface UseAppStateReturn {
   pauseTimer: () => void;
   resetTimer: () => void;
   handleSetTimeLeft: (time: number) => void;
-  handleFocusModeChange: (mode: 'pomodoro' | 'stopwatch') => void;
+  handleFocusModeChange: (mode: FocusModeType) => void;
   resetFocusState: () => void;
 
   // Desktop Updater
@@ -112,9 +113,9 @@ export interface UseAppStateReturn {
   runConfirmAction: (kind: 'confirm' | 'cancel') => Promise<void>;
 
   // Internal
-  taskTiebreakerRef: React.MutableRefObject<number>;
-  showSettingsRef: React.MutableRefObject<boolean>;
-  selectedTaskRef: React.MutableRefObject<Task | null>;
+  taskTiebreakerRef: MutableRefObject<number>;
+  showSettingsRef: MutableRefObject<boolean>;
+  selectedTaskRef: MutableRefObject<Task | null>;
 }
 
 export function useAppState(): UseAppStateReturn {
