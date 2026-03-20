@@ -48,6 +48,9 @@ const getFriendlyUpdateError = (raw: string, reason?: string) => {
   if (normalizedReason === 'adhoc-signature') {
     return 'Current build uses ad-hoc signing. In-app update may fail on some macOS setups, fallback installer will be used.';
   }
+  if (normalizedReason === 'manual-install-required' || normalizedReason === 'external-install-failed') {
+    return 'Auto install failed. Gitick opened the latest release page, please install the newest DMG manually.';
+  }
   if (message.includes('zip file not provided') || message.includes('err_updater_zip_file_not_found')) {
     return 'Release assets are incomplete (missing .zip update package). Please republish this version.';
   }

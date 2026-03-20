@@ -8,6 +8,7 @@ const https = require('https');
 const { URL } = require('url');
 const {
   RELEASE_METADATA_URL,
+  RELEASES_LATEST_URL,
   isSafeExternalUrl,
   isTrustedGitHubReleaseUrl,
 } = require('./externalUrl.cjs');
@@ -529,10 +530,18 @@ const startExternalMacUpdateInstall = async () => {
       message: `Installing update and restarting app...${installPlan?.logPath ? ` (log: ${installPlan.logPath})` : ''}`,
     };
   } catch (error) {
+    try {
+      // Fallback to manual installer path so users can still update.
+      shell.openExternal(RELEASES_LATEST_URL);
+    } catch (_) {
+      // noop
+    }
     return {
       ok: false,
-      reason: classifyUpdaterReason(error?.message, 'external-install-failed'),
-      message: error?.message || 'Unable to install update automatically.',
+      reason: 'manual-install-required',
+      message:
+        `${error?.message || 'Unable to install update automatically.'} ` +
+        'Gitick opened the latest release page for manual update.',
     };
   }
 };

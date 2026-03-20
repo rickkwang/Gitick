@@ -9,6 +9,7 @@ const TRUSTED_RELEASE_HOSTS = new Set([
   'release-assets.githubusercontent.com',
 ]);
 const RELEASE_METADATA_URL = 'https://github.com/rickkwang/Gitick/releases/latest/download/latest-mac.yml';
+const RELEASES_LATEST_URL = 'https://github.com/rickkwang/Gitick/releases/latest';
 
 const isSafeExternalUrl = (rawUrl) => {
   try {
@@ -39,6 +40,7 @@ module.exports = {
   ALLOWED_EXTERNAL_HOSTS,
   TRUSTED_RELEASE_HOSTS,
   RELEASE_METADATA_URL,
+  RELEASES_LATEST_URL,
   isSafeExternalUrl,
   isTrustedGitHubReleaseUrl,
 };
