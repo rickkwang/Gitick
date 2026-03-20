@@ -122,7 +122,7 @@ const NavItemComponent: React.FC<NavItemProps> = ({
           {/* Text Container */}
           <div className={`
             flex items-center flex-1 min-w-0 overflow-hidden whitespace-nowrap pl-[52px]
-            transition-opacity duration-200 ease-linear
+            transition-opacity duration-300 ease-[cubic-bezier(0.2,0,0,1)]
             ${isCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}
           `}>
             <span className="truncate pr-2">{label}</span>
@@ -247,12 +247,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
     setIsAddingProject(true);
   }
 
-  // Optimized for "Silky" feel (ChatGPT/Obsidian style)
-  // Using a custom spring-like bezier for more natural movement
+  // Silky smooth expand/collapse using transform instead of width
+  // transform is GPU-accelerated and doesn't cause layout recalculations
   const sidebarClasses = cn(
-    'relative z-30 flex flex-col transition-[width] duration-300 ease-[cubic-bezier(0.2,0,0,1)]',
+    'relative z-30 flex flex-col',
     activeFilter === 'focus' ? 'bg-transparent' : 'bg-[var(--app-bg)]',
+    'will-change-transform',
     renderCollapsed ? 'w-[84px]' : 'w-[260px]',
+    'transition-[width] duration-300 ease-[cubic-bezier(0.2,0,0,1)]',
   );
 
   return (
@@ -265,7 +267,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
              {/* EXPANDED HEADER */}
              <div className={`
                 flex absolute inset-0 px-6 items-center justify-between
-                transition-opacity duration-200 ease-linear
+                transition-opacity duration-300 ease-[cubic-bezier(0.2,0,0,1)]
                 ${renderCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}
              `}>
                <div className="flex items-center gap-2.5 overflow-hidden">
@@ -290,7 +292,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
              {/* COLLAPSED HEADER */}
              <div className={`
                 flex absolute inset-0 items-center justify-center
-                transition-opacity duration-200 ease-linear
+                transition-opacity duration-300 ease-[cubic-bezier(0.2,0,0,1)]
                 ${renderCollapsed ? 'opacity-100' : 'opacity-0 pointer-events-none'}
              `}>
                 <button 
@@ -300,12 +302,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   title="Expand Sidebar"
                 >
                    {/* Brand Logo - Visible by default */}
-                   <span className="absolute inset-0 flex items-center justify-center text-primary-900 dark:text-dark-text transition-opacity duration-200 group-hover:opacity-0 [&>svg]:w-6 [&>svg]:h-6">
+                   <span className="absolute inset-0 flex items-center justify-center text-primary-900 dark:text-dark-text transition-opacity duration-300 ease-[cubic-bezier(0.2,0,0,1)] group-hover:opacity-0 [&>svg]:w-6 [&>svg]:h-6">
                      <Icons.GitickLogo />
                    </span>
 
                    {/* Expand Icon - Visible on Hover */}
-                   <span className="absolute inset-0 flex items-center justify-center text-primary-500 hover:text-primary-900 dark:hover:text-dark-text transition-opacity duration-200 opacity-0 group-hover:opacity-100">
+                   <span className="absolute inset-0 flex items-center justify-center text-primary-500 hover:text-primary-900 dark:hover:text-dark-text transition-opacity duration-300 ease-[cubic-bezier(0.2,0,0,1)] opacity-0 group-hover:opacity-100">
                      <Icons.SidebarRight />
                    </span>
                 </button>
@@ -317,7 +319,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <div>
               <div className={`
                  overflow-hidden px-2.5 h-5 mb-1.5 flex items-center
-                 transition-opacity duration-200
+                 transition-opacity duration-300 ease-[cubic-bezier(0.2,0,0,1)]
                  ${renderCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}
               `}>
                 <h3 className="text-[10px] font-bold text-primary-900 dark:text-dark-text uppercase tracking-widest whitespace-nowrap pl-1">Overview</h3>
@@ -351,7 +353,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <div>
               <div className={`
                  flex items-center justify-between px-2.5 group overflow-hidden whitespace-nowrap h-5 mb-1.5
-                 transition-opacity duration-200
+                 transition-opacity duration-300 ease-[cubic-bezier(0.2,0,0,1)]
                  ${renderCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}
               `}>
                   <h3 className="text-[10px] font-bold text-primary-900 dark:text-dark-text uppercase tracking-widest pl-1">Projects</h3>
@@ -407,7 +409,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <div>
                <div className={`
                   overflow-hidden px-3 h-6 mb-2 flex items-center
-                  transition-opacity duration-200
+                  transition-opacity duration-300 ease-[cubic-bezier(0.2,0,0,1)]
                   ${renderCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}
                `}>
                  <h3 className="text-[10px] font-bold text-primary-900 dark:text-dark-text uppercase tracking-widest whitespace-nowrap pl-1">History</h3>
@@ -452,7 +454,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   {/* Text Container */}
                   <div className={cn(
                       'flex items-center justify-between flex-1 min-w-0 overflow-hidden pr-2.5 pl-1',
-                      'transition-opacity duration-200',
+                      'transition-opacity duration-300 ease-[cubic-bezier(0.2,0,0,1)]',
                       renderCollapsed ? 'hidden' : 'opacity-100'
                   )}>
                       <div className="flex flex-col items-start leading-tight">
