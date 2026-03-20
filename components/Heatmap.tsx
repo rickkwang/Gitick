@@ -213,17 +213,11 @@ export const Heatmap: React.FC<HeatmapProps> = ({ tasks }) => {
   const getColor = (count: number) => {
     if (count <= 0) return 'bg-[var(--heat-0)]';
 
-    if (intensityCeiling <= 4) {
-      if (count === 1) return 'bg-[var(--heat-1)]';
-      if (count === 2) return 'bg-[var(--heat-2)]';
-      if (count === 3) return 'bg-[var(--heat-3)]';
-      return 'bg-[var(--heat-4)]';
-    }
-
-    const ratio = count / intensityCeiling;
-    if (ratio <= 0.25) return 'bg-[var(--heat-1)]';
-    if (ratio <= 0.5) return 'bg-[var(--heat-2)]';
-    if (ratio <= 0.75) return 'bg-[var(--heat-3)]';
+    // 使用基于比例的连续映射，避免离散阈值导致的颜色跳变
+    const ratio = count / Math.max(1, intensityCeiling);
+    if (ratio <= 0.15) return 'bg-[var(--heat-1)]';
+    if (ratio <= 0.35) return 'bg-[var(--heat-2)]';
+    if (ratio <= 0.65) return 'bg-[var(--heat-3)]';
     return 'bg-[var(--heat-4)]';
   };
 
@@ -256,8 +250,8 @@ export const Heatmap: React.FC<HeatmapProps> = ({ tasks }) => {
 
   return (
     <div className="w-full overflow-hidden">
-      <div className="grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)] gap-4 items-start">
-        <div className="rounded-lg border border-primary-200/70 dark:border-dark-border/70 bg-primary-50 dark:bg-dark-bg/40 p-3">
+      <div className="grid grid-cols-1 lg:grid-cols-[260px_minmax(0,1fr)] gap-5 md:gap-6 items-start">
+        <div className="rounded-xl border border-primary-200/65 dark:border-dark-border/65 bg-primary-50/70 dark:bg-dark-bg/35 p-3.5">
           <p className="text-[10px] uppercase tracking-wider font-bold text-primary-400 dark:text-dark-muted">Last 6 months activity</p>
           <div className="mt-2 flex items-baseline gap-1.5">
             <span className="text-xl font-display font-semibold text-primary-900 dark:text-dark-text">{visibleContributions}</span>
@@ -341,8 +335,8 @@ export const Heatmap: React.FC<HeatmapProps> = ({ tasks }) => {
                 ))}
               </div>
 
-              <div className="mt-2 flex items-center justify-end">
-                <div className="flex items-center gap-1 text-[9px] text-primary-400 dark:text-dark-muted">
+              <div className="mt-1.5 flex items-center justify-end">
+                <div className="flex items-center gap-1 text-[9px] text-primary-400 dark:text-dark-muted/90">
                   <span>Less</span>
                   <div className={`${CELL_SIZE} rounded-sm bg-[var(--heat-0)]`} />
                   <div className={`${CELL_SIZE} rounded-sm bg-[var(--heat-1)]`} />

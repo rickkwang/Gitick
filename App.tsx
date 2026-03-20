@@ -33,6 +33,7 @@ const SettingsModal = lazy(() =>
 );
 const TASKS_PERSIST_DEBOUNCE_MS = 800;
 const DESKTOP_FONT_SIZE_OPTIONS = [10, 12, 14, 16, 18] as const;
+const MAX_CONCURRENT_TASKS_CREATED_SAME_MS = 1000;
 
 const normalizeDesktopFontSize = (value: number): number => {
   if (!Number.isFinite(value)) return 12;
@@ -137,6 +138,7 @@ const App: React.FC = () => {
   const [isStartupStatic, setIsStartupStatic] = useState(() => typeof window !== 'undefined');
   
   const tasksRef = useRef(tasks);
+  const taskTiebreakerRef = useRef(0);
 
   useEffect(() => {
     tasksRef.current = tasks;
@@ -236,22 +238,6 @@ const App: React.FC = () => {
       setUndoAction(undefined);
     }, 4000);
   }, []);
-
-  useEffect(
-    () => () => {
-      if (toastTimeoutRef.current) {
-        clearTimeout(toastTimeoutRef.current);
-      }
-      if (themeSwitchRafRef.current !== null) {
-        window.cancelAnimationFrame(themeSwitchRafRef.current);
-      }
-      if (themeSwitchTimerRef.current !== null) {
-        window.clearTimeout(themeSwitchTimerRef.current);
-      }
-      document.documentElement.classList.remove('theme-switching');
-    },
-    [],
-  );
 
   const {
     focusTimeLeft,
@@ -401,9 +387,13 @@ const App: React.FC = () => {
             completed: false,
             completedAt: undefined,
             dueDate: getNextRecurringDueDate(task.dueDate, task.recurrence),
-            createdAt: now + 1,
+            // Use tiebreaker to ensure unique createdAt for tasks created in same millisecond
+            createdAt: now - taskTiebreakerRef.current,
           }
         : null;
+
+    // Increment tiebreaker for next potential concurrent task
+    taskTiebreakerRef.current = (taskTiebreakerRef.current + 1) % MAX_CONCURRENT_TASKS_CREATED_SAME_MS;
 
     setTasks(prev => {
       const updated = prev.map(t =>
@@ -411,7 +401,7 @@ const App: React.FC = () => {
       );
       return nextTask ? [nextTask, ...updated] : updated;
     });
-    
+
     setSelectedTask((prev) =>
       prev?.id === id ? { ...prev, completed: !prev.completed, completedAt: !prev.completed ? now : undefined } : prev,
     );
@@ -538,7 +528,7 @@ const App: React.FC = () => {
   );
 
   const renderEmptyState = () => (
-    <div className="flex flex-col items-center justify-center pt-24 text-center select-none opacity-60">
+    <div className="flex flex-col items-center justify-center pt-12 md:pt-14 text-center select-none opacity-60">
       <div className="w-20 h-20 rounded-xl bg-primary-50 dark:bg-dark-bg border border-primary-200/80 dark:border-dark-border/80 flex items-center justify-center text-primary-300 dark:text-dark-muted mb-6 shadow-sm">
         <div className="scale-150">
           {emptyState.icon}
@@ -586,7 +576,7 @@ const App: React.FC = () => {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isCommandPaletteOpen]);
+  }, []); // Intentionally empty: uses refs for reactive state to avoid stale closures
 
   const renderTaskList = (taskList: Task[], groupName?: string) => {
      if (taskList.length === 0) return null;
@@ -666,12 +656,12 @@ const App: React.FC = () => {
                   
                   {/* Scrollable List Area */}
                   <div className="flex-1 overflow-y-auto main-scroll scroll-smooth">
-                      <div className="max-w-[1400px] mx-auto w-full px-8 py-6">
+                      <div className="max-w-[1400px] mx-auto w-full px-4 md:px-6 lg:px-8 py-6">
                           {filter !== 'focus' && (
                             <div className="mb-5">
-                              <div className="w-full max-w-[1040px] mx-auto px-1 py-1">
-                                <div className="flex items-center gap-2">
-                                  <div className="w-full max-w-[520px] min-w-[280px]">
+                              <div className="w-full max-w-[1200px] mx-auto py-1">
+                                <div className="flex items-center justify-between gap-4">
+                                  <div className="w-full max-w-[520px]">
                                     <div className="h-9 flex items-center gap-2 rounded-lg px-3 bg-primary-50 dark:bg-dark-bg/40 border border-primary-200/70 dark:border-dark-border/70">
                                       <span className="text-primary-400 dark:text-dark-muted shrink-0 flex items-center justify-center w-4 h-4">
                                         <Icons.Search />
@@ -684,8 +674,6 @@ const App: React.FC = () => {
                                       />
                                     </div>
                                   </div>
-
-                                  <div className="flex-1" />
 
                                   <div className="flex items-center gap-1.5 shrink-0">
                                     <div className="h-9 rounded-lg border border-primary-200/70 dark:border-dark-border/70 bg-primary-50 dark:bg-dark-bg/40 px-2.5">
@@ -725,7 +713,7 @@ const App: React.FC = () => {
                           {/* Heatmap Section */}
                           {filter === 'next7days' && (
                              <div className="mb-6">
-                                <div className="w-full max-w-[1040px] mx-auto p-4 bg-primary-50 dark:bg-dark-surface rounded-lg shadow-sm border border-primary-200/80 dark:border-dark-border/80">
+                                <div className="w-full max-w-[1200px] mx-auto p-4 md:p-5 bg-primary-50 dark:bg-dark-surface rounded-xl shadow-sm border border-primary-200/85 dark:border-dark-border/85">
                                    <div className="flex items-center justify-between mb-2">
                                       <h3 className="text-[10px] font-bold text-primary-900 dark:text-dark-text uppercase tracking-wider flex items-center gap-1.5">
                                          <Icons.Flame /> Contributions
@@ -739,7 +727,7 @@ const App: React.FC = () => {
                           )}
                           
                           {/* LIST RENDERING */}
-                          <div className="w-full max-w-[1040px] mx-auto">
+                          <div className="w-full max-w-[1200px] mx-auto">
                             {filter === 'completed' ? (
                                <Suspense fallback={<div className="h-40 animate-pulse rounded-xl bg-primary-200/50 dark:bg-dark-border/60" />}>
                                  <GitGraph tasks={filteredTasks} onDelete={deleteTask} userProfile={userProfile} />
@@ -789,8 +777,8 @@ const App: React.FC = () => {
                         <div className="absolute bottom-0 left-0 right-0 h-40 bg-[var(--app-bg)]/92 dark:bg-[var(--app-bg)]/88" />
 
                         {/* Input Container - Padded from bottom including Safe Area */}
-                        <div className="relative z-10 w-full flex justify-center px-4 pt-10 pb-4">
-                           <div className="max-w-[1040px] w-full pointer-events-auto mb-9">
+                        <div className="relative z-10 w-full flex justify-center px-4 md:px-6 lg:px-8 pt-10 pb-4">
+                           <div className="max-w-[1200px] w-full pointer-events-auto mb-9">
                               <TaskInput onAddTask={addTask} activeList={filter} projects={projects} />
                            </div>
                         </div>
@@ -807,10 +795,10 @@ const App: React.FC = () => {
           className={`
              flex flex-col h-full bg-primary-50 dark:bg-dark-surface overflow-hidden border-l border-primary-200/70 dark:border-dark-border
              transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)]
-             ${isRightSidebarOpen && filter !== 'focus' ? 'w-96 translate-x-0 opacity-100' : 'w-0 translate-x-10 opacity-0'}
+             ${isRightSidebarOpen && filter !== 'focus' ? 'w-96 lg:w-80 md:w-72 translate-x-0 opacity-100' : 'w-0 translate-x-10 opacity-0'}
           `}
         >
-          <div className="w-96 h-full flex flex-col min-w-[24rem]">
+          <div className="w-96 lg:w-80 md:w-72 h-full flex flex-col min-w-[18rem] max-w-[24rem]">
             {selectedTask ? (
                <StagingPanel
                   task={selectedTask}
