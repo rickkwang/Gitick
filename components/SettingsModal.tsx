@@ -24,7 +24,7 @@ interface SettingsModalProps {
 
 type SettingsTab = 'profile' | 'general' | 'data' | 'about';
 
-export const SettingsModal: React.FC<SettingsModalProps> = ({
+const SettingsModalComponent: React.FC<SettingsModalProps> = ({
   onClose,
   isDarkMode,
   onToggleTheme,
@@ -46,6 +46,18 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   const [avatarError, setAvatarError] = useState('');
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const avatarInputRef = useRef<HTMLInputElement>(null);
+  const previousActiveElement = useRef<HTMLElement | null>(null);
+
+  // Focus trap: save and restore focus
+  useEffect(() => {
+    if (onClose) {
+      previousActiveElement.current = document.activeElement as HTMLElement;
+    }
+    return () => {
+      previousActiveElement.current?.focus();
+      previousActiveElement.current = null;
+    };
+  }, [onClose]);
 
   // Local state for profile form to avoid constant re-renders on every keystroke
   const [localProfile, setLocalProfile] = useState(userProfile);
@@ -67,6 +79,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     }
     if (file.size > 2 * 1024 * 1024) {
       setAvatarError('Avatar file is too large. Max size is 2MB.');
+      return;
+    }
+    // Reject SVG files to prevent XSS attacks (they can contain scripts)
+    if (file.type === 'image/svg+xml' || file.name.endsWith('.svg')) {
+      setAvatarError('SVG files are not allowed for security reasons.');
       return;
     }
     const reader = new FileReader();
@@ -219,7 +236,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                         <input
                           ref={avatarInputRef}
                           type="file"
-                          accept="image/*"
+                          accept="image/png,image/jpeg,image/jpg,image/gif,image/webp"
                           onChange={handleAvatarUpload}
                           className="hidden"
                         />
@@ -462,3 +479,5 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     </div>
   );
 };
+
+export const SettingsModal = React.memo(SettingsModalComponent);

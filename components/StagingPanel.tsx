@@ -12,7 +12,7 @@ interface StagingPanelProps {
   projects: string[];
 }
 
-export const StagingPanel: React.FC<StagingPanelProps> = ({ task, onClose, onUpdate, onDelete, onCommit, projects }) => {
+const StagingPanelComponent: React.FC<StagingPanelProps> = ({ task, onClose, onUpdate, onDelete, onCommit, projects }) => {
   const [newSubtaskTitle, setNewSubtaskTitle] = useState('');
   const [newTag, setNewTag] = useState('');
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -353,3 +353,5 @@ export const StagingPanel: React.FC<StagingPanelProps> = ({ task, onClose, onUpd
       </div>
   );
 };
+
+export const StagingPanel = React.memo(StagingPanelComponent);

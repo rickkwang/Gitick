@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Icons } from '../constants';
 import { addDaysLocalIsoDate, toLocalIsoDate } from '../utils/date';
 
@@ -8,7 +8,7 @@ interface DatePickerProps {
   onClose: () => void;
 }
 
-export const DatePicker: React.FC<DatePickerProps> = ({ selectedDate, onSelect, onClose }) => {
+const DatePickerComponent: React.FC<DatePickerProps> = ({ selectedDate, onSelect, onClose }) => {
   // Initialize view based on selected date or today
   const [viewDate, setViewDate] = useState(() => {
     if (selectedDate) {
@@ -17,8 +17,78 @@ export const DatePicker: React.FC<DatePickerProps> = ({ selectedDate, onSelect, 
     }
     return new Date();
   });
+  const [focusedDay, setFocusedDay] = useState<number | null>(null);
 
   const todayStr = toLocalIsoDate(new Date());
+  const calendarRef = useRef<HTMLDivElement>(null);
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const year = viewDate.getFullYear();
+      const month = viewDate.getMonth();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+      switch (e.key) {
+        case 'ArrowLeft':
+          e.preventDefault();
+          if (focusedDay === null) {
+            setFocusedDay(daysInMonth);
+          } else if (focusedDay > 1) {
+            setFocusedDay(focusedDay - 1);
+          } else {
+            // Go to previous month
+            setViewDate(new Date(year, month - 1, 1));
+            setFocusedDay(new Date(year, month - 1, 0).getDate());
+          }
+          break;
+        case 'ArrowRight':
+          e.preventDefault();
+          if (focusedDay === null) {
+            setFocusedDay(1);
+          } else if (focusedDay < daysInMonth) {
+            setFocusedDay(focusedDay + 1);
+          } else {
+            // Go to next month
+            setViewDate(new Date(year, month + 1, 1));
+            setFocusedDay(1);
+          }
+          break;
+        case 'ArrowUp':
+          e.preventDefault();
+          if (focusedDay === null) {
+            setFocusedDay(Math.min(7, daysInMonth));
+          } else {
+            const newDay = Math.max(1, focusedDay - 7);
+            setFocusedDay(newDay);
+          }
+          break;
+        case 'ArrowDown':
+          e.preventDefault();
+          if (focusedDay === null) {
+            setFocusedDay(Math.min(daysInMonth, daysInMonth > 7 ? daysInMonth - 7 : 1));
+          } else {
+            const newDay = Math.min(daysInMonth, focusedDay + 7);
+            setFocusedDay(newDay);
+          }
+          break;
+        case 'Enter':
+        case ' ':
+          e.preventDefault();
+          if (focusedDay !== null) {
+            handleSelect(focusedDay);
+          }
+          break;
+        case 'Escape':
+          e.preventDefault();
+          onClose();
+          break;
+      }
+    };
+
+    calendarRef.current?.addEventListener('keydown', handleKeyDown);
+    return () => calendarRef.current?.removeEventListener('keydown', handleKeyDown);
+  }, [viewDate, focusedDay, onClose]);
 
   const handlePrevMonth = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -62,7 +132,11 @@ export const DatePicker: React.FC<DatePickerProps> = ({ selectedDate, onSelect, 
   const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
   return (
-    <div 
+    <div
+        ref={calendarRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Date picker"
         className="absolute top-full right-0 mt-2 z-50 w-72 bg-primary-50 dark:bg-dark-bg rounded-xl shadow-lg ring-1 ring-primary-200/50 dark:ring-dark-border/50 p-6 animate-in fade-in zoom-in-95 duration-200 select-none"
         onClick={(e) => e.stopPropagation()}
     >
@@ -72,7 +146,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({ selectedDate, onSelect, 
                 {monthNames[month]} {year}
             </span>
             <div className="flex gap-1">
-                <button 
+                <button
                   onClick={handlePrevMonth}
                   aria-label="Previous month"
                   className="p-1.5 rounded-full hover:bg-primary-200/50 dark:hover:bg-dark-border text-primary-500 dark:text-dark-muted hover:text-primary-900 dark:hover:text-dark-text transition-colors"
@@ -90,32 +164,39 @@ export const DatePicker: React.FC<DatePickerProps> = ({ selectedDate, onSelect, 
         </div>
 
         {/* Weekdays */}
-        <div className="grid grid-cols-7 mb-2 text-center">
+        <div className="grid grid-cols-7 mb-2 text-center" role="row">
             {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(d => (
-                <div key={d} className="text-[10px] font-bold text-primary-400 dark:text-dark-muted uppercase">
+                <div key={d} className="text-[10px] font-bold text-primary-400 dark:text-dark-muted uppercase" role="columnheader">
                     {d}
                 </div>
             ))}
         </div>
 
         {/* Grid */}
-        <div className="grid grid-cols-7 gap-y-1 gap-x-1 mb-4">
+        <div className="grid grid-cols-7 gap-y-1 gap-x-1 mb-4" role="grid">
             {blanks.map((_, i) => <div key={`blank-${i}`} />)}
             {days.map(d => {
                 const dateStr = toLocalIsoDate(new Date(year, month, d));
                 const isSelected = selectedDate === dateStr;
                 const isToday = dateStr === todayStr;
+                const isFocused = focusedDay === d;
 
                 return (
                     <button
                         key={d}
                         onClick={() => handleSelect(d)}
+                        onMouseEnter={() => setFocusedDay(d)}
+                        tabIndex={isFocused ? 0 : -1}
+                        role="gridcell"
+                        aria-selected={isSelected}
+                        aria-label={`${monthNames[month]} ${d}, ${year}${isToday ? ' (today)' : ''}`}
                         className={`
                             h-8 w-8 rounded-full flex items-center justify-center text-xs font-medium transition-all duration-200
                             ${isSelected
                                 ? 'bg-[var(--accent)] text-white dark:bg-[var(--accent)] dark:text-white shadow-md scale-105 font-bold'
                                 : 'text-primary-700 dark:text-dark-text hover:bg-primary-200/50 dark:hover:bg-dark-border'}
                             ${!isSelected && isToday ? 'text-[var(--accent)] font-bold bg-[var(--accent-soft)]' : ''}
+                            ${isFocused && !isSelected ? 'ring-2 ring-[var(--accent)] ring-offset-1' : ''}
                         `}
                     >
                         {d}
@@ -123,28 +204,28 @@ export const DatePicker: React.FC<DatePickerProps> = ({ selectedDate, onSelect, 
                 );
             })}
         </div>
-        
+
         {/* Shortcuts */}
         <div className="pt-3 border-t border-primary-200/80 dark:border-dark-border flex flex-wrap gap-2">
-            <button 
+            <button
                 onClick={() => handleQuickAction('today')}
                 className="px-3 py-1.5 rounded-lg bg-primary-100 dark:bg-dark-border text-[10px] font-bold text-primary-600 dark:text-dark-text hover:bg-primary-200/50 dark:hover:bg-dark-border transition-colors"
             >
                 Today
             </button>
-            <button 
+            <button
                 onClick={() => handleQuickAction('tomorrow')}
                 className="px-3 py-1.5 rounded-lg bg-primary-100 dark:bg-dark-border text-[10px] font-bold text-primary-600 dark:text-dark-text hover:bg-primary-200/50 dark:hover:bg-dark-border transition-colors"
             >
                 Tomorrow
             </button>
-            <button 
+            <button
                 onClick={() => handleQuickAction('nextWeek')}
                 className="px-3 py-1.5 rounded-lg bg-primary-100 dark:bg-dark-border text-[10px] font-bold text-primary-600 dark:text-dark-text hover:bg-primary-200/50 dark:hover:bg-dark-border transition-colors"
             >
                 Next Week
             </button>
-            <button 
+            <button
                 onClick={() => handleQuickAction('clear')}
                 className="px-3 py-1.5 rounded-lg border border-transparent hover:border-[var(--status-danger-border)] text-[10px] font-bold text-primary-400 dark:text-dark-muted hover:text-[var(--status-danger-text)] hover:bg-[var(--status-danger-bg)] transition-colors ml-auto"
             >
@@ -154,3 +235,5 @@ export const DatePicker: React.FC<DatePickerProps> = ({ selectedDate, onSelect, 
     </div>
   );
 };
+
+export const DatePicker = React.memo(DatePickerComponent);

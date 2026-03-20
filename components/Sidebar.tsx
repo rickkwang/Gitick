@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { FilterType, UserProfile } from '../types';
 import { Icons, PROJECTS as DEFAULT_PROJECTS } from '../constants';
+import { cn } from '../lib/utils';
 
 interface SidebarProps {
   activeFilter: FilterType;
@@ -67,21 +68,27 @@ const NavItemComponent: React.FC<NavItemProps> = ({
             onFilterChange(id);
           }}
           className={`
-            relative flex items-center text-sm font-medium rounded-xl outline-none select-none
-            transition-colors duration-200
+            group/btn relative flex items-center text-sm font-medium rounded-xl outline-none select-none
+            transition-all duration-200
             h-[40px] px-0
             w-full justify-start
               ${
                 isActive
                   ? isCollapsed
-                  ? 'text-primary-900 dark:text-dark-text border border-transparent'
-                  : 'bg-primary-200/50 dark:bg-dark-border/60 text-primary-900 dark:text-dark-text font-bold border border-transparent'
+                  ? 'text-primary-900 dark:text-dark-text'
+                  : 'bg-primary-200/50 dark:bg-dark-border/60 text-primary-900 dark:text-dark-text font-bold'
                 : isCollapsed
-                  ? 'text-primary-900 dark:text-dark-text border border-transparent hover:text-primary-900 dark:hover:text-dark-text'
-                  : 'text-primary-900 dark:text-dark-text border border-transparent hover:bg-primary-100 dark:hover:bg-dark-border/50 hover:border-primary-200/80 dark:hover:border-dark-border hover:text-primary-900 dark:hover:text-dark-text'
+                  ? 'text-primary-900 dark:text-dark-text hover:bg-primary-100/50 dark:hover:bg-dark-border/30'
+                  : 'text-primary-900 dark:text-dark-text hover:bg-primary-100 dark:hover:bg-dark-border/50 hover:border-primary-200/80 dark:hover:border-dark-border hover:text-primary-900 dark:hover:text-dark-text'
             }
           `}
         >
+          {/* Tooltip for collapsed state */}
+          {isCollapsed && (
+            <span className="absolute left-full ml-2 px-2 py-1 rounded-md bg-primary-900 dark:bg-dark-text text-primary-50 dark:text-dark-bg text-xs font-medium whitespace-nowrap opacity-0 pointer-events-none group-hover/btn:opacity-100 transition-opacity duration-150 z-50 shadow-lg">
+              {label}
+            </span>
+          )}
           {/* Icon Container - Fixed Width 48px (w-12) */}
           <span
             className={`
@@ -90,6 +97,13 @@ const NavItemComponent: React.FC<NavItemProps> = ({
               ${isCollapsed ? 'left-1/2 -translate-x-1/2' : 'left-0'}
             `}
           >
+            {/* Active Indicator Bar */}
+            <span
+              className={`
+                absolute left-0 top-1/2 -translate-y-1/2 h-6 w-0.5 rounded-r-full transition-all duration-200
+                ${isActive ? 'bg-[var(--accent)] opacity-100' : 'bg-transparent opacity-0'}
+              `}
+            />
             <span
               className={`
                 flex items-center justify-center transition-colors duration-200
@@ -172,11 +186,23 @@ const navItemPropsEqual = (prev: NavItemProps, next: NavItemProps) => {
     prev.isFocusItem === next.isFocusItem &&
     prev.isFocusActive === next.isFocusActive &&
     prev.focusTimeLeft === next.focusTimeLeft &&
-    prev.isCollapsed === next.isCollapsed
+    prev.isCollapsed === next.isCollapsed &&
+    prev.onFilterChange === next.onFilterChange &&
+    prev.onDeleteProject === next.onDeleteProject
   );
 };
 
 const NavItem = React.memo(NavItemComponent, navItemPropsEqual);
+
+const getProjectIcon = (name: string) => {
+  switch (name) {
+    case 'Work': return Icons.Briefcase;
+    case 'Study': return Icons.Book;
+    case 'Travel': return Icons.Plane;
+    case 'Life': return Icons.Coffee;
+    default: return Icons.Folder;
+  }
+};
 
 export const Sidebar: React.FC<SidebarProps> = ({
   activeFilter,
@@ -221,23 +247,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
     setIsAddingProject(true);
   }
 
-  const getProjectIcon = (name: string) => {
-    switch (name) {
-      case 'Work': return Icons.Briefcase;
-      case 'Study': return Icons.Book;
-      case 'Travel': return Icons.Plane;
-      case 'Life': return Icons.Coffee;
-      default: return Icons.Folder;
-    }
-  };
-
   // Optimized for "Silky" feel (ChatGPT/Obsidian style)
   // Using a custom spring-like bezier for more natural movement
-  const sidebarClasses = `
-    relative z-30 ${activeFilter === 'focus' ? 'bg-transparent' : 'bg-[var(--app-bg)]'} flex flex-col
-    transition-[width] duration-300 ease-[cubic-bezier(0.2,0,0,1)]
-    ${renderCollapsed ? 'w-[84px]' : 'w-[260px]'}
-  `;
+  const sidebarClasses = cn(
+    'relative z-30 flex flex-col transition-[width] duration-300 ease-[cubic-bezier(0.2,0,0,1)]',
+    activeFilter === 'focus' ? 'bg-transparent' : 'bg-[var(--app-bg)]',
+    renderCollapsed ? 'w-[84px]' : 'w-[260px]',
+  );
 
   return (
       <aside className={sidebarClasses}>
@@ -434,12 +450,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   </div>
 
                   {/* Text Container */}
-                  <div className={`
-                      flex items-center justify-between flex-1 min-w-0 overflow-hidden pr-2.5 pl-1
-                      transition-opacity duration-200
-                      opacity-100
-                      ${renderCollapsed ? 'hidden' : 'opacity-100'}
-                  `}>
+                  <div className={cn(
+                      'flex items-center justify-between flex-1 min-w-0 overflow-hidden pr-2.5 pl-1',
+                      'transition-opacity duration-200',
+                      renderCollapsed ? 'hidden' : 'opacity-100'
+                  )}>
                       <div className="flex flex-col items-start leading-tight">
                           <span className="text-sm font-bold text-primary-900 dark:text-dark-text truncate max-w-[120px]">{userProfile.name}</span>
                           <span className="text-[10px] text-primary-900 dark:text-dark-text font-medium">Settings</span>

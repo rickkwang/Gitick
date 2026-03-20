@@ -18,7 +18,7 @@ const RECURRENCE_OPTIONS: Array<{ label: string; value: RecurrenceRule | null }>
   { label: 'Weekdays', value: { type: 'weekdays' } },
 ];
 
-export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, projects }) => {
+const TaskInputComponent: React.FC<TaskInputProps> = ({ onAddTask, activeList, projects }) => {
   const [input, setInput] = useState('');
   const [selectedProject, setSelectedProject] = useState<string>('Inbox');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -141,6 +141,7 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
                     onCompositionEnd={() => { isComposingRef.current = false; }}
                     onKeyDown={handleKeyDown}
                     placeholder={getPlaceholder()}
+                    aria-label="Add new task"
                     className="h-full w-full min-w-0 bg-transparent pr-2 text-sm font-medium text-primary-900 outline-none placeholder:text-primary-400 dark:text-dark-text dark:placeholder:text-dark-muted"
                     autoFocus={shouldAutoFocus}
                 />
@@ -190,9 +191,11 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
                     </button>
 
                     {isDropdownOpen && (
-                      <div className="absolute bottom-full right-0 mb-2 w-44 overflow-hidden rounded-lg border border-primary-200 bg-primary-50 py-1.5 shadow-lg dark:border-dark-border dark:bg-dark-surface animate-in fade-in zoom-in-95 slide-in-from-bottom-2 duration-200">
+                      <div className="absolute bottom-full right-0 mb-2 w-44 overflow-hidden rounded-lg border border-primary-200 bg-primary-50 py-1.5 shadow-lg dark:border-dark-border dark:bg-dark-surface animate-in fade-in zoom-in-95 slide-in-from-bottom-2 duration-200" role="listbox">
                         <button
                           type="button"
+                          role="option"
+                          aria-selected={selectedProject === 'Inbox'}
                           onClick={() => { setSelectedProject('Inbox'); setIsDropdownOpen(false); }}
                           className={`mx-1 w-[calc(100%-0.5rem)] text-left px-2.5 py-2 rounded-xl text-xs font-medium flex items-center gap-2.5 transition-colors ${selectedProject === 'Inbox' ? 'text-primary-900 dark:text-dark-text bg-primary-200/50 dark:bg-dark-border/50' : 'text-primary-500 dark:text-dark-muted hover:bg-primary-200/40 dark:hover:bg-dark-border/30'}`}
                         >
@@ -205,6 +208,8 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
                             <button
                               key={p}
                               type="button"
+                              role="option"
+                              aria-selected={selectedProject === p}
                               onClick={() => { setSelectedProject(p); setIsDropdownOpen(false); }}
                               className={`mx-1 w-[calc(100%-0.5rem)] text-left px-2.5 py-2 rounded-xl text-xs font-medium flex items-center gap-2.5 transition-colors ${selectedProject === p ? 'text-primary-900 dark:text-dark-text bg-primary-200/50 dark:bg-dark-border/50' : 'text-primary-500 dark:text-dark-muted hover:bg-primary-200/40 dark:hover:bg-dark-border/30'}`}
                             >
@@ -272,3 +277,5 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, activeList, pro
     </div>
   );
 };
+
+export const TaskInput = React.memo(TaskInputComponent);

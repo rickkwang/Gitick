@@ -29,9 +29,11 @@
     "desktop:ci:verify-artifacts": "node scripts/verify-mac-updater-artifacts.mjs"
   },
   "dependencies": {
+    "clsx": "^2.1.1",
     "electron-updater": "^6.6.2",
     "react": "^19.2.1",
-    "react-dom": "^19.2.1"
+    "react-dom": "^19.2.1",
+    "tailwind-merge": "^3.5.0"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
@@ -39,6 +41,7 @@
     "concurrently": "^9.1.2",
     "electron": "^37.2.1",
     "electron-builder": "^26.0.12",
+    "esbuild": "^0.27.4",
     "typescript": "~5.8.2",
     "vite": "^6.2.0",
     "vitest": "^4.1.0",
