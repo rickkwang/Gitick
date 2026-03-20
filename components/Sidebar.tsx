@@ -307,7 +307,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                  transition-opacity duration-300 ease-[cubic-bezier(0.2,0,0,1)]
                  ${renderCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}
               `}>
-                <h3 className="text-[10px] font-bold text-primary-900 dark:text-dark-text uppercase tracking-widest whitespace-nowrap pl-1">Overview</h3>
+                <h3 className="text-[10px] font-semibold text-primary-900 dark:text-dark-text uppercase tracking-[0.14em] whitespace-nowrap pl-1">Overview</h3>
               </div>
               <nav className="space-y-0.5">
                 <NavItem 
@@ -341,7 +341,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                  transition-opacity duration-300 ease-[cubic-bezier(0.2,0,0,1)]
                  ${renderCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}
               `}>
-                  <h3 className="text-[10px] font-bold text-primary-900 dark:text-dark-text uppercase tracking-widest pl-1">Projects</h3>
+                  <h3 className="text-[10px] font-semibold text-primary-900 dark:text-dark-text uppercase tracking-[0.14em] pl-1">Projects</h3>
                   <button
                     onClick={startAddProject}
                     aria-label="Add project"
@@ -397,7 +397,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   transition-opacity duration-300 ease-[cubic-bezier(0.2,0,0,1)]
                   ${renderCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}
                `}>
-                 <h3 className="text-[10px] font-bold text-primary-900 dark:text-dark-text uppercase tracking-widest whitespace-nowrap pl-1">History</h3>
+                 <h3 className="text-[10px] font-semibold text-primary-900 dark:text-dark-text uppercase tracking-[0.14em] whitespace-nowrap pl-1">History</h3>
                </div>
                  <nav className="space-y-0.5">
                   <NavItem 

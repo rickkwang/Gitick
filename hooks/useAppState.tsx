@@ -31,6 +31,8 @@ const normalizeDesktopFontSize = (value: number): number => {
   );
 };
 
+type TaskUpdate = Task | ((prevTask: Task) => Task);
+
 export interface UseAppStateReturn {
   // State
   tasks: Task[];
@@ -84,7 +86,7 @@ export interface UseAppStateReturn {
   // Callbacks
   addTask: (newTaskData: Omit<Task, 'id' | 'createdAt'>) => void;
   deleteTask: (id: string) => void;
-  updateTask: (updatedTask: Task) => void;
+  updateTask: (taskUpdate: TaskUpdate) => void;
   performToggle: (id: string) => void;
   requestToggleTask: (task: Task) => void;
   toggleThemeMode: () => void;
@@ -495,13 +497,27 @@ export function useAppState(): UseAppStateReturn {
     [performToggle],
   );
 
-  const updateTask = useCallback((updatedTask: Task) => {
-    const normalizedTask =
-      updatedTask.completed && !updatedTask.completedAt
-        ? { ...updatedTask, completedAt: Date.now() }
-        : updatedTask;
-    setTasks((prev) => prev.map((t) => (t.id === normalizedTask.id ? normalizedTask : t)));
-    setSelectedTask(normalizedTask);
+  const updateTask = useCallback((taskUpdate: TaskUpdate) => {
+    let latestNormalizedTask: Task | null = null;
+
+    setTasks((prev) =>
+      prev.map((t) => {
+        const candidateTask = typeof taskUpdate === 'function' ? taskUpdate(t) : taskUpdate;
+        if (candidateTask.id !== t.id) return t;
+        const normalizedTask =
+          candidateTask.completed && !candidateTask.completedAt
+            ? { ...candidateTask, completedAt: Date.now() }
+            : candidateTask;
+        latestNormalizedTask = normalizedTask;
+        return normalizedTask;
+      }),
+    );
+
+    setSelectedTask((prevSelectedTask) => {
+      if (!latestNormalizedTask) return prevSelectedTask;
+      if (!prevSelectedTask || prevSelectedTask.id !== latestNormalizedTask.id) return prevSelectedTask;
+      return latestNormalizedTask;
+    });
   }, []);
 
   const deleteTask = useCallback(

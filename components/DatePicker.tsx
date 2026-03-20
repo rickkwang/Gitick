@@ -137,7 +137,7 @@ const DatePickerComponent: React.FC<DatePickerProps> = ({ selectedDate, onSelect
         role="dialog"
         aria-modal="true"
         aria-label="Date picker"
-        className="absolute top-full right-0 mt-2 z-50 w-72 bg-primary-50 dark:bg-dark-bg rounded-xl shadow-lg ring-1 ring-primary-200/50 dark:ring-dark-border/50 p-6 animate-in fade-in zoom-in-95 duration-200 select-none"
+        className="absolute top-full left-0 mt-2 z-50 w-72 max-w-[calc(100vw-2rem)] bg-primary-50 dark:bg-dark-bg rounded-xl shadow-lg ring-1 ring-primary-200/50 dark:ring-dark-border/50 p-6 animate-in fade-in zoom-in-95 duration-200 select-none"
         onClick={(e) => e.stopPropagation()}
     >
         {/* Header */}

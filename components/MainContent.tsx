@@ -158,7 +158,7 @@ export const MainContent: React.FC<MainContentProps> = ({
                 <div className="mb-6">
                   <div className="w-full max-w-[1200px] mx-auto p-4 md:p-5 bg-primary-50 dark:bg-dark-surface rounded-xl shadow-sm border border-primary-200/85 dark:border-dark-border/85">
                     <div className="flex items-center justify-between mb-2">
-                      <h3 className="text-[10px] font-bold text-primary-900 dark:text-dark-text uppercase tracking-wider flex items-center gap-1.5">
+                      <h3 className="text-[10px] font-semibold text-primary-900 dark:text-dark-text uppercase tracking-[0.14em] flex items-center gap-1.5">
                         <svg
                           className="w-3.5 h-3.5"
                           fill="none"

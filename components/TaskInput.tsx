@@ -130,7 +130,7 @@ const TaskInputComponent: React.FC<TaskInputProps> = ({ onAddTask, activeList, p
   return (
     <div className="w-full relative z-30">
       <form onSubmit={handleSubmit} className="group transition-all duration-300">
-        <div className="relative overflow-visible rounded-[16px] border border-primary-200/90 dark:border-dark-border/80 bg-primary-50/98 dark:bg-dark-surface shadow-[0_2px_14px_rgba(20,20,19,0.05)] dark:shadow-none transition-all duration-200 ease-out focus-within:shadow-[0_6px_22px_rgba(20,20,19,0.08)]">
+        <div className="relative overflow-visible rounded-xl border border-primary-200/90 dark:border-dark-border/80 bg-primary-50/98 dark:bg-dark-surface shadow-sm transition-all duration-200 ease-out focus-within:shadow-md">
             <div className="flex min-h-[60px] items-center gap-2.5 pl-4 pr-3.5">
                 <input
                     ref={inputRef}
@@ -191,7 +191,7 @@ const TaskInputComponent: React.FC<TaskInputProps> = ({ onAddTask, activeList, p
                     </button>
 
                     {isDropdownOpen && (
-                      <div className="absolute bottom-full right-0 mb-2 w-44 overflow-hidden rounded-lg border border-primary-200 bg-primary-50 py-1.5 shadow-lg dark:border-dark-border dark:bg-dark-surface animate-in fade-in zoom-in-95 slide-in-from-bottom-2 duration-200" role="listbox">
+                      <div className="absolute bottom-full right-0 mb-2 w-44 overflow-hidden rounded-xl border border-primary-200 bg-primary-50 py-1.5 shadow-md dark:border-dark-border dark:bg-dark-surface animate-in fade-in zoom-in-95 slide-in-from-bottom-2 duration-200" role="listbox">
                         <button
                           type="button"
                           role="option"

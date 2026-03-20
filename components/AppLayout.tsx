@@ -18,10 +18,20 @@ const normalizeDesktopFontSize = (value: number): number => {
 };
 
 export const AppLayout: React.FC<AppLayoutProps> = (props) => {
-  const RIGHT_PANEL_MIN_WIDTH = 360;
-  const RIGHT_PANEL_MAX_WIDTH = 560;
-  const RIGHT_PANEL_DEFAULT_WIDTH = 420;
+  const RIGHT_PANEL_BASE_MIN_WIDTH = 360;
+  const RIGHT_PANEL_BASE_MAX_WIDTH = 560;
+  const RIGHT_PANEL_BASE_DEFAULT_WIDTH = 420;
+  const RIGHT_PANEL_COMPACT_ENTER = 418;
+  const RIGHT_PANEL_COMPACT_EXIT = 442;
   const RIGHT_PANEL_STORAGE_KEY = 'gitick.rightPanelWidth';
+  const getRightPanelBounds = useCallback((viewportWidth: number) => {
+    const dynamicMin = Math.min(RIGHT_PANEL_BASE_MIN_WIDTH, Math.floor(viewportWidth * 0.42));
+    const dynamicMax = Math.min(RIGHT_PANEL_BASE_MAX_WIDTH, Math.floor(viewportWidth * 0.62));
+    const minWidth = Math.max(320, dynamicMin);
+    const maxWidth = Math.max(minWidth + 36, dynamicMax);
+    const defaultWidth = Math.min(maxWidth, Math.max(minWidth, RIGHT_PANEL_BASE_DEFAULT_WIDTH));
+    return { minWidth, maxWidth, defaultWidth };
+  }, []);
 
   const {
     tasks,
@@ -87,19 +97,21 @@ export const AppLayout: React.FC<AppLayoutProps> = (props) => {
     emptyState,
   } = props;
   const [rightPanelWidth, setRightPanelWidth] = useState(() => {
-    if (typeof window === 'undefined') return RIGHT_PANEL_DEFAULT_WIDTH;
+    if (typeof window === 'undefined') return RIGHT_PANEL_BASE_DEFAULT_WIDTH;
+    const { minWidth, maxWidth, defaultWidth } = getRightPanelBounds(window.innerWidth);
     const raw = window.localStorage.getItem(RIGHT_PANEL_STORAGE_KEY);
     const parsed = Number(raw);
-    if (!Number.isFinite(parsed)) return RIGHT_PANEL_DEFAULT_WIDTH;
-    return Math.min(RIGHT_PANEL_MAX_WIDTH, Math.max(RIGHT_PANEL_MIN_WIDTH, parsed));
+    if (!Number.isFinite(parsed)) return defaultWidth;
+    return Math.min(maxWidth, Math.max(minWidth, parsed));
   });
   const [isResizingRightPanel, setIsResizingRightPanel] = useState(false);
   const rightPanelActive = isRightSidebarOpen && filter !== 'focus';
-  const isRightPanelCompact = rightPanelWidth < 430;
+  const [isRightPanelCompact, setIsRightPanelCompact] = useState(rightPanelWidth < RIGHT_PANEL_COMPACT_ENTER);
 
-  const handleRightPanelResizeStart = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleRightPanelResizeStart = useCallback((event: React.PointerEvent<HTMLButtonElement>) => {
     event.preventDefault();
     if (!rightPanelActive) return;
+    event.currentTarget.setPointerCapture(event.pointerId);
     setIsResizingRightPanel(true);
   }, [rightPanelActive]);
 
@@ -139,8 +151,29 @@ export const AppLayout: React.FC<AppLayoutProps> = (props) => {
   }, [isCommandPaletteOpen, setIsCommandPaletteOpen, setShowSettings, setSelectedTask]);
 
   useEffect(() => {
+    const { minWidth, maxWidth } = getRightPanelBounds(window.innerWidth);
+    setRightPanelWidth((prevWidth) => Math.min(maxWidth, Math.max(minWidth, prevWidth)));
+  }, [getRightPanelBounds]);
+
+  useEffect(() => {
     if (typeof window === 'undefined') return;
     window.localStorage.setItem(RIGHT_PANEL_STORAGE_KEY, String(rightPanelWidth));
+  }, [rightPanelWidth]);
+
+  useEffect(() => {
+    const handleViewportResize = () => {
+      const { minWidth, maxWidth } = getRightPanelBounds(window.innerWidth);
+      setRightPanelWidth((prevWidth) => Math.min(maxWidth, Math.max(minWidth, prevWidth)));
+    };
+    window.addEventListener('resize', handleViewportResize);
+    return () => window.removeEventListener('resize', handleViewportResize);
+  }, [getRightPanelBounds]);
+
+  useEffect(() => {
+    setIsRightPanelCompact((prevCompact) => {
+      if (prevCompact) return rightPanelWidth < RIGHT_PANEL_COMPACT_EXIT;
+      return rightPanelWidth < RIGHT_PANEL_COMPACT_ENTER;
+    });
   }, [rightPanelWidth]);
 
   useEffect(() => {
@@ -151,26 +184,32 @@ export const AppLayout: React.FC<AppLayoutProps> = (props) => {
     document.body.style.userSelect = 'none';
     document.body.style.cursor = 'col-resize';
 
-    const handleMouseMove = (event: MouseEvent) => {
+    const handlePointerMove = (event: PointerEvent) => {
       const viewportWidth = window.innerWidth;
+      const { minWidth, maxWidth } = getRightPanelBounds(viewportWidth);
       const proposedWidth = viewportWidth - event.clientX;
-      const clampedWidth = Math.min(RIGHT_PANEL_MAX_WIDTH, Math.max(RIGHT_PANEL_MIN_WIDTH, proposedWidth));
+      const clampedWidth = Math.min(maxWidth, Math.max(minWidth, proposedWidth));
       setRightPanelWidth(clampedWidth);
     };
 
-    const handleMouseUp = () => {
+    const handlePointerUp = () => {
+      setIsResizingRightPanel(false);
+    };
+    const handlePointerCancel = () => {
       setIsResizingRightPanel(false);
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
+    window.addEventListener('pointermove', handlePointerMove);
+    window.addEventListener('pointerup', handlePointerUp);
+    window.addEventListener('pointercancel', handlePointerCancel);
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointerup', handlePointerUp);
+      window.removeEventListener('pointercancel', handlePointerCancel);
       document.body.style.userSelect = previousUserSelect;
       document.body.style.cursor = previousCursor;
     };
-  }, [isResizingRightPanel]);
+  }, [getRightPanelBounds, isResizingRightPanel]);
 
   return (
     <div
@@ -247,7 +286,7 @@ export const AppLayout: React.FC<AppLayoutProps> = (props) => {
             <button
               type="button"
               aria-label="Resize details panel"
-              onMouseDown={handleRightPanelResizeStart}
+              onPointerDown={handleRightPanelResizeStart}
               className="absolute -left-1 top-0 h-full w-2 cursor-col-resize z-20 group"
             >
               <span className="absolute left-1/2 top-1/2 h-14 w-[2px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary-300/40 dark:bg-dark-muted/40 opacity-0 group-hover:opacity-100 transition-opacity" />
