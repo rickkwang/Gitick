@@ -53,10 +53,11 @@ export const parseTaskInput = (text: string, projects: string[] = []): ParsedTas
     dateLabel = 'Tomorrow';
   } else if (/\b(next week)\b/.test(lowerText)) {
     const today = new Date();
-    const nextMon = new Date(today);
-    nextMon.setDate(today.getDate() + ((1 + 7 - today.getDay()) % 7 || 7));
-    const diffDays = Math.round((nextMon.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-    dueDate = addDaysLocalIsoDate(diffDays);
+    const dayOfWeek = today.getDay();
+    // Calculate days until next Monday (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
+    // If today is Monday (1), we want next Monday = 7 days later
+    const daysUntilNextMonday = dayOfWeek === 0 ? 1 : (8 - dayOfWeek) % 7 || 7;
+    dueDate = addDaysLocalIsoDate(daysUntilNextMonday);
     dateLabel = 'Next Week';
   }
 

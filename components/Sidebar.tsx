@@ -74,9 +74,7 @@ const NavItemComponent: React.FC<NavItemProps> = ({
             w-full justify-start
               ${
                 isActive
-                  ? isCollapsed
                   ? 'text-primary-900 dark:text-dark-text'
-                  : 'bg-primary-200/50 dark:bg-dark-border/60 text-primary-900 dark:text-dark-text font-bold'
                 : isCollapsed
                   ? 'text-primary-900 dark:text-dark-text hover:bg-primary-100/50 dark:hover:bg-dark-border/30'
                   : 'text-primary-900 dark:text-dark-text hover:bg-primary-100 dark:hover:bg-dark-border/50 hover:border-primary-200/80 dark:hover:border-dark-border hover:text-primary-900 dark:hover:text-dark-text'
@@ -97,20 +95,13 @@ const NavItemComponent: React.FC<NavItemProps> = ({
               ${isCollapsed ? 'left-1/2 -translate-x-1/2' : 'left-0'}
             `}
           >
-            {/* Active Indicator Bar */}
-            <span
-              className={`
-                absolute left-0 top-1/2 -translate-y-1/2 h-6 w-0.5 rounded-r-full transition-all duration-200
-                ${isActive ? 'bg-[var(--accent)] opacity-100' : 'bg-transparent opacity-0'}
-              `}
-            />
             <span
               className={`
                 flex items-center justify-center transition-colors duration-200
                 w-[20px] h-[20px]
                 ${
                   isActive
-                    ? 'text-primary-900 dark:text-dark-text'
+                    ? 'text-[var(--accent)]'
                     : 'text-primary-900 dark:text-dark-text group-hover:text-primary-900 dark:group-hover:text-dark-text'
                 }
               `}
@@ -125,7 +116,7 @@ const NavItemComponent: React.FC<NavItemProps> = ({
             transition-opacity duration-300 ease-[cubic-bezier(0.2,0,0,1)]
             ${isCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}
           `}>
-            <span className="truncate pr-2">{label}</span>
+            <span className={`truncate pr-2 ${isActive ? 'font-semibold' : ''}`}>{label}</span>
             
             {/* Task Count / Focus Timer */}
             <div className="ml-auto pr-3 pl-1">
@@ -150,11 +141,6 @@ const NavItemComponent: React.FC<NavItemProps> = ({
           </div>
         </button>
 
-        {/* Collapsed Indicator Dot - Desktop Only */}
-        {!isFocusItem && taskCount > 0 && isCollapsed && (
-             <span className="absolute top-3 left-1/2 translate-x-[10px] w-2 h-2 rounded-full bg-primary-900 dark:bg-dark-text ring-2 ring-primary-50 dark:ring-dark-bg pointer-events-none animate-in fade-in zoom-in duration-200" />
-        )}
-        
         {/* Delete Button */}
         {canDelete && onDeleteProject && !isCollapsed && (
           <button
@@ -312,7 +298,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
              </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto no-scrollbar py-2.5 space-y-5 px-2.5">
+          <div className="flex-1 overflow-hidden">
+            <div className="h-full overflow-y-auto no-scrollbar py-2.5 space-y-5 px-2.5 pr-4 -mr-2">
             {/* Section: Overview */}
             <div>
               <div className={`
@@ -419,6 +406,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     isCollapsed={renderCollapsed}
                   />
                </nav>
+            </div>
             </div>
           </div>
           

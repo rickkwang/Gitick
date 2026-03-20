@@ -221,141 +221,133 @@ export const Heatmap: React.FC<HeatmapProps> = ({ tasks }) => {
     return 'bg-[var(--heat-4)]';
   };
 
-  const CELL_SIZE = 'w-[10px] h-[10px]';
-  const GAP = 'gap-[2px]';
-  const COL_WIDTH = CELL_PX + CELL_GAP_PX;
+  const CELL_SIZE = 'w-[11px] h-[11px]';
+  const GAP = 'gap-[3px]';
+  const COL_WIDTH = CELL_PX + CELL_GAP_PX + 1;
   const todayKey = toLocalIsoDate(new Date());
   const hasAnyActivity = allTimeContributions > 0;
 
   const renderTrend = (stats: PeriodStats) => {
     if (stats.percent === null) {
-      return <span className="text-[10px] text-primary-400 dark:text-dark-muted">No prior data</span>;
+      return <span className="text-[10px] text-primary-400 dark:text-dark-muted">—</span>;
     }
 
     const direction = stats.delta > 0 ? '+' : '';
     const trendClass =
       stats.delta > 0
-        ? 'text-[var(--status-success-text)]'
+        ? 'text-[var(--accent-coral)]'
         : stats.delta < 0
           ? 'text-[var(--status-danger-text)]'
           : 'text-primary-400 dark:text-dark-muted';
 
     return (
-      <span className={`text-[10px] font-semibold ${trendClass}`}>
-        {direction}
-        {Math.round(stats.percent)}%
+      <span className={`text-[11px] font-medium ${trendClass}`}>
+        {direction}{Math.round(stats.percent)}%
       </span>
     );
   };
 
+  const StatCard = ({ label, value, trend, sublabel }: { label: string; value: string | number; trend?: PeriodStats; sublabel?: string }) => (
+    <div className="flex flex-col">
+      <span className="text-[10px] uppercase tracking-wider text-primary-400 dark:text-dark-muted font-medium">{label}</span>
+      <span className="text-2xl font-semibold text-primary-900 dark:text-dark-text mt-0.5">{value}</span>
+      {trend && (
+        <div className="flex items-center gap-1.5 mt-0.5">
+          {renderTrend(trend)}
+          {sublabel && <span className="text-[9px] text-primary-400 dark:text-dark-muted">{sublabel}</span>}
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <div className="w-full overflow-hidden">
-      <div className="grid grid-cols-1 lg:grid-cols-[260px_minmax(0,1fr)] gap-5 md:gap-6 items-start">
-        <div className="rounded-xl border border-primary-200/65 dark:border-dark-border/65 bg-primary-50/70 dark:bg-dark-bg/35 p-3.5">
-          <p className="text-[10px] uppercase tracking-wider font-bold text-primary-400 dark:text-dark-muted">Last 6 months activity</p>
-          <div className="mt-2 flex items-baseline gap-1.5">
-            <span className="text-xl font-display font-semibold text-primary-900 dark:text-dark-text">{visibleContributions}</span>
-            <span className="text-[10px] text-primary-400 dark:text-dark-muted">completed</span>
-          </div>
-          <div className="mt-3 space-y-2">
-            <div className="flex items-center justify-between text-[11px]">
-              <span className="text-primary-500 dark:text-dark-muted">Last 7 days</span>
-              <span className="font-semibold text-primary-900 dark:text-dark-text">{last7Stats.current}</span>
-            </div>
-            <div className="flex items-center justify-between text-[10px]">
-              <span className="text-primary-400 dark:text-dark-muted">vs previous 7 days</span>
-              {renderTrend(last7Stats)}
-            </div>
-            <div className="h-px bg-primary-200/70 dark:bg-dark-border/70" />
-            <div className="flex items-center justify-between text-[11px]">
-              <span className="text-primary-500 dark:text-dark-muted">Last 30 days</span>
-              <span className="font-semibold text-primary-900 dark:text-dark-text">{last30Stats.current}</span>
-            </div>
-            <div className="flex items-center justify-between text-[10px]">
-              <span className="text-primary-400 dark:text-dark-muted">vs previous 30 days</span>
-              {renderTrend(last30Stats)}
-            </div>
-            <div className="h-px bg-primary-200/70 dark:bg-dark-border/70" />
-            <div className="grid grid-cols-2 gap-2 pt-0.5">
-              <div>
-                <p className="text-[10px] text-primary-400 dark:text-dark-muted">Current streak</p>
-                <p className="text-sm font-semibold text-primary-900 dark:text-dark-text">{currentStreak}d</p>
-              </div>
-              <div>
-                <p className="text-[10px] text-primary-400 dark:text-dark-muted">Best day</p>
-                <p className="text-sm font-semibold text-primary-900 dark:text-dark-text">{bestDayCount}</p>
-              </div>
-              <div>
-                <p className="text-[10px] text-primary-400 dark:text-dark-muted">Best streak</p>
-                <p className="text-sm font-semibold text-primary-900 dark:text-dark-text">{maxStreak}d</p>
-              </div>
-              <div>
-                <p className="text-[10px] text-primary-400 dark:text-dark-muted">All-time</p>
-                <p className="text-sm font-semibold text-primary-900 dark:text-dark-text">{allTimeContributions}</p>
-              </div>
-            </div>
-          </div>
-        </div>
+      {/* Main Number Section */}
+      <div className="flex items-baseline gap-3 mb-4">
+        <span className="text-4xl font-semibold text-primary-900 dark:text-dark-text">{visibleContributions}</span>
+        <span className="text-sm text-primary-500 dark:text-dark-muted">tasks completed in the last 6 months</span>
+      </div>
 
-        <div className="min-w-0 lg:h-full lg:flex lg:flex-col lg:justify-center">
-          <div className="w-full overflow-x-auto no-scrollbar">
-            <div className="w-max mx-auto">
-              <div className="relative mb-1 h-4 text-[10px] text-primary-400 dark:text-dark-muted">
-                {monthLabels.map((month) => (
-                  <div
-                    key={`${month.label}-${month.index}`}
-                    className="absolute top-0 transition-all duration-300"
-                    style={{ left: `${month.index * COL_WIDTH}px` }}
-                  >
-                    {month.label}
-                  </div>
-                ))}
+      {/* Heatmap */}
+      <div className="w-full overflow-x-auto no-scrollbar pb-2">
+        <div className="w-max mx-auto">
+          <div className="relative mb-2 h-4 text-[10px] text-primary-400 dark:text-dark-muted">
+            {monthLabels.map((month) => (
+              <div
+                key={`${month.label}-${month.index}`}
+                className="absolute top-0 transition-all duration-300"
+                style={{ left: `${month.index * COL_WIDTH}px` }}
+              >
+                {month.label}
               </div>
-
-              <div className={`flex ${GAP}`}>
-                {weeks.map((week, weekIndex) => (
-                  <div key={weekIndex} className={`flex flex-col ${GAP} shrink-0`}>
-                    {week.map((cell) => {
-                      const count = completionMap[cell.key] ?? 0;
-                      const isFuture = cell.key > todayKey;
-
-                      if (isFuture) {
-                        return <div key={cell.key} className={`${CELL_SIZE}`} />;
-                      }
-
-                      return (
-                        <div
-                          key={cell.key}
-                          title={`${count} ${count === 1 ? 'task' : 'tasks'} on ${cell.date.toLocaleDateString()}`}
-                          className={`${CELL_SIZE} rounded-sm transition-colors ${getColor(count)}`}
-                        />
-                      );
-                    })}
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-1.5 flex items-center justify-end">
-                <div className="flex items-center gap-1 text-[9px] text-primary-400 dark:text-dark-muted/90">
-                  <span>Less</span>
-                  <div className={`${CELL_SIZE} rounded-sm bg-[var(--heat-0)]`} />
-                  <div className={`${CELL_SIZE} rounded-sm bg-[var(--heat-1)]`} />
-                  <div className={`${CELL_SIZE} rounded-sm bg-[var(--heat-2)]`} />
-                  <div className={`${CELL_SIZE} rounded-sm bg-[var(--heat-3)]`} />
-                  <div className={`${CELL_SIZE} rounded-sm bg-[var(--heat-4)]`} />
-                  <span>More</span>
-                </div>
-              </div>
-            </div>
+            ))}
           </div>
 
-          {!hasAnyActivity && (
-            <p className="mt-2 text-[10px] text-primary-400 dark:text-dark-muted text-center lg:text-left">
-              Complete one task to start your activity trail and streak.
-            </p>
-          )}
+          <div className={`flex ${GAP}`}>
+            {weeks.map((week, weekIndex) => (
+              <div key={weekIndex} className={`flex flex-col ${GAP} shrink-0`}>
+                {week.map((cell) => {
+                  const count = completionMap[cell.key] ?? 0;
+                  const isFuture = cell.key > todayKey;
+
+                  if (isFuture) {
+                    return <div key={cell.key} className={`${CELL_SIZE}`} />;
+                  }
+
+                  return (
+                    <div
+                      key={cell.key}
+                      title={`${count} ${count === 1 ? 'task' : 'tasks'} on ${cell.date.toLocaleDateString()}`}
+                      className={`${CELL_SIZE} rounded-sm transition-colors ${getColor(count)}`}
+                    />
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-2 flex items-center justify-end">
+            <div className="flex items-center gap-1.5 text-[9px] text-primary-400 dark:text-dark-muted/90">
+              <span>Less</span>
+              <div className={`${CELL_SIZE} rounded-sm bg-[var(--heat-0)]`} />
+              <div className={`${CELL_SIZE} rounded-sm bg-[var(--heat-1)]`} />
+              <div className={`${CELL_SIZE} rounded-sm bg-[var(--heat-2)]`} />
+              <div className={`${CELL_SIZE} rounded-sm bg-[var(--heat-3)]`} />
+              <div className={`${CELL_SIZE} rounded-sm bg-[var(--heat-4)]`} />
+              <span>More</span>
+            </div>
+          </div>
         </div>
       </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-4">
+        <div className="rounded-xl border border-primary-200/50 dark:border-dark-border/50 bg-primary-50/50 dark:bg-dark-bg/30 p-3">
+          <StatCard label="Last 7 days" value={last7Stats.current} trend={last7Stats} sublabel="vs prev week" />
+        </div>
+        <div className="rounded-xl border border-primary-200/50 dark:border-dark-border/50 bg-primary-50/50 dark:bg-dark-bg/30 p-3">
+          <StatCard label="Last 30 days" value={last30Stats.current} trend={last30Stats} sublabel="vs prev month" />
+        </div>
+        <div className="rounded-xl border border-primary-200/50 dark:border-dark-border/50 bg-primary-50/50 dark:bg-dark-bg/30 p-3">
+          <StatCard label="Current streak" value={`${currentStreak}d`} />
+        </div>
+        <div className="rounded-xl border border-primary-200/50 dark:border-dark-border/50 bg-primary-50/50 dark:bg-dark-bg/30 p-3">
+          <StatCard label="Best streak" value={`${maxStreak}d`} />
+        </div>
+      </div>
+
+      {/* Secondary Stats */}
+      <div className="flex flex-wrap items-center gap-4 mt-3 text-[11px] text-primary-500 dark:text-dark-muted">
+        <span>All-time: <span className="font-semibold text-primary-700 dark:text-dark-text">{allTimeContributions}</span></span>
+        <span className="text-primary-200 dark:text-dark-border">·</span>
+        <span>Best day: <span className="font-semibold text-primary-700 dark:text-dark-text">{bestDayCount}</span> tasks</span>
+      </div>
+
+      {!hasAnyActivity && (
+        <p className="mt-4 text-[11px] text-primary-400 dark:text-dark-muted text-center">
+          Complete a task to start building your activity trail.
+        </p>
+      )}
     </div>
   );
 };

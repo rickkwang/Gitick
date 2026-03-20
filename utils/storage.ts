@@ -48,12 +48,44 @@ export const readStoredJson = <T>(
   return fallback;
 };
 
-export const writeStoredJson = (key: string, value: unknown) => {
-  if (typeof window === 'undefined') return;
+export const isLocalStorageAvailable = (): boolean => {
   try {
-    localStorage.setItem(key, JSON.stringify(value));
+    const testKey = '__storage_test__';
+    localStorage.setItem(testKey, testKey);
+    localStorage.removeItem(testKey);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+export const getLocalStorageUsage = (): { used: number; available: boolean } => {
+  let used = 0;
+  try {
+    for (const key in localStorage) {
+      if (Object.prototype.hasOwnProperty.call(localStorage, key)) {
+        used += localStorage.getItem(key)?.length ?? 0;
+      }
+    }
+  } catch {
+    return { used: 0, available: false };
+  }
+  return { used, available: true };
+};
+
+export const writeStoredJson = (key: string, value: unknown): boolean => {
+  if (typeof window === 'undefined') return false;
+  try {
+    const serialized = JSON.stringify(value);
+    localStorage.setItem(key, serialized);
+    return true;
   } catch (error) {
-    console.error(`Failed to persist localStorage key: ${key}`, error);
+    if (error instanceof DOMException && error.name === 'QuotaExceededError') {
+      console.error(`localStorage quota exceeded for key: ${key}. Consider clearing old data.`);
+    } else {
+      console.error(`Failed to persist localStorage key: ${key}`, error);
+    }
+    return false;
   }
 };
 
