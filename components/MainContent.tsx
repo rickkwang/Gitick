@@ -4,6 +4,7 @@ import { TaskInput } from './TaskInput';
 import { TaskItem } from './TaskItem';
 import { SearchFilterBar } from './SearchFilterBar';
 import { Task, FilterType } from '../types';
+import type { FocusModeType } from '../utils/focusTimer';
 
 const Heatmap = lazy(() => import('./Heatmap').then((module) => ({ default: module.Heatmap })));
 const GitGraph = lazy(() => import('./GitGraph').then((module) => ({ default: module.GitGraph })));
@@ -16,8 +17,8 @@ interface MainContentProps {
   startTimer: () => void;
   pauseTimer: () => void;
   resetTimer: () => void;
-  focusModeType: 'pomodoro' | 'stopwatch';
-  handleFocusModeChange: (mode: 'pomodoro' | 'stopwatch') => void;
+  focusModeType: FocusModeType;
+  handleFocusModeChange: (mode: FocusModeType) => void;
   tasks: Task[];
   filteredTasks: Task[];
   taskGroups: Record<string, Task[]> | null;

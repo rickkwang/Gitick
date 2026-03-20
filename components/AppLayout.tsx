@@ -6,16 +6,9 @@ import { CommandPalette } from './CommandPalette';
 import { ConfirmDialog } from './ConfirmDialog';
 import { SettingsModal } from './SettingsModal';
 import type { UseAppStateReturn } from '../hooks/useAppState';
+import { normalizeDesktopFontSize } from '../lib/utils';
 
 interface AppLayoutProps extends UseAppStateReturn {}
-
-const normalizeDesktopFontSize = (value: number): number => {
-  const DESKTOP_FONT_SIZE_OPTIONS = [10, 12, 14, 16, 18] as const;
-  if (!Number.isFinite(value)) return 12;
-  return DESKTOP_FONT_SIZE_OPTIONS.reduce((nearest, candidate) =>
-    Math.abs(candidate - value) < Math.abs(nearest - value) ? candidate : nearest,
-  );
-};
 
 export const AppLayout: React.FC<AppLayoutProps> = (props) => {
   const RIGHT_PANEL_BASE_MIN_WIDTH = 360;

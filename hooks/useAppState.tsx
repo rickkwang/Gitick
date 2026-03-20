@@ -10,6 +10,7 @@ import { sanitizeTaskList } from '../utils/taskSanitizer';
 import { getFilteredTasks, getTaskCounts, groupDashboardTasks } from '../utils/taskView';
 import { getNextRecurringDueDate } from '../utils/recurrence';
 import { todayLocalIsoDate } from '../utils/date';
+import { normalizeDesktopFontSize } from '../lib/utils';
 import {
   LEGACY_STORAGE_KEYS,
   STORAGE_KEYS,
@@ -21,15 +22,7 @@ import {
 } from '../utils/storage';
 
 const TASKS_PERSIST_DEBOUNCE_MS = 800;
-const DESKTOP_FONT_SIZE_OPTIONS = [10, 12, 14, 16, 18] as const;
 const MAX_CONCURRENT_TASKS_CREATED_SAME_MS = 1000;
-
-const normalizeDesktopFontSize = (value: number): number => {
-  if (!Number.isFinite(value)) return 12;
-  return DESKTOP_FONT_SIZE_OPTIONS.reduce((nearest, candidate) =>
-    Math.abs(candidate - value) < Math.abs(nearest - value) ? candidate : nearest,
-  );
-};
 
 type TaskUpdate = Task | ((prevTask: Task) => Task);
 
