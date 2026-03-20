@@ -10,9 +10,10 @@ interface StagingPanelProps {
   onDelete: (id: string) => void;
   onCommit: (task: Task) => void;
   projects: string[];
+  isCompact?: boolean;
 }
 
-const StagingPanelComponent: React.FC<StagingPanelProps> = ({ task, onClose, onUpdate, onDelete, onCommit, projects }) => {
+const StagingPanelComponent: React.FC<StagingPanelProps> = ({ task, onClose, onUpdate, onDelete, onCommit, projects, isCompact = false }) => {
   const [newSubtaskTitle, setNewSubtaskTitle] = useState('');
   const [newTag, setNewTag] = useState('');
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -129,7 +130,7 @@ const StagingPanelComponent: React.FC<StagingPanelProps> = ({ task, onClose, onU
   return (
       <div className={containerClasses}>
         {/* Header */}
-        <div className="h-14 flex items-center justify-between px-8 bg-primary-50 dark:bg-dark-surface shrink-0">
+        <div className={`h-14 flex items-center justify-between ${isCompact ? 'px-5' : 'px-8'} bg-primary-50 dark:bg-dark-surface shrink-0`}>
            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-primary-400 dark:text-dark-muted">
              <Icons.GitCommit />
              <span>Details</span>
@@ -142,7 +143,7 @@ const StagingPanelComponent: React.FC<StagingPanelProps> = ({ task, onClose, onU
            </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-8 py-4 space-y-6 custom-scroll bg-primary-50 dark:bg-dark-surface">
+        <div className={`flex-1 overflow-y-auto ${isCompact ? 'px-5 py-4 space-y-5' : 'px-8 py-4 space-y-6'} custom-scroll bg-primary-50 dark:bg-dark-surface`}>
           
           {/* Title - Clean & Large */}
           <div className="flex items-start gap-3">
@@ -153,7 +154,7 @@ const StagingPanelComponent: React.FC<StagingPanelProps> = ({ task, onClose, onU
                 {task.completed ? <div className="scale-125"><Icons.Checked /></div> : <div className="scale-125"><Icons.Circle /></div>}
              </button>
              <textarea
-                className="w-full text-2xl font-bold text-primary-900 dark:text-dark-text bg-transparent border-none p-0 outline-none resize-none focus:ring-0 placeholder:text-primary-300 dark:placeholder:text-dark-muted leading-snug font-sans"
+                className={`w-full ${isCompact ? 'text-xl' : 'text-2xl'} font-bold text-primary-900 dark:text-dark-text bg-transparent border-none p-0 outline-none resize-none focus:ring-0 placeholder:text-primary-300 dark:placeholder:text-dark-muted leading-snug font-sans`}
                 value={task.title}
                 onChange={(e) => onUpdate({...task, title: e.target.value})}
                 rows={2}
@@ -162,7 +163,7 @@ const StagingPanelComponent: React.FC<StagingPanelProps> = ({ task, onClose, onU
           </div>
 
           {/* Properties Flow - Horizontal Chips */}
-          <div className="flex flex-wrap items-center gap-2 pl-9">
+          <div className={`flex flex-wrap items-center gap-2 ${isCompact ? 'pl-0' : 'pl-9'}`}>
               {/* Due Date Chip */}
               <div className="relative" ref={dateContainerRef}>
                   <button
@@ -254,7 +255,7 @@ const StagingPanelComponent: React.FC<StagingPanelProps> = ({ task, onClose, onU
                </form>
           </div>
 
-          <hr className="border-primary-200/80 dark:border-dark-border ml-9" />
+          <hr className={`border-primary-200/80 dark:border-dark-border ${isCompact ? 'ml-0' : 'ml-9'}`} />
 
           {/* Description Section - Fluid */}
           <div className="flex gap-4 group">
@@ -330,7 +331,7 @@ const StagingPanelComponent: React.FC<StagingPanelProps> = ({ task, onClose, onU
         </div>
 
         {/* Footer Actions */}
-        <div className="p-6 bg-transparent flex gap-3">
+        <div className={`${isCompact ? 'p-4' : 'p-6'} bg-transparent flex gap-3`}>
            <button 
              onClick={() => onCommit(task)}
              className={`flex-1 py-3.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-all shadow-sm

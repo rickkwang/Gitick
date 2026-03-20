@@ -1,4 +1,4 @@
-import React, { Suspense, useEffect } from 'react';
+import React, { Suspense, useCallback, useEffect, useState } from 'react';
 import { Sidebar } from './Sidebar';
 import { StagingPanel } from './StagingPanel';
 import { MainContent } from './MainContent';
@@ -18,6 +18,11 @@ const normalizeDesktopFontSize = (value: number): number => {
 };
 
 export const AppLayout: React.FC<AppLayoutProps> = (props) => {
+  const RIGHT_PANEL_MIN_WIDTH = 360;
+  const RIGHT_PANEL_MAX_WIDTH = 560;
+  const RIGHT_PANEL_DEFAULT_WIDTH = 420;
+  const RIGHT_PANEL_STORAGE_KEY = 'gitick.rightPanelWidth';
+
   const {
     tasks,
     filter,
@@ -81,6 +86,22 @@ export const AppLayout: React.FC<AppLayoutProps> = (props) => {
     showTaskInput,
     emptyState,
   } = props;
+  const [rightPanelWidth, setRightPanelWidth] = useState(() => {
+    if (typeof window === 'undefined') return RIGHT_PANEL_DEFAULT_WIDTH;
+    const raw = window.localStorage.getItem(RIGHT_PANEL_STORAGE_KEY);
+    const parsed = Number(raw);
+    if (!Number.isFinite(parsed)) return RIGHT_PANEL_DEFAULT_WIDTH;
+    return Math.min(RIGHT_PANEL_MAX_WIDTH, Math.max(RIGHT_PANEL_MIN_WIDTH, parsed));
+  });
+  const [isResizingRightPanel, setIsResizingRightPanel] = useState(false);
+  const rightPanelActive = isRightSidebarOpen && filter !== 'focus';
+  const isRightPanelCompact = rightPanelWidth < 430;
+
+  const handleRightPanelResizeStart = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    if (!rightPanelActive) return;
+    setIsResizingRightPanel(true);
+  }, [rightPanelActive]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -116,6 +137,40 @@ export const AppLayout: React.FC<AppLayoutProps> = (props) => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isCommandPaletteOpen, setIsCommandPaletteOpen, setShowSettings, setSelectedTask]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    window.localStorage.setItem(RIGHT_PANEL_STORAGE_KEY, String(rightPanelWidth));
+  }, [rightPanelWidth]);
+
+  useEffect(() => {
+    if (!isResizingRightPanel) return;
+
+    const previousUserSelect = document.body.style.userSelect;
+    const previousCursor = document.body.style.cursor;
+    document.body.style.userSelect = 'none';
+    document.body.style.cursor = 'col-resize';
+
+    const handleMouseMove = (event: MouseEvent) => {
+      const viewportWidth = window.innerWidth;
+      const proposedWidth = viewportWidth - event.clientX;
+      const clampedWidth = Math.min(RIGHT_PANEL_MAX_WIDTH, Math.max(RIGHT_PANEL_MIN_WIDTH, proposedWidth));
+      setRightPanelWidth(clampedWidth);
+    };
+
+    const handleMouseUp = () => {
+      setIsResizingRightPanel(false);
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+      document.body.style.userSelect = previousUserSelect;
+      document.body.style.cursor = previousCursor;
+    };
+  }, [isResizingRightPanel]);
 
   return (
     <div
@@ -178,12 +233,27 @@ export const AppLayout: React.FC<AppLayoutProps> = (props) => {
         {/* COL 3: Staging Area */}
         <aside
           className={`
-             flex flex-col h-full bg-primary-50 dark:bg-dark-surface overflow-hidden border-l border-primary-200/70 dark:border-dark-border
-             transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)]
-             ${isRightSidebarOpen && filter !== 'focus' ? 'w-96 lg:w-80 md:w-72 translate-x-0 opacity-100' : 'w-0 translate-x-10 opacity-0'}
+             relative flex flex-col h-full bg-primary-50 dark:bg-dark-surface overflow-hidden border-l border-primary-200/70 dark:border-dark-border
+             transition-[width,opacity,transform] duration-300 ease-[cubic-bezier(0.2,0,0,1)]
+             ${isResizingRightPanel ? 'duration-0' : ''}
           `}
+          style={{
+            width: rightPanelActive ? rightPanelWidth : 0,
+            opacity: rightPanelActive ? 1 : 0,
+            transform: rightPanelActive ? 'translateX(0)' : 'translateX(24px)',
+          }}
         >
-          <div className="w-96 lg:w-80 md:w-72 h-full flex flex-col min-w-[18rem] max-w-[24rem]">
+          {rightPanelActive && (
+            <button
+              type="button"
+              aria-label="Resize details panel"
+              onMouseDown={handleRightPanelResizeStart}
+              className="absolute -left-1 top-0 h-full w-2 cursor-col-resize z-20 group"
+            >
+              <span className="absolute left-1/2 top-1/2 h-14 w-[2px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary-300/40 dark:bg-dark-muted/40 opacity-0 group-hover:opacity-100 transition-opacity" />
+            </button>
+          )}
+          <div className="w-full h-full flex flex-col min-w-0">
             {selectedTask ? (
               <StagingPanel
                 task={selectedTask}
@@ -192,6 +262,7 @@ export const AppLayout: React.FC<AppLayoutProps> = (props) => {
                 onDelete={deleteTask}
                 onCommit={requestToggleTask}
                 projects={projects}
+                isCompact={isRightPanelCompact}
               />
             ) : (
               <div className="h-full flex flex-col items-center justify-center text-center p-8 opacity-50">
