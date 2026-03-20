@@ -247,12 +247,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
     setIsAddingProject(true);
   }
 
-  // Silky smooth expand/collapse using transform instead of width
-  // transform is GPU-accelerated and doesn't cause layout recalculations
+  // Silky smooth expand/collapse
   const sidebarClasses = cn(
     'relative z-30 flex flex-col',
     activeFilter === 'focus' ? 'bg-transparent' : 'bg-[var(--app-bg)]',
-    'will-change-transform',
     renderCollapsed ? 'w-[84px]' : 'w-[260px]',
     'transition-[width] duration-300 ease-[cubic-bezier(0.2,0,0,1)]',
   );
