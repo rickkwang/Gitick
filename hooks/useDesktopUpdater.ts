@@ -298,7 +298,6 @@ export const useDesktopUpdater = ({
     const runCheck = async () => {
       try {
         hasAutoCheckedThisSessionRef.current = true;
-        localStorage.setItem(UPDATE_LAST_CHECK_TS_KEY, String(Date.now()));
         const result = await updater.checkForUpdates();
         if (result.reason === 'in-progress') {
           setDesktopUpdateStatus('Checking for updates...');
@@ -306,6 +305,8 @@ export const useDesktopUpdater = ({
           const friendly = getFriendlyUpdateError(result.message ?? result.reason ?? 'check failed', result.reason);
           setDesktopUpdateStatus(friendly);
           setIsCheckingDesktopUpdate(false);
+        } else {
+          localStorage.setItem(UPDATE_LAST_CHECK_TS_KEY, String(Date.now()));
         }
       } catch (error) {
         console.warn('Background update check call failed:', error);

@@ -628,6 +628,8 @@ ipcMain.handle('updater:check', async () => {
     const metadataVersion = await resolveAvailableVersionFromMetadata();
     if (metadataVersion) {
       sendUpdaterStatus({ type: 'available', version: metadataVersion });
+    } else {
+      sendUpdaterStatus({ type: 'not-available' });
     }
     return { ok: true };
   } catch (metadataError) {
