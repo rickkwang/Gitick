@@ -23,11 +23,12 @@ export const playSuccessSound = () => {
 
     osc.connect(gain);
     gain.connect(ctx.destination);
+    osc.onended = () => {
+      // Close AudioContext after sound finishes to release resources.
+      void ctx.close();
+    };
     osc.start();
     osc.stop(ctx.currentTime + 0.1);
-
-    // Close AudioContext after sound finishes to release resources
-    ctx.close();
   } catch (error) {
     console.error('Audio play failed', error);
   }
