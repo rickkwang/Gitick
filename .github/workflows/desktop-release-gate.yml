@@ -20,9 +20,6 @@ jobs:
         run: npm ci
 
       - name: Build desktop packages
-        env:
-          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
-          CSC_FOR_PULL_REQUEST: 'false'
         run: npm run desktop:dmg
 
       - name: Verify mac signatures (release gate)

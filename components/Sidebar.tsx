@@ -172,9 +172,7 @@ const navItemPropsEqual = (prev: NavItemProps, next: NavItemProps) => {
     prev.isFocusItem === next.isFocusItem &&
     prev.isFocusActive === next.isFocusActive &&
     prev.focusTimeLeft === next.focusTimeLeft &&
-    prev.isCollapsed === next.isCollapsed &&
-    prev.onFilterChange === next.onFilterChange &&
-    prev.onDeleteProject === next.onDeleteProject
+    prev.isCollapsed === next.isCollapsed
   );
 };
 

@@ -220,9 +220,5 @@ const TaskItemComponent: React.FC<TaskItemProps> = ({
 
 export const TaskItem = React.memo(TaskItemComponent, (prev, next) =>
   prev.task === next.task &&
-  prev.selected === next.selected &&
-  prev.onToggle === next.onToggle &&
-  prev.onSelect === next.onSelect &&
-  prev.onDelete === next.onDelete &&
-  prev.onEditTags === next.onEditTags,
+  prev.selected === next.selected,
 );

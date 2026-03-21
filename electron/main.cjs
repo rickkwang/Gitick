@@ -21,6 +21,7 @@ let updaterDownloadTask = null;
 let latestAvailableVersion = null;
 let latestDownloadedVersion = null;
 let externalInstallTask = null;
+let externalInstallWaiters = null; // Queue of resolve callbacks for concurrent callers
 
 const sendUpdaterStatus = (payload) => {
   if (!mainWindow || mainWindow.isDestroyed()) return;
@@ -314,6 +315,22 @@ const setupAutoUpdater = () => {
 };
 
 const downloadFileWithProgress = (sourceUrl, outputPath) => new Promise((resolve, reject) => {
+  let resStream = null;
+  let fileStream = null;
+
+  const cleanup = () => {
+    if (resStream) {
+      resStream.removeAllListeners();
+      resStream.resume();
+      resStream = null;
+    }
+    if (fileStream) {
+      fileStream.removeAllListeners();
+      fileStream.destroy();
+      fileStream = null;
+    }
+  };
+
   const request = (urlString) => {
     if (!isTrustedGitHubReleaseUrl(urlString)) {
       reject(new Error('Blocked untrusted download URL.'));
@@ -321,6 +338,8 @@ const downloadFileWithProgress = (sourceUrl, outputPath) => new Promise((resolve
     }
     const requestUrl = new URL(urlString);
     const req = https.get(requestUrl, (res) => {
+      resStream = res;
+
       if (
         res.statusCode &&
         res.statusCode >= 300 &&
@@ -328,20 +347,20 @@ const downloadFileWithProgress = (sourceUrl, outputPath) => new Promise((resolve
         res.headers.location
       ) {
         const redirectUrl = new URL(res.headers.location, requestUrl).toString();
-        res.resume();
+        cleanup();
         request(redirectUrl);
         return;
       }
 
       if (!res.statusCode || res.statusCode < 200 || res.statusCode >= 300) {
+        cleanup();
         reject(new Error(`Download failed with status ${res.statusCode || 'unknown'}`));
-        res.resume();
         return;
       }
 
       const total = Number(res.headers['content-length'] || 0);
       let downloaded = 0;
-      const file = fs.createWriteStream(outputPath);
+      fileStream = fs.createWriteStream(outputPath);
 
       res.on('data', (chunk) => {
         downloaded += chunk.length;
@@ -351,15 +370,24 @@ const downloadFileWithProgress = (sourceUrl, outputPath) => new Promise((resolve
         }
       });
 
-      res.on('error', reject);
-      file.on('error', reject);
-      file.on('finish', () => {
-        file.close(() => resolve(outputPath));
+      res.on('error', () => {
+        cleanup();
+        reject(new Error('Download stream error'));
       });
-      res.pipe(file);
+      fileStream.on('error', () => {
+        cleanup();
+        reject(new Error('File write error'));
+      });
+      fileStream.on('finish', () => {
+        fileStream.close(() => resolve(outputPath));
+      });
+      res.pipe(fileStream);
     });
 
-    req.on('error', reject);
+    req.on('error', () => {
+      cleanup();
+      reject(new Error('Request failed'));
+    });
   };
 
   request(sourceUrl);
@@ -484,8 +512,13 @@ echo "ok" > "$STATUS_FILE"
 };
 
 const startExternalMacUpdateInstall = async () => {
+  // If an installation is already in progress, wait for it instead of returning immediately.
+  // This prevents race conditions where rapid concurrent calls could trigger multiple installs.
   if (externalInstallTask) {
-    return { ok: true, reason: 'in-progress' };
+    return new Promise((resolve) => {
+      if (!externalInstallWaiters) externalInstallWaiters = [];
+      externalInstallWaiters.push(resolve);
+    });
   }
 
   const targetVersion = latestDownloadedVersion || latestAvailableVersion;
@@ -497,6 +530,7 @@ const startExternalMacUpdateInstall = async () => {
     };
   }
 
+  let installResult;
   externalInstallTask = (async () => {
     const workDir = path.join(os.tmpdir(), `gitick-update-${Date.now()}`);
     const zipPath = path.join(workDir, 'update.zip');
@@ -517,18 +551,16 @@ const startExternalMacUpdateInstall = async () => {
     }
 
     return scheduleMacExternalInstall(extractedApp);
-  })().finally(() => {
-    externalInstallTask = null;
-  });
+  })();
 
   try {
     const installPlan = await externalInstallTask;
-    setImmediate(() => app.quit());
-    return {
+    installResult = {
       ok: true,
       reason: 'external-install-started',
       message: `Installing update and restarting app...${installPlan?.logPath ? ` (log: ${installPlan.logPath})` : ''}`,
     };
+    setImmediate(() => app.quit());
   } catch (error) {
     try {
       // Fallback to manual installer path so users can still update.
@@ -536,14 +568,25 @@ const startExternalMacUpdateInstall = async () => {
     } catch (_) {
       // noop
     }
-    return {
+    installResult = {
       ok: false,
       reason: 'manual-install-required',
       message:
         `${error?.message || 'Unable to install update automatically.'} ` +
         'Gitick opened the latest release page for manual update.',
     };
+  } finally {
+    externalInstallTask = null;
+    // Resolve all waiting callers with the same result
+    if (externalInstallWaiters) {
+      for (const resolve of externalInstallWaiters) {
+        resolve(installResult);
+      }
+      externalInstallWaiters = null;
+    }
   }
+
+  return installResult;
 };
 
 function createMainWindow() {

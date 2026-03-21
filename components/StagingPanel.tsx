@@ -3,6 +3,14 @@ import { Task, Priority, Subtask } from '../types';
 import { Icons } from '../constants';
 import { DatePicker } from './DatePicker';
 
+// Fallback for crypto.randomUUID in environments where it may not be available
+const generateSubtaskId = (): string => {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  return `subtask-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+};
+
 interface StagingPanelProps {
   task: Task | null;
   onClose: () => void;
@@ -67,7 +75,7 @@ const StagingPanelComponent: React.FC<StagingPanelProps> = ({ task, onClose, onU
     e.preventDefault();
     if (!newSubtaskTitle.trim()) return;
     const newSub: Subtask = {
-      id: crypto.randomUUID(),
+      id: generateSubtaskId(),
       title: newSubtaskTitle.trim(),
       completed: false
     };

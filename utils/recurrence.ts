@@ -4,7 +4,10 @@ import { toLocalIsoDate } from './date';
 const isoToLocalDate = (iso: string): Date | null => {
   const [y, m, d] = iso.split('-').map(Number);
   if (!y || !m || !d) return null;
-  return new Date(y, m - 1, d);
+  const date = new Date(y, m - 1, d);
+  // Validate: invalid dates silently roll over (e.g., 2024-02-30 → Mar 1)
+  if (date.getMonth() !== m - 1 || date.getDate() !== d) return null;
+  return date;
 };
 
 const nextWeekday = (base: Date): Date => {

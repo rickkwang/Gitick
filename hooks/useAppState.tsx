@@ -24,6 +24,14 @@ import {
 const TASKS_PERSIST_DEBOUNCE_MS = 800;
 const MAX_CONCURRENT_TASKS_CREATED_SAME_MS = 1000;
 
+// Fallback for crypto.randomUUID in environments where it may not be available
+const generateTaskId = (): string => {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  return `task-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+};
+
 type TaskUpdate = Task | ((prevTask: Task) => Task);
 
 export interface UseAppStateReturn {
@@ -203,6 +211,15 @@ export function useAppState(): UseAppStateReturn {
   const tasksRef = useRef(tasks);
   const taskTiebreakerRef = useRef(0);
 
+  // Cleanup timers/RAF on unmount
+  useEffect(() => {
+    return () => {
+      if (toastTimeoutRef.current !== null) clearTimeout(toastTimeoutRef.current);
+      if (themeSwitchTimerRef.current !== null) clearTimeout(themeSwitchTimerRef.current);
+      if (themeSwitchRafRef.current !== null) cancelAnimationFrame(themeSwitchRafRef.current);
+    };
+  }, []);
+
   useEffect(() => {
     tasksRef.current = tasks;
   }, [tasks]);
@@ -247,7 +264,14 @@ export function useAppState(): UseAppStateReturn {
   useEffect(() => {
     let idleId: number | null = null;
     const timer = window.setTimeout(() => {
-      const persist = () => writeStoredJson(STORAGE_KEYS.tasks, tasks);
+      const persist = () => {
+        const ok = writeStoredJson(STORAGE_KEYS.tasks, tasks);
+        if (!ok) {
+          showToast('Failed to save tasks. Storage may be full.', () => {
+            clearAllLocalData();
+          });
+        }
+      };
       if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
         idleId = window.requestIdleCallback(persist, { timeout: 1000 });
       } else {
@@ -439,7 +463,7 @@ export function useAppState(): UseAppStateReturn {
   const addTask = useCallback((newTaskData: Omit<Task, 'id' | 'createdAt'>) => {
     const newTask: Task = {
       ...newTaskData,
-      id: crypto.randomUUID(),
+      id: generateTaskId(),
       createdAt: Date.now(),
       completedAt: undefined,
       recurrence: newTaskData.recurrence ?? null,
@@ -459,7 +483,7 @@ export function useAppState(): UseAppStateReturn {
       shouldGenerateNext && task
         ? {
             ...task,
-            id: crypto.randomUUID(),
+            id: generateTaskId(),
             completed: false,
             completedAt: undefined,
             dueDate: getNextRecurringDueDate(task.dueDate, task.recurrence),

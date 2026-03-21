@@ -1,7 +1,7 @@
 {
   "name": "gitick---task-manager",
   "private": true,
-  "version": "0.2.114",
+  "version": "0.2.115",
   "description": "Gitick desktop task manager",
   "author": "Myrick Wang",
   "repository": {
@@ -21,7 +21,8 @@
     "desktop:dev": "concurrently -k \"vite --host 127.0.0.1 --port 3000\" \"wait-on tcp:3000 && VITE_DEV_SERVER_URL=http://127.0.0.1:3000 electron .\"",
     "desktop:pack": "npm run build:stable && electron-builder --dir",
     "desktop:dmg": "npm run build:stable && electron-builder --mac",
-    "desktop:release": "npm run desktop:dmg && node scripts/verify-mac-signatures.mjs && node scripts/publish-desktop-release.mjs",
+    "desktop:release": "npm run clean:release && npm run desktop:dmg && node scripts/verify-mac-signatures.mjs && node scripts/publish-desktop-release.mjs",
+    "clean:release": "node scripts/clean-release.mjs",
     "desktop:release:signed": "node scripts/check-notarization-env.mjs && npm run desktop:release",
     "test": "vitest",
     "test:run": "vitest run",
@@ -37,6 +38,7 @@
     "tailwind-merge": "^3.5.0"
   },
   "devDependencies": {
+    "@electron/notarize": "^2.5.0",
     "@types/node": "^22.14.0",
     "@vitejs/plugin-react": "^5.0.0",
     "concurrently": "^9.1.2",

@@ -113,6 +113,12 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
     return [...createCommand, ...viewCommands, ...taskMatches];
   }, [query, tasks]);
 
+  // Keep a ref to access current commands without closure staleness
+  const commandsRef = useRef(commands);
+  useEffect(() => {
+    commandsRef.current = commands;
+  }, [commands]);
+
   useEffect(() => {
     if (activeIndex >= commands.length) {
       setActiveIndex(commands.length > 0 ? commands.length - 1 : 0);
@@ -142,7 +148,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
         return;
       }
       if (event.key === 'Enter') {
-        const command = commands[activeIndex];
+        const command = commandsRef.current[activeIndex];
         if (!command) return;
         event.preventDefault();
         if (command.kind === 'view') onChangeFilter(command.filter);
