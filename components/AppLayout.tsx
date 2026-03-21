@@ -206,7 +206,8 @@ export const AppLayout: React.FC<AppLayoutProps> = (props) => {
 
   return (
     <div
-      className={`[--app-radius:0.75rem] flex flex-col h-dvh rounded-[var(--app-radius)] font-sans text-primary-900 dark:text-dark-text bg-[var(--app-bg)] overflow-hidden transition-colors duration-300 selection:bg-primary-900 selection:text-white dark:selection:bg-primary-100 dark:selection:text-primary-900 ${
+      style={{ borderRadius: 'var(--app-radius)' }}
+      className={`[--app-radius:10px] flex flex-col h-dvh font-sans text-primary-900 dark:text-dark-text bg-[var(--app-bg)] overflow-hidden transition-colors duration-300 selection:bg-primary-900 selection:text-white dark:selection:bg-primary-100 dark:selection:text-primary-900 ${
         isStartupStatic ? 'startup-static' : ''
       }`}
     >

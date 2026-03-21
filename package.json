@@ -1,7 +1,7 @@
 {
   "name": "gitick---task-manager",
   "private": true,
-  "version": "0.2.112",
+  "version": "0.2.114",
   "description": "Gitick desktop task manager",
   "author": "Myrick Wang",
   "repository": {
@@ -22,6 +22,7 @@
     "desktop:pack": "npm run build:stable && electron-builder --dir",
     "desktop:dmg": "npm run build:stable && electron-builder --mac",
     "desktop:release": "npm run desktop:dmg && node scripts/verify-mac-signatures.mjs && node scripts/publish-desktop-release.mjs",
+    "desktop:release:signed": "node scripts/check-notarization-env.mjs && npm run desktop:release",
     "test": "vitest",
     "test:run": "vitest run",
     "test:run:stable": "node scripts/run-command-stable.mjs --label test --timeout 180000 --retries 1 -- \"vitest run\"",
@@ -59,8 +60,13 @@
       "electron/**/*",
       "package.json"
     ],
+    "afterSign": "scripts/notarize.cjs",
     "mac": {
       "category": "public.app-category.productivity",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist",
       "target": [
         {
           "target": "dmg",

@@ -110,6 +110,15 @@
         --accent-coral-border: rgba(217, 119, 87, 0.28);
       }
 
+      html,
+      body,
+      #root {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
       @media (min-width: 1024px) {
         html {
           font-size: var(--desktop-font-size);
@@ -117,7 +126,7 @@
       }
 
       body {
-        background-color: var(--app-bg);
+        background: transparent;
         color: var(--app-fg);
         font-family: 'Work Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
         overflow: hidden;
