@@ -48,10 +48,11 @@ const NavItemComponent: React.FC<NavItemProps> = ({
   isFocusActive,
   focusTimeLeft,
   onDeleteProject,
-  isCollapsed
+  isCollapsed,
 }) => {
   const isActive = activeFilter === id;
   const rootClasses = 'px-0';
+  const showText = !isCollapsed;
   
   const formatTimeMini = (seconds: number) => {
     const m = Math.floor(seconds / 60);
@@ -69,10 +70,10 @@ const NavItemComponent: React.FC<NavItemProps> = ({
             onFilterChange(id);
           }}
           className={`
-            group/btn relative flex items-center text-sm font-medium rounded-xl outline-none select-none
-            transition-all duration-200
+            group/btn relative flex items-center justify-start text-sm font-medium rounded-xl outline-none select-none
+            transition-colors duration-200
             h-[40px] px-0
-            w-full justify-start
+            w-full
               ${
                 isActive
                   ? 'text-primary-900 dark:text-dark-text'
@@ -88,12 +89,11 @@ const NavItemComponent: React.FC<NavItemProps> = ({
               {label}
             </span>
           )}
-          {/* Icon Container - Fixed Width 48px (w-12) */}
+          {/* Icon Container */}
           <span
             className={`
-              shrink-0 flex items-center justify-center transition-colors duration-200
-              w-[44px] h-[40px] absolute top-0
-              ${isCollapsed ? 'left-1/2 -translate-x-1/2' : 'left-0'}
+              absolute left-0 top-0 shrink-0 flex items-center justify-center
+              w-[44px] h-[40px]
             `}
           >
             <span
@@ -113,9 +113,9 @@ const NavItemComponent: React.FC<NavItemProps> = ({
           
           {/* Text Container */}
           <div className={`
-            flex items-center flex-1 min-w-0 overflow-hidden whitespace-nowrap pl-[52px]
-            transition-opacity duration-300 ease-[cubic-bezier(0.2,0,0,1)]
-            ${isCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}
+            ml-[44px] flex items-center flex-1 min-w-0 overflow-hidden whitespace-nowrap
+            transition-[opacity,max-width,padding] duration-220 ease-[cubic-bezier(0.2,0,0,1)]
+            ${showText ? 'opacity-100 max-w-[240px] pl-2 pr-0' : 'opacity-0 pointer-events-none max-w-0 pl-0 pr-0'}
           `}>
             <span className={`truncate pr-2 ${isActive ? 'font-semibold' : ''}`}>{label}</span>
             
@@ -300,12 +300,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
 
           <div className="flex-1 overflow-hidden">
-            <div className="h-full overflow-y-auto no-scrollbar py-2.5 space-y-5 px-2.5 pr-4 -mr-2">
+            <div
+              className={cn(
+                'h-full overflow-y-auto no-scrollbar py-2.5 space-y-5',
+                renderCollapsed ? 'px-2.5' : 'px-2.5 pr-4 -mr-2',
+              )}
+            >
             {/* Section: Overview */}
             <div>
               <div className={`
                  overflow-hidden px-2.5 flex items-center
-                 transition-[opacity,transform] duration-300 ease-[cubic-bezier(0.2,0,0,1)]
+                 transition-[opacity,transform,max-height,margin] duration-300 ease-[cubic-bezier(0.2,0,0,1)]
                  ${renderCollapsed ? 'opacity-0 pointer-events-none -translate-y-1 max-h-0 mb-0' : 'opacity-100 translate-y-0 max-h-5 mb-1.5'}
               `}>
                 <h3 className="text-[10px] font-semibold text-primary-900 dark:text-dark-text uppercase tracking-[0.14em] whitespace-nowrap pl-1">Overview</h3>
@@ -339,7 +344,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <div>
               <div className={`
                  flex items-center justify-between px-2.5 group overflow-hidden whitespace-nowrap
-                 transition-[opacity,transform] duration-300 ease-[cubic-bezier(0.2,0,0,1)]
+                 transition-[opacity,transform,max-height,margin] duration-300 ease-[cubic-bezier(0.2,0,0,1)]
                  ${renderCollapsed ? 'opacity-0 pointer-events-none -translate-y-1 max-h-0 mb-0' : 'opacity-100 translate-y-0 max-h-5 mb-1.5'}
               `}>
                   <h3 className="text-[10px] font-semibold text-primary-900 dark:text-dark-text uppercase tracking-[0.14em] pl-1">Projects</h3>
@@ -395,7 +400,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <div>
                <div className={`
                   overflow-hidden px-3 flex items-center
-                  transition-[opacity,transform] duration-300 ease-[cubic-bezier(0.2,0,0,1)]
+                  transition-[opacity,transform,max-height,margin] duration-300 ease-[cubic-bezier(0.2,0,0,1)]
                   ${renderCollapsed ? 'opacity-0 pointer-events-none -translate-y-1 max-h-0 mb-0' : 'opacity-100 translate-y-0 max-h-6 mb-2'}
                `}>
                  <h3 className="text-[10px] font-semibold text-primary-900 dark:text-dark-text uppercase tracking-[0.14em] whitespace-nowrap pl-1">History</h3>
@@ -416,7 +421,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
              {/* Subtle Divider */}
              <div className="mx-2 mb-1.5 h-px bg-primary-200/80 dark:bg-dark-border/80" />
              
-             <div className={renderCollapsed ? 'md:px-0 px-1.5' : 'px-1.5'}> {/* Wrapper to match NavItem padding */}
+             <div className={renderCollapsed ? 'px-2.5' : 'px-1.5'}> {/* Wrapper to match NavItem padding */}
                 <button 
                   onClick={onOpenSettings}
                   className={`
@@ -428,7 +433,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   title="Settings & Profile"
                 >
                   {/* Icon Container - Perfectly aligned with NavItem w-12 */}
-                  <div className={`shrink-0 flex items-center justify-center transition-colors duration-200 ${renderCollapsed ? 'w-10 h-10' : 'w-11 h-full'}`}>
+                  <div className={`shrink-0 flex items-center justify-center transition-[width,height,color] duration-300 ease-[cubic-bezier(0.2,0,0,1)] ${renderCollapsed ? 'w-10 h-10' : 'w-11 h-full'}`}>
                       <div className={`w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-bold text-white shadow-sm ring-1 ring-white/10 dark:ring-black/10 overflow-hidden ${userProfile.avatarColor}`}>
                           {userProfile.avatarImage ? (
                             <img src={userProfile.avatarImage} alt="User avatar" className="w-full h-full object-cover" />
