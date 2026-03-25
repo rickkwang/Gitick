@@ -35,7 +35,6 @@ module.exports = async function notarizeAfterSign(context) {
       appleApiKey,
       appleApiKeyId,
       appleApiIssuer,
-      tool: 'notarytool',
     });
     console.log('[notarize] Completed via API key.');
     return;
@@ -46,7 +45,6 @@ module.exports = async function notarizeAfterSign(context) {
     appleId,
     appleIdPassword,
     teamId: appleTeamId,
-    tool: 'notarytool',
   });
   console.log('[notarize] Completed via Apple ID app-specific password.');
 };

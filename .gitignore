@@ -12,6 +12,7 @@ dist
 dist-ssr
 release
 bun.lock
+bun.lockb
 *.local
 
 # Editor directories and files

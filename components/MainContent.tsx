@@ -12,7 +12,7 @@ const GitGraph = lazy(() => import('./GitGraph').then((module) => ({ default: mo
 interface MainContentProps {
   filter: FilterType;
   focusTimeLeft: number;
-  handleSetTimeLeft: (time: number) => void;
+  handleSetTimeLeft: (val: number | ((prev: number) => number)) => void;
   isFocusActive: boolean;
   startTimer: () => void;
   pauseTimer: () => void;
@@ -41,7 +41,7 @@ interface MainContentProps {
     email: string;
     jobTitle: string;
     avatarColor: string;
-    avatarImage: string;
+    avatarImage?: string;
   };
 }
 

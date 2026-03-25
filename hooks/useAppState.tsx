@@ -106,7 +106,7 @@ export interface UseAppStateReturn {
   startTimer: () => void;
   pauseTimer: () => void;
   resetTimer: () => void;
-  handleSetTimeLeft: (time: number) => void;
+  handleSetTimeLeft: (val: number | ((prev: number) => number)) => void;
   handleFocusModeChange: (mode: FocusModeType) => void;
   resetFocusState: () => void;
 

@@ -26,7 +26,7 @@ export const getFilteredTasks = (
   if (filter === 'completed') {
     filtered = filtered.filter((task) => task.completed);
   } else if (filter === 'next7days') {
-    filtered = filtered.filter((task) => !task.completed && Boolean(task.dueDate) && task.dueDate <= next7daysStr);
+    filtered = filtered.filter((task) => !task.completed && Boolean(task.dueDate) && (task.dueDate as string) <= next7daysStr);
   } else if (filter === 'today') {
     filtered = filtered.filter((task) => !task.completed && task.dueDate === todayStr);
   } else if (filter === 'inbox') {

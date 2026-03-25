@@ -15,11 +15,11 @@ interface SettingsModalProps {
   tasks: Task[];
   onImportData: (tasks: Task[]) => void;
   onClearData: () => void;
-  desktopAppVersion: string;
+  desktopAppVersion?: string;
   canCheckDesktopUpdate: boolean;
-  desktopUpdateStatus: string;
+  desktopUpdateStatus?: string;
   isCheckingDesktopUpdate: boolean;
-  onCheckDesktopUpdate: () => Promise<void>;
+  onCheckDesktopUpdate: () => void;
 }
 
 type SettingsTab = 'profile' | 'general' | 'data' | 'about';
@@ -50,14 +50,12 @@ const SettingsModalComponent: React.FC<SettingsModalProps> = ({
 
   // Focus trap: save and restore focus
   useEffect(() => {
-    if (onClose) {
-      previousActiveElement.current = document.activeElement as HTMLElement;
-    }
+    previousActiveElement.current = document.activeElement as HTMLElement;
     return () => {
       previousActiveElement.current?.focus();
       previousActiveElement.current = null;
     };
-  }, [onClose]);
+  }, []);
 
   // Local state for profile form to avoid constant re-renders on every keystroke
   const [localProfile, setLocalProfile] = useState(userProfile);
