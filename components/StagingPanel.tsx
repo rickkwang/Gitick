@@ -2,14 +2,7 @@ import React, { useState, useRef, useEffect, type SetStateAction } from 'react';
 import { Task, Priority, Subtask } from '../types';
 import { Icons } from '../constants';
 import { DatePicker } from './DatePicker';
-
-// Fallback for crypto.randomUUID in environments where it may not be available
-const generateSubtaskId = (): string => {
-  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-    return crypto.randomUUID();
-  }
-  return `subtask-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-};
+import { generateSubtaskId } from '../utils/id';
 
 interface StagingPanelProps {
   task: Task | null;
@@ -32,6 +25,8 @@ const StagingPanelComponent: React.FC<StagingPanelProps> = ({ task, onClose, onU
   const dateContainerRef = useRef<HTMLDivElement>(null);
   const titleDebounceRef = useRef<number | null>(null);
   const descriptionDebounceRef = useRef<number | null>(null);
+  // Track if blur is pending to avoid race conditions
+  const isBlurPendingRef = useRef(false);
 
   // Auto-resize textarea
   useEffect(() => {
@@ -195,10 +190,14 @@ const StagingPanelComponent: React.FC<StagingPanelProps> = ({ task, onClose, onU
                     setTitleDraft(nextTitle);
                     if (titleDebounceRef.current) window.clearTimeout(titleDebounceRef.current);
                     titleDebounceRef.current = window.setTimeout(() => {
-                      onUpdate((prevTask) => ({ ...prevTask, title: nextTitle }));
+                      // Only save if no blur is pending (blur already saved)
+                      if (!isBlurPendingRef.current) {
+                        onUpdate((prevTask) => ({ ...prevTask, title: nextTitle }));
+                      }
                     }, 150);
                   }}
                   onBlur={() => {
+                    isBlurPendingRef.current = true;
                     if (titleDebounceRef.current) {
                       window.clearTimeout(titleDebounceRef.current);
                       titleDebounceRef.current = null;
@@ -206,6 +205,8 @@ const StagingPanelComponent: React.FC<StagingPanelProps> = ({ task, onClose, onU
                     if (titleDraft !== task.title) {
                       onUpdate((prevTask) => ({ ...prevTask, title: titleDraft }));
                     }
+                    // Reset blur flag after a short delay to allow debounce to be rescheduled
+                    setTimeout(() => { isBlurPendingRef.current = false; }, 0);
                   }}
                   rows={2}
                   placeholder="Task title"
@@ -353,10 +354,14 @@ const StagingPanelComponent: React.FC<StagingPanelProps> = ({ task, onClose, onU
                     setDescriptionDraft(nextDescription);
                     if (descriptionDebounceRef.current) window.clearTimeout(descriptionDebounceRef.current);
                     descriptionDebounceRef.current = window.setTimeout(() => {
-                      onUpdate((prevTask) => ({ ...prevTask, description: nextDescription }));
+                      // Only save if no blur is pending (blur already saved)
+                      if (!isBlurPendingRef.current) {
+                        onUpdate((prevTask) => ({ ...prevTask, description: nextDescription }));
+                      }
                     }, 220);
                   }}
                   onBlur={() => {
+                    isBlurPendingRef.current = true;
                     if (descriptionDebounceRef.current) {
                       window.clearTimeout(descriptionDebounceRef.current);
                       descriptionDebounceRef.current = null;
@@ -365,6 +370,7 @@ const StagingPanelComponent: React.FC<StagingPanelProps> = ({ task, onClose, onU
                     if (descriptionDraft !== persistedDescription) {
                       onUpdate((prevTask) => ({ ...prevTask, description: descriptionDraft }));
                     }
+                    setTimeout(() => { isBlurPendingRef.current = false; }, 0);
                   }}
                   placeholder="Add a description..."
                 />

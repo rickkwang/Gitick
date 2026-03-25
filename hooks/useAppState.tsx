@@ -11,6 +11,7 @@ import { getFilteredTasks, getTaskCounts, groupDashboardTasks } from '../utils/t
 import { getNextRecurringDueDate } from '../utils/recurrence';
 import { todayLocalIsoDate } from '../utils/date';
 import { normalizeDesktopFontSize } from '../lib/utils';
+import { generateTaskId } from '../utils/id';
 import {
   LEGACY_STORAGE_KEYS,
   STORAGE_KEYS,
@@ -23,14 +24,6 @@ import {
 
 const TASKS_PERSIST_DEBOUNCE_MS = 800;
 const MAX_CONCURRENT_TASKS_CREATED_SAME_MS = 1000;
-
-// Fallback for crypto.randomUUID in environments where it may not be available
-const generateTaskId = (): string => {
-  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-    return crypto.randomUUID();
-  }
-  return `task-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-};
 
 type TaskUpdate = Task | ((prevTask: Task) => Task);
 

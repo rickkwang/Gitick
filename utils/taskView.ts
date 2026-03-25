@@ -37,7 +37,7 @@ export const getFilteredTasks = (
     filtered = filtered.filter((task) => !task.completed);
   }
 
-  return [...filtered].sort((taskA, taskB) => {
+  return filtered.sort((taskA, taskB) => {
     if (taskA.completed !== taskB.completed) return taskA.completed ? 1 : -1;
 
     const scoreA = PRIORITY_SCORE[taskA.priority];

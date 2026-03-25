@@ -1,4 +1,5 @@
 import { Priority, Task, RecurrenceType } from '../types';
+import { generateTaskId } from './id';
 
 const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -6,13 +7,6 @@ const isPriority = (value: unknown): value is Priority =>
   value === Priority.HIGH || value === Priority.MEDIUM || value === Priority.LOW;
 const isRecurrenceType = (value: unknown): value is RecurrenceType =>
   value === 'daily' || value === 'weekly' || value === 'monthly' || value === 'weekdays';
-
-const createId = () => {
-  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-    return crypto.randomUUID();
-  }
-  return `task-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-};
 
 const normalizeSubtasks = (value: unknown): Task['subtasks'] => {
   if (!Array.isArray(value)) return [];
@@ -25,7 +19,7 @@ const normalizeSubtasks = (value: unknown): Task['subtasks'] => {
       if (!title) return null;
 
       return {
-        id: typeof rawSub.id === 'string' && rawSub.id.trim() ? rawSub.id : createId(),
+        id: typeof rawSub.id === 'string' && rawSub.id.trim() ? rawSub.id : generateTaskId(),
         title,
         completed: Boolean(rawSub.completed),
       };
@@ -66,7 +60,7 @@ const normalizeTask = (raw: unknown): Task | null => {
   const dueDate = typeof item.dueDate === 'string' && ISO_DATE_RE.test(item.dueDate) ? item.dueDate : undefined;
 
   return {
-    id: typeof item.id === 'string' && item.id.trim() ? item.id : createId(),
+    id: typeof item.id === 'string' && item.id.trim() ? item.id : generateTaskId(),
     title,
     description: typeof item.description === 'string' ? item.description : '',
     completed,
@@ -99,7 +93,7 @@ export const sanitizeTaskList = (value: unknown): Task[] => {
         seenIds.add(task.id);
         return task;
       }
-      const nextTask = { ...task, id: createId() };
+      const nextTask = { ...task, id: generateTaskId() };
       seenIds.add(nextTask.id);
       return nextTask;
     });

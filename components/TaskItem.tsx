@@ -218,7 +218,4 @@ const TaskItemComponent: React.FC<TaskItemProps> = ({
   );
 };
 
-export const TaskItem = React.memo(TaskItemComponent, (prev, next) =>
-  prev.task === next.task &&
-  prev.selected === next.selected,
-);
+export const TaskItem = React.memo(TaskItemComponent);

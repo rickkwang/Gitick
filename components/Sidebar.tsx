@@ -209,8 +209,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const [newProjectName, setNewProjectName] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const renderCollapsed = isCollapsed;
-
   useEffect(() => {
     if (isAddingProject) {
       inputRef.current?.focus();
@@ -227,7 +225,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   };
 
   const startAddProject = () => {
-    if (renderCollapsed) {
+    if (isCollapsed) {
        toggleCollapse();
     }
     setIsAddingProject(true);
@@ -237,7 +235,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const sidebarClasses = cn(
     'relative z-30 flex flex-col',
     activeFilter === 'focus' ? 'bg-transparent' : 'bg-[var(--app-bg)]',
-    renderCollapsed ? 'w-[84px]' : 'w-[260px]',
+    isCollapsed ? 'w-[84px]' : 'w-[260px]',
     'transition-[width] duration-300 ease-[cubic-bezier(0.2,0,0,1)]',
   );
 
@@ -252,7 +250,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
              <div className={`
                 flex absolute inset-0 px-6 items-center justify-between
                 transition-opacity duration-300 ease-[cubic-bezier(0.2,0,0,1)]
-                ${renderCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}
+                ${isCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}
              `}>
                <div className="flex items-center gap-2.5 overflow-hidden">
                  <span className="shrink-0 w-12 h-12 flex items-center justify-center [&>svg]:w-6 [&>svg]:h-6 text-primary-900 dark:text-dark-text">
@@ -277,7 +275,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
              <div className={`
                 flex absolute inset-0 items-center justify-center
                 transition-opacity duration-300 ease-[cubic-bezier(0.2,0,0,1)]
-                ${renderCollapsed ? 'opacity-100' : 'opacity-0 pointer-events-none'}
+                ${isCollapsed ? 'opacity-100' : 'opacity-0 pointer-events-none'}
              `}>
                 <button 
                   onClick={toggleCollapse} 
@@ -305,7 +303,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <div className={`
                  overflow-hidden px-2.5 h-5 mb-1.5 flex items-center
                  transition-opacity duration-300 ease-[cubic-bezier(0.2,0,0,1)]
-                 ${renderCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}
+                 ${isCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}
               `}>
                 <h3 className="text-[10px] font-semibold text-primary-900 dark:text-dark-text uppercase tracking-[0.14em] whitespace-nowrap pl-1">Overview</h3>
               </div>
@@ -313,23 +311,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <NavItem 
                   id="next7days" label="Dashboard" icon={Icons.Dashboard} 
                   activeFilter={activeFilter} onFilterChange={onFilterChange} taskCount={taskCounts['next7days']} 
-                  isCollapsed={renderCollapsed}
+                  isCollapsed={isCollapsed}
                 />
                 <NavItem 
                   id="inbox" label="Inbox" icon={Icons.Inbox} 
                   activeFilter={activeFilter} onFilterChange={onFilterChange} taskCount={taskCounts['inbox']} 
-                  isCollapsed={renderCollapsed}
+                  isCollapsed={isCollapsed}
                 />
                 <NavItem 
                   id="today" label="Today" icon={Icons.Calendar} 
                   activeFilter={activeFilter} onFilterChange={onFilterChange} taskCount={taskCounts['today']} 
-                  isCollapsed={renderCollapsed}
+                  isCollapsed={isCollapsed}
                 />
                 <NavItem 
                   id="focus" label="Focus Mode" icon={Icons.Clock} 
                   activeFilter={activeFilter} onFilterChange={onFilterChange} taskCount={0} 
                   isFocusItem={true} isFocusActive={isFocusActive} focusTimeLeft={focusTimeLeft}
-                  isCollapsed={renderCollapsed}
+                  isCollapsed={isCollapsed}
                 />
               </nav>
             </div>
@@ -339,7 +337,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <div className={`
                  flex items-center justify-between px-2.5 group overflow-hidden whitespace-nowrap h-5 mb-1.5
                  transition-opacity duration-300 ease-[cubic-bezier(0.2,0,0,1)]
-                 ${renderCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}
+                 ${isCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}
               `}>
                   <h3 className="text-[10px] font-semibold text-primary-900 dark:text-dark-text uppercase tracking-[0.14em] pl-1">Projects</h3>
                   <button
@@ -364,11 +362,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     activeFilter={activeFilter} 
                     onFilterChange={onFilterChange} 
                                        taskCount={taskCounts[project] || 0} 
-                    isCollapsed={renderCollapsed}
+                    isCollapsed={isCollapsed}
                   />
                 ))}
 
-                {isAddingProject && !renderCollapsed && (
+                {isAddingProject && !isCollapsed && (
                   <form onSubmit={handleCreateProject} className="px-1 py-0.5 animate-in fade-in slide-in-from-top-2 duration-200">
                     <div className="flex items-center gap-2.5 px-2.5 py-1.5 bg-primary-100 dark:bg-dark-bg rounded-lg border border-primary-200 dark:border-dark-border focus-within:border-[var(--accent)] focus-within:ring-1 focus-within:ring-[var(--accent)] transition-all shadow-sm">
                       <span className="text-primary-900 dark:text-dark-text"><Icons.Folder /></span>
@@ -395,7 +393,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                <div className={`
                   overflow-hidden px-3 h-6 mb-2 flex items-center
                   transition-opacity duration-300 ease-[cubic-bezier(0.2,0,0,1)]
-                  ${renderCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}
+                  ${isCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}
                `}>
                  <h3 className="text-[10px] font-semibold text-primary-900 dark:text-dark-text uppercase tracking-[0.14em] whitespace-nowrap pl-1">History</h3>
                </div>
@@ -403,7 +401,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   <NavItem 
                     id="completed" label="Repository" icon={Icons.CheckCircle} 
                     activeFilter={activeFilter} onFilterChange={onFilterChange} taskCount={0} 
-                    isCollapsed={renderCollapsed}
+                    isCollapsed={isCollapsed}
                   />
                </nav>
             </div>
@@ -415,19 +413,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
              {/* Subtle Divider */}
              <div className="mx-2 mb-1.5 h-px bg-primary-200/80 dark:bg-dark-border/80" />
              
-             <div className={renderCollapsed ? 'md:px-0 px-1.5' : 'px-1.5'}> {/* Wrapper to match NavItem padding */}
+             <div className={isCollapsed ? 'md:px-0 px-1.5' : 'px-1.5'}> {/* Wrapper to match NavItem padding */}
                 <button 
                   onClick={onOpenSettings}
                   className={`
                     group flex items-center w-full rounded-xl transition-colors duration-200 outline-none
                     h-10 px-0
-                    ${renderCollapsed ? 'md:justify-center' : ''}
+                    ${isCollapsed ? 'md:justify-center' : ''}
                     hover:bg-primary-200/50 dark:hover:bg-dark-border
                   `}
                   title="Settings & Profile"
                 >
                   {/* Icon Container - Perfectly aligned with NavItem w-12 */}
-                  <div className={`shrink-0 flex items-center justify-center transition-colors duration-200 ${renderCollapsed ? 'w-10 h-10' : 'w-11 h-full'}`}>
+                  <div className={`shrink-0 flex items-center justify-center transition-colors duration-200 ${isCollapsed ? 'w-10 h-10' : 'w-11 h-full'}`}>
                       <div className={`w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-bold text-white shadow-sm ring-1 ring-white/10 dark:ring-black/10 overflow-hidden ${userProfile.avatarColor}`}>
                           {userProfile.avatarImage ? (
                             <img src={userProfile.avatarImage} alt="User avatar" className="w-full h-full object-cover" />
@@ -441,7 +439,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   <div className={cn(
                       'flex items-center justify-between flex-1 min-w-0 overflow-hidden pr-2.5 pl-1',
                       'transition-opacity duration-300 ease-[cubic-bezier(0.2,0,0,1)]',
-                      renderCollapsed ? 'hidden' : 'opacity-100'
+                      isCollapsed ? 'hidden' : 'opacity-100'
                   )}>
                       <div className="flex flex-col items-start leading-tight">
                           <span className="text-sm font-bold text-primary-900 dark:text-dark-text truncate max-w-[120px]">{userProfile.name}</span>
