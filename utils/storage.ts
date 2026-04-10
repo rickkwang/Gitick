@@ -62,10 +62,10 @@ export const isLocalStorageAvailable = (): boolean => {
 export const getLocalStorageUsage = (): { used: number; available: boolean } => {
   let used = 0;
   try {
-    for (const key in localStorage) {
-      if (Object.prototype.hasOwnProperty.call(localStorage, key)) {
-        used += localStorage.getItem(key)?.length ?? 0;
-      }
+    const keys = Object.keys(localStorage);
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i];
+      used += localStorage.getItem(key)?.length ?? 0;
     }
   } catch {
     return { used: 0, available: false };

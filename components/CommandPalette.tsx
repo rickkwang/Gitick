@@ -70,8 +70,15 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
     if (!open) {
       setQuery('');
       setActiveIndex(0);
-      // Restore focus when closing
-      previousActiveElement.current?.focus();
+      // Restore focus when closing - check element still exists in DOM
+      try {
+        if (previousActiveElement.current && previousActiveElement.current.isConnected) {
+          previousActiveElement.current.focus();
+        }
+      } catch (e) {
+        // Element no longer in DOM or not focusable, ignore
+        console.warn('Failed to restore focus:', e);
+      }
       previousActiveElement.current = null;
     } else {
       // Save current focus and trap focus in palette
@@ -148,6 +155,8 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
         return;
       }
       if (event.key === 'Enter') {
+        // Boundary check: ensure activeIndex is valid for current commands
+        if (activeIndex < 0 || activeIndex >= commandsRef.current.length) return;
         const command = commandsRef.current[activeIndex];
         if (!command) return;
         event.preventDefault();

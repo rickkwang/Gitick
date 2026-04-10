@@ -43,6 +43,18 @@ export const useFocusTimer = ({ filter, showToast }: UseFocusTimerOptions): UseF
     setIsFocusActive(false);
   }, []);
 
+  // Refs to avoid interval restart on every render
+  const filterRef = useRef(filter);
+  const showToastRef = useRef(showToast);
+
+  useEffect(() => {
+    filterRef.current = filter;
+  }, [filter]);
+
+  useEffect(() => {
+    showToastRef.current = showToast;
+  }, [showToast]);
+
   const startTimer = () => {
     if (isFocusActiveRef.current) return;
     const startSeconds = Math.max(1, Math.floor(focusTimeLeft));
@@ -64,7 +76,7 @@ export const useFocusTimer = ({ filter, showToast }: UseFocusTimerOptions): UseF
     setFocusTimeLeft(getDefaultFocusSeconds(focusModeType));
   };
 
-  // Timer tick
+  // Timer tick - only depends on [isFocusActive, focusEndTime] to avoid interval restart
   useEffect(() => {
     let interval: number | null = null;
 
@@ -81,16 +93,17 @@ export const useFocusTimer = ({ filter, showToast }: UseFocusTimerOptions): UseF
             completedMode === 'focus'
               ? 'Focus session finished. Time for a break.'
               : 'Break finished. Back to focus.';
-          showToast(msg);
+          showToastRef.current(msg);
           playSuccessSound();
           if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
             new Notification('Gitick Timer', { body: msg, icon: '/favicon.ico' });
           }
           switchTimerMode(nextMode, true);
         } else {
-          const shouldSyncThisTick = filter === 'focus' || diff <= 60 || diff % 10 === 0;
+          const shouldSyncThisTick = filterRef.current === 'focus' || diff <= 60 || diff % 10 === 0;
           if (shouldSyncThisTick) {
-            setFocusTimeLeft((prev) => (prev === diff ? prev : diff));
+            // Always sync if value differs from real remaining time by any amount
+            setFocusTimeLeft((prev) => (prev !== diff ? diff : prev));
           }
           document.title = `${formatTimerLabel(diff)} - ${focusModeType === 'focus' ? 'Focus' : 'Break'}`;
         }
@@ -102,7 +115,32 @@ export const useFocusTimer = ({ filter, showToast }: UseFocusTimerOptions): UseF
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [isFocusActive, focusEndTime, focusModeType, switchTimerMode, filter, showToast]);
+  }, [isFocusActive, focusEndTime]);
+
+  // Re-sync timer when tab becomes visible again (browser may have throttled the interval)
+  useEffect(() => {
+    if (!isFocusActive || !focusEndTime) return;
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        const diff = Math.ceil((focusEndTime - Date.now()) / 1000);
+        if (diff <= 0) {
+          // Timer finished while hidden — treat as expired
+          const completedMode = focusModeType;
+          const nextMode = completedMode === 'focus' ? 'break' : 'focus';
+          const msg = completedMode === 'focus'
+            ? 'Focus session finished. Time for a break.'
+            : 'Break finished. Back to focus.';
+          showToastRef.current(msg);
+          playSuccessSound();
+          switchTimerMode(nextMode, true);
+        } else {
+          setFocusTimeLeft(diff);
+        }
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [isFocusActive, focusEndTime, focusModeType, switchTimerMode]);
 
   const handleSetTimeLeft = (val: number | ((prev: number) => number)) => {
     setFocusTimeLeft((prev) => {

@@ -298,21 +298,24 @@ export const AppLayout: React.FC<AppLayoutProps> = (props) => {
                 isCompact={isRightPanelCompact}
               />
             ) : (
-              <div className="h-full flex flex-col items-center justify-center text-center p-8 opacity-50">
-                <svg
-                  className="w-8 h-8 text-primary-400 dark:text-dark-muted"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
-                  />
-                </svg>
-                <p className="mt-4 text-xs font-mono text-primary-400">Select a task to view staging details</p>
+              <div className="h-full flex flex-col items-center justify-center text-center p-8">
+                <div className="w-14 h-14 rounded-xl bg-primary-100 dark:bg-dark-bg border border-primary-200/60 dark:border-dark-border/60 flex items-center justify-center mb-4 opacity-50">
+                  <svg
+                    className="w-6 h-6 text-primary-400 dark:text-dark-muted"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                    />
+                  </svg>
+                </div>
+                <p className="text-xs font-medium text-primary-400 dark:text-dark-muted opacity-70">选择任务查看详情</p>
+                <p className="mt-1 text-[10px] font-mono text-primary-300 dark:text-dark-muted/60 opacity-60">Click any task to inspect</p>
               </div>
             )}
           </div>

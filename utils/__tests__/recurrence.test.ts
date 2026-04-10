@@ -13,6 +13,14 @@ describe('recurrence utils', () => {
     expect(getNextRecurringDueDate('2026-03-19', { type: 'monthly' })).toBe('2026-04-19');
   });
 
+  it('clamps monthly recurrence to end of next month when day does not exist', () => {
+    expect(getNextRecurringDueDate('2026-01-31', { type: 'monthly' })).toBe('2026-02-28');
+  });
+
+  it('handles leap year for monthly recurrence', () => {
+    expect(getNextRecurringDueDate('2024-01-31', { type: 'monthly' })).toBe('2024-02-29');
+  });
+
   it('handles weekdays recurrence from friday to monday', () => {
     expect(getNextRecurringDueDate('2026-03-20', { type: 'weekdays' })).toBe('2026-03-23');
   });

@@ -52,8 +52,8 @@ const TaskItemComponent: React.FC<TaskItemProps> = ({
       className={cn(
         'group relative flex items-start gap-4 py-4 px-5 rounded-xl cursor-pointer transition-all duration-200 border active:scale-[0.995]',
         selected
-          ? 'bg-primary-50 dark:bg-dark-surface border-transparent shadow-md dark:shadow-none z-10'
-          : 'bg-primary-50 dark:bg-dark-surface border-primary-200/75 dark:border-dark-border/85 hover:bg-primary-50 dark:hover:bg-dark-surface',
+          ? 'bg-white dark:bg-dark-surface border-primary-300/60 dark:border-dark-border shadow-[0_2px_12px_rgba(20,20,19,0.08),0_1px_3px_rgba(20,20,19,0.06)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.3)] z-10'
+          : 'bg-primary-50 dark:bg-dark-surface border-primary-200/75 dark:border-dark-border/85 hover:bg-white dark:hover:bg-dark-surface hover:border-primary-300/50 dark:hover:border-dark-border hover:shadow-[0_1px_6px_rgba(20,20,19,0.06)] dark:hover:shadow-none',
         task.completed ? 'opacity-70' : 'opacity-100',
       )}
     >
@@ -61,11 +61,11 @@ const TaskItemComponent: React.FC<TaskItemProps> = ({
       {!task.completed && (
         <div
           className={cn(
-            'absolute left-2 top-1/2 -translate-y-1/2 h-8 w-1 rounded-full transition-opacity duration-300',
+            'absolute left-2 top-1/2 -translate-y-1/2 h-8 w-1 rounded-full transition-opacity duration-200 ease-in-out',
             priorityColor[task.priority],
             task.priority === Priority.HIGH
-              ? 'opacity-60 group-hover:opacity-90'
-              : 'opacity-0 group-hover:opacity-90',
+              ? 'opacity-50 group-hover:opacity-85'
+              : 'opacity-0 group-hover:opacity-75',
           )}
         />
       )}

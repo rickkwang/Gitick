@@ -130,7 +130,7 @@ const TaskInputComponent: React.FC<TaskInputProps> = ({ onAddTask, activeList, p
   return (
     <div className="w-full relative z-30">
       <form onSubmit={handleSubmit} className="group transition-all duration-300">
-        <div className="relative overflow-visible rounded-xl border border-primary-200/90 dark:border-dark-border/80 bg-primary-50/98 dark:bg-dark-surface shadow-sm transition-all duration-200 ease-out focus-within:shadow-md">
+        <div className="relative overflow-visible rounded-xl border border-primary-200/90 dark:border-dark-border/80 bg-white dark:bg-dark-surface shadow-sm transition-all duration-200 ease-out focus-within:shadow-md focus-within:border-primary-300/80 dark:focus-within:border-dark-border">
             <div className="flex min-h-[60px] items-center gap-2.5 pl-4 pr-3.5">
                 <input
                     ref={inputRef}

@@ -68,6 +68,33 @@ const SettingsModalComponent: React.FC<SettingsModalProps> = ({
     // Visual feedback usually goes here, but we'll assume fast update
   };
 
+  const compressImage = (dataUrl: string, maxWidth = 200, maxHeight = 200, quality = 0.85): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let { width, height } = img;
+        // Scale down if needed while preserving aspect ratio
+        if (width > maxWidth || height > maxHeight) {
+          const ratio = Math.min(maxWidth / width, maxHeight / height);
+          width = Math.round(width * ratio);
+          height = Math.round(height * ratio);
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          reject(new Error('Failed to get canvas context'));
+          return;
+        }
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = () => reject(new Error('Failed to load image'));
+      img.src = dataUrl;
+    });
+  };
+
   const handleAvatarUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -85,18 +112,32 @@ const SettingsModalComponent: React.FC<SettingsModalProps> = ({
       return;
     }
     const reader = new FileReader();
-    reader.onload = (loadEvent) => {
+    reader.onload = async (loadEvent) => {
       const result = loadEvent.target?.result;
       if (typeof result !== 'string') {
         setAvatarError('Failed to read avatar image.');
         return;
       }
-      const nextProfile = { ...localProfile, avatarImage: result };
-      setLocalProfile(nextProfile);
-      onUpdateProfile(nextProfile);
-      setAvatarError('');
-      if (avatarInputRef.current) {
-        avatarInputRef.current.value = '';
+      try {
+        // Compress image to avoid exceeding localStorage quota (typically 5-10MB)
+        const compressed = await compressImage(result, 200, 200, 0.85);
+        // Guard: compressed data-URL should be well under 200KB
+        const MAX_AVATAR_BYTES = 200 * 1024;
+        if (compressed.length > MAX_AVATAR_BYTES) {
+          setAvatarError('Image is too large after compression. Please choose a smaller image.');
+          if (avatarInputRef.current) avatarInputRef.current.value = '';
+          return;
+        }
+        const nextProfile = { ...localProfile, avatarImage: compressed };
+        setLocalProfile(nextProfile);
+        onUpdateProfile(nextProfile);
+        setAvatarError('');
+        if (avatarInputRef.current) {
+          avatarInputRef.current.value = '';
+        }
+      } catch {
+        setAvatarError('Failed to process image. Please try a different file.');
+        if (avatarInputRef.current) avatarInputRef.current.value = '';
       }
     };
     reader.readAsDataURL(file);

@@ -10,6 +10,34 @@ interface ErrorBoundaryState {
   error: Error | null;
 }
 
+const ERROR_LOG_KEY = 'gitick:error_log';
+const MAX_ERRORS_STORED = 10;
+
+interface StoredError {
+  message: string;
+  stack?: string;
+  timestamp: number;
+  componentStack?: string;
+}
+
+const storeErrorLocally = (error: Error, componentStack?: string) => {
+  try {
+    const stored = localStorage.getItem(ERROR_LOG_KEY);
+    const errors: StoredError[] = stored ? JSON.parse(stored) : [];
+    errors.unshift({
+      message: error.message,
+      stack: error.stack,
+      timestamp: Date.now(),
+      componentStack,
+    });
+    // Keep only the most recent errors
+    const trimmed = errors.slice(0, MAX_ERRORS_STORED);
+    localStorage.setItem(ERROR_LOG_KEY, JSON.stringify(trimmed));
+  } catch {
+    // Silent fail if localStorage is unavailable or quota exceeded
+  }
+};
+
 // Class component with explicit state and props typing for React 19
 class ErrorBoundaryImpl extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
   declare state: ErrorBoundaryState;
@@ -26,6 +54,7 @@ class ErrorBoundaryImpl extends React.Component<ErrorBoundaryProps, ErrorBoundar
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error('ErrorBoundary caught an error:', error, errorInfo);
+    storeErrorLocally(error, errorInfo.componentStack ?? undefined);
   }
 
   render() {

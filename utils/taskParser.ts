@@ -15,7 +15,9 @@ const PRIORITY_REGEX = /!(high|medium|low)/i;
 const TAG_REGEX = /#([^\s#@!]+)/gu;
 const PROJECT_REGEX = /@([^\s#@!]+)/iu;
 const PROJECT_TOKEN_REGEX = /@([^\s#@!]+)/gu;
-const DATE_STRIP_REGEX = /\b(today|tod|tomorrow|tmr|tom|next week)\b/gi;
+// Negative lookbehind ensures we don't match "todayismy birthday" etc.
+// Using (?<![a-zA-Z]) instead of \b for cross-browser compatibility
+const DATE_STRIP_REGEX = /(?<![a-zA-Z])(today|tod|tomorrow|tmr|tom|next week)(?![a-zA-Z])/gi;
 
 export const parseTaskInput = (text: string, projects: string[] = []): ParsedTask => {
   let priority: Priority | undefined;
@@ -43,15 +45,15 @@ export const parseTaskInput = (text: string, projects: string[] = []): ParsedTas
     projectFound = projects.find((p) => p.toLowerCase() === pName.toLowerCase());
   }
 
-  // Date
+  // Date - use same negative lookbehind pattern for consistency
   const lowerText = text.toLowerCase();
-  if (/\b(today|tod)\b/.test(lowerText)) {
+  if (/(?<![a-zA-Z])(today|tod)(?![a-zA-Z])/i.test(lowerText)) {
     dueDate = todayLocalIsoDate();
     dateLabel = 'Today';
-  } else if (/\b(tomorrow|tmr|tom)\b/.test(lowerText)) {
+  } else if (/(?<![a-zA-Z])(tomorrow|tmr|tom)(?![a-zA-Z])/i.test(lowerText)) {
     dueDate = addDaysLocalIsoDate(1);
     dateLabel = 'Tomorrow';
-  } else if (/\b(next week)\b/.test(lowerText)) {
+  } else if (/(?<![a-zA-Z])(next week)(?![a-zA-Z])/i.test(lowerText)) {
     const today = new Date();
     const dayOfWeek = today.getDay();
     // Calculate days until next Monday (0 = Sunday, 1 = Monday, ..., 6 = Saturday)

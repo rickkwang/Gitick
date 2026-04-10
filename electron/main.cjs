@@ -56,7 +56,19 @@ const compareSemver = (a, b) => {
   return 0;
 };
 
-const shellSingleQuote = (value) => `'${String(value).replace(/'/g, `'\\''`)}'`;
+// Validate that value is a safe path (alphanumeric, hyphen, underscore, dot, slash)
+  // This prevents shell injection when shellSingleQuote is used with unsanitized input
+  const isSafePath = (value) => /^[a-zA-Z0-9_/.,-]*$/.test(value);
+
+  const shellSingleQuote = (value) => {
+    const str = String(value);
+    // Defensive check: reject values with potentially dangerous characters
+    // that could break out of the single-quoted string or inject commands
+    if (!isSafePath(str)) {
+      throw new Error(`Unsafe path rejected by shellSingleQuote: ${str}`);
+    }
+    return `'${str.replace(/'/g, `'\\''`)}'`;
+  };
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const fetchText = (sourceUrl) => new Promise((resolve, reject) => {

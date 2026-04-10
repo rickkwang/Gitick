@@ -10,12 +10,29 @@ const isoToLocalDate = (iso: string): Date | null => {
   return date;
 };
 
+// nextWeekday skips weekend days (Saturday=6, Sunday=0).
+// Note: This is a simplified implementation that always skips weekends.
+// A more complete solution would allow configuring which days to skip.
 const nextWeekday = (base: Date): Date => {
   const next = new Date(base);
   do {
     next.setDate(next.getDate() + 1);
   } while (next.getDay() === 0 || next.getDay() === 6);
   return next;
+};
+
+const nextMonthSameDayOrLast = (base: Date): Date => {
+  const year = base.getFullYear();
+  const month = base.getMonth();
+  const day = base.getDate();
+
+  const targetMonth = month + 1;
+  const targetYear = year + Math.floor(targetMonth / 12);
+  const normalizedTargetMonth = targetMonth % 12;
+  const lastDayOfTargetMonth = new Date(targetYear, normalizedTargetMonth + 1, 0).getDate();
+  const targetDay = Math.min(day, lastDayOfTargetMonth);
+
+  return new Date(targetYear, normalizedTargetMonth, targetDay);
 };
 
 export const getNextRecurringDueDate = (
@@ -37,8 +54,7 @@ export const getNextRecurringDueDate = (
       next.setDate(next.getDate() + 7);
       return toLocalIsoDate(next);
     case 'monthly':
-      next.setMonth(next.getMonth() + 1);
-      return toLocalIsoDate(next);
+      return toLocalIsoDate(nextMonthSameDayOrLast(anchor));
     case 'weekdays':
       return toLocalIsoDate(nextWeekday(anchor));
     default:

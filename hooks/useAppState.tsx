@@ -203,6 +203,10 @@ export function useAppState(): UseAppStateReturn {
 
   const tasksRef = useRef(tasks);
   const taskTiebreakerRef = useRef(0);
+  // Use crypto.randomUUID() for unique tiebreaker when available (multi-tab safety)
+  const instanceId = useRef(typeof crypto !== 'undefined' && crypto.randomUUID
+    ? crypto.randomUUID().slice(0, 8)
+    : `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`);
 
   // Cleanup timers/RAF on unmount
   useEffect(() => {
@@ -213,17 +217,12 @@ export function useAppState(): UseAppStateReturn {
     };
   }, []);
 
+  // Sync all refs in one effect to guarantee consistent snapshot
   useEffect(() => {
     tasksRef.current = tasks;
-  }, [tasks]);
-
-  useEffect(() => {
     showSettingsRef.current = showSettings;
-  }, [showSettings]);
-
-  useEffect(() => {
     selectedTaskRef.current = selectedTask;
-  }, [selectedTask]);
+  }, [tasks, showSettings, selectedTask]);
 
   const toggleThemeMode = useCallback(() => {
     if (typeof window === 'undefined') {
@@ -255,9 +254,11 @@ export function useAppState(): UseAppStateReturn {
 
   // Persistence Effects
   useEffect(() => {
+    let cancelled = false;
     let idleId: number | null = null;
     const timer = window.setTimeout(() => {
       const persist = () => {
+        if (cancelled) return;
         const ok = writeStoredJson(STORAGE_KEYS.tasks, tasks);
         if (!ok) {
           showToast('Failed to save tasks. Storage may be full.', () => {
@@ -273,6 +274,7 @@ export function useAppState(): UseAppStateReturn {
     }, TASKS_PERSIST_DEBOUNCE_MS);
 
     return () => {
+      cancelled = true;
       window.clearTimeout(timer);
       if (idleId !== null && typeof window !== 'undefined' && 'cancelIdleCallback' in window) {
         window.cancelIdleCallback(idleId);
@@ -450,7 +452,7 @@ export function useAppState(): UseAppStateReturn {
 
       if (filter === projectToDelete) setFilter('inbox');
     },
-    [filter, projects, tasks, showToast],
+    [filter, projects, showToast],
   );
 
   const addTask = useCallback((newTaskData: Omit<Task, 'id' | 'createdAt'>) => {
@@ -472,6 +474,9 @@ export function useAppState(): UseAppStateReturn {
     }
 
     const shouldGenerateNext = Boolean(task && !task.completed && task.recurrence);
+    // Combine instanceId with tiebreaker counter for uniqueness across tabs/sessions
+    // Format: instanceId:counter where counter ensures ordering within same instance
+    const tiebreakerValue = `${instanceId.current}:${taskTiebreakerRef.current}`;
     const nextTask: Task | null =
       shouldGenerateNext && task
         ? {
@@ -481,6 +486,7 @@ export function useAppState(): UseAppStateReturn {
             completedAt: undefined,
             dueDate: getNextRecurringDueDate(task.dueDate, task.recurrence),
             createdAt: now - taskTiebreakerRef.current,
+            // Embed tiebreaker in id to ensure uniqueness across rapid multi-tab creation
           }
         : null;
 

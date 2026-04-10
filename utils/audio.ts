@@ -2,14 +2,34 @@ type LegacyAudioWindow = Window & {
   webkitAudioContext?: typeof AudioContext;
 };
 
-export const playSuccessSound = () => {
-  if (typeof window === 'undefined') return;
+let audioContext: AudioContext | null = null;
+let audioContextState: 'open' | 'closed' = 'open';
+
+const getAudioContext = (): AudioContext | null => {
+  if (typeof window === 'undefined') return null;
 
   const audioWindow = window as LegacyAudioWindow;
   const AudioContextCtor = window.AudioContext || audioWindow.webkitAudioContext;
-  if (!AudioContextCtor) return;
+  if (!AudioContextCtor) return null;
 
-  const ctx = new AudioContextCtor();
+  // Use the real context state instead of a separate tracking variable
+  if (!audioContext || audioContext.state === 'closed') {
+    audioContext = new AudioContextCtor();
+    audioContextState = 'open';
+  }
+
+  // Resume suspended context (e.g. after user interaction policy)
+  if (audioContext.state === 'suspended') {
+    void audioContext.resume();
+  }
+
+  return audioContext;
+};
+
+export const playSuccessSound = () => {
+  const ctx = getAudioContext();
+  if (!ctx) return;
+
   const osc = ctx.createOscillator();
   const gain = ctx.createGain();
 
@@ -23,21 +43,10 @@ export const playSuccessSound = () => {
   osc.connect(gain);
   gain.connect(ctx.destination);
 
-  const stopAndClose = () => {
-    try {
-      void ctx.close();
-    } catch {
-      // AudioContext may already be closed
-    }
-  };
-
-  osc.onended = stopAndClose;
-
   try {
     osc.start();
     osc.stop(ctx.currentTime + 0.1);
   } catch (error) {
     console.error('Audio play failed', error);
-    stopAndClose();
   }
 };

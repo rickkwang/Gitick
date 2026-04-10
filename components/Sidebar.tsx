@@ -235,7 +235,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const sidebarClasses = cn(
     'relative z-30 flex flex-col',
     activeFilter === 'focus' ? 'bg-transparent' : 'bg-[var(--app-bg)]',
-    isCollapsed ? 'w-[84px]' : 'w-[260px]',
+    isCollapsed ? 'w-[96px]' : 'w-[260px]',
     'transition-[width] duration-300 ease-[cubic-bezier(0.2,0,0,1)]',
   );
 
@@ -248,7 +248,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
              {/* EXPANDED HEADER */}
              <div className={`
-                flex absolute inset-0 px-6 items-center justify-between
+                flex absolute inset-0 px-6 items-center justify-between z-20
                 transition-opacity duration-300 ease-[cubic-bezier(0.2,0,0,1)]
                 ${isCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}
              `}>
@@ -260,9 +260,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                    Gitick
                  </span>
                </div>
-               
-               <button 
-                  onClick={toggleCollapse} 
+
+               <button
+                  onClick={toggleCollapse}
                   aria-label="Collapse sidebar"
                   className="flex items-center justify-center p-2 rounded-lg text-primary-400 hover:text-primary-900 dark:hover:text-dark-text hover:bg-primary-200/50 dark:hover:bg-dark-border transition-colors"
                   title="Collapse Sidebar"
@@ -273,7 +273,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
              {/* COLLAPSED HEADER */}
              <div className={`
-                flex absolute inset-0 items-center justify-center
+                flex absolute inset-0 items-center justify-center z-10
                 transition-opacity duration-300 ease-[cubic-bezier(0.2,0,0,1)]
                 ${isCollapsed ? 'opacity-100' : 'opacity-0 pointer-events-none'}
              `}>

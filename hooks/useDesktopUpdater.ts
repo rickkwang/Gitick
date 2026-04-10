@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, type MutableRefObject } from 'react';
 
 export interface DesktopConfirmDialogRequest {
   title: string;
@@ -73,6 +73,8 @@ export const useDesktopUpdater = ({
   const desktopUpdaterSignalRef = useRef(false);
   const hasAutoCheckedThisSessionRef = useRef(false);
   const lastPromptedAvailableVersionRef = useRef<string | null>(null);
+  // mountedRef tracks whether the hook is still active to guard async callbacks
+  const mountedRef = useRef(true) as MutableRefObject<boolean>;
 
   const [desktopAppVersion, setDesktopAppVersion] = useState('');
   const [desktopUpdateStatus, setDesktopUpdateStatus] = useState('');
@@ -162,11 +164,19 @@ export const useDesktopUpdater = ({
     }
   }, [finishDesktopUpdateFlow, showToast]);
 
+  // Track mount/unmount lifecycle at hook level
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
   useEffect(() => {
     if (!enabled || !window.gitickDesktop?.updater) return;
 
     const updater = window.gitickDesktop.updater;
-    void updater.getVersion().then((version) => setDesktopAppVersion(version)).catch(() => undefined);
+    void updater.getVersion().then((version) => setDesktopAppVersion(version)).catch((e) => console.warn('Failed to get desktop version:', e));
     void updater
       .diagnose()
       .then((diagnosis) => {
@@ -180,7 +190,7 @@ export const useDesktopUpdater = ({
           setDesktopUpdateStatus((current) => current || warning);
         }
       })
-      .catch(() => undefined);
+      .catch((e) => console.warn('Desktop updater diagnose failed:', e));
 
     desktopUpdaterSignalRef.current = false;
 
@@ -299,6 +309,7 @@ export const useDesktopUpdater = ({
       try {
         hasAutoCheckedThisSessionRef.current = true;
         const result = await updater.checkForUpdates();
+        if (!mountedRef.current) return;
         if (result.reason === 'in-progress') {
           setDesktopUpdateStatus('Checking for updates...');
         } else if (!result.ok) {
@@ -309,6 +320,7 @@ export const useDesktopUpdater = ({
           localStorage.setItem(UPDATE_LAST_CHECK_TS_KEY, String(Date.now()));
         }
       } catch (error) {
+        if (!mountedRef.current) return;
         console.warn('Background update check call failed:', error);
         setDesktopUpdateStatus('Unable to check updates right now.');
         setIsCheckingDesktopUpdate(false);
