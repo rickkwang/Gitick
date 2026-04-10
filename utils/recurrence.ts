@@ -56,7 +56,8 @@ export const getNextRecurringDueDate = (
     case 'monthly':
       return toLocalIsoDate(nextMonthSameDayOrLast(anchor));
     case 'weekdays':
-      return toLocalIsoDate(nextWeekday(anchor));
+      next.setDate(next.getDate() + 1);
+      return toLocalIsoDate(nextWeekday(next));
     default:
       return currentDueDate;
   }

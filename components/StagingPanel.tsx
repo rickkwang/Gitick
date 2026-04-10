@@ -205,8 +205,8 @@ const StagingPanelComponent: React.FC<StagingPanelProps> = ({ task, onClose, onU
                     if (titleDraft !== task.title) {
                       onUpdate((prevTask) => ({ ...prevTask, title: titleDraft }));
                     }
-                    // Reset blur flag after a short delay to allow debounce to be rescheduled
-                    setTimeout(() => { isBlurPendingRef.current = false; }, 0);
+                    // Reset blur flag synchronously after save to allow debounce to be rescheduled
+                    isBlurPendingRef.current = false;
                   }}
                   rows={2}
                   placeholder="Task title"
@@ -226,7 +226,7 @@ const StagingPanelComponent: React.FC<StagingPanelProps> = ({ task, onClose, onU
                       onClick={() => setShowDatePicker(!showDatePicker)}
                       className={`${chipBase} shadow-sm ${
                         task.dueDate
-                          ? 'bg-[var(--status-info-bg)] border-[var(--status-info-border)] text-[var(--status-info-text)] shadow-[0_0_0_1px_rgba(60,128,255,.08)]'
+                          ? 'bg-[var(--status-info-bg)] border-[var(--status-info-border)] text-[var(--status-info-text)] shadow-[0_0_0_1px_rgba(198,138,90,.2)]'
                           : neutralChip
                       }`}
                   >
@@ -347,7 +347,7 @@ const StagingPanelComponent: React.FC<StagingPanelProps> = ({ task, onClose, onU
              <div className="flex-1 space-y-1">
                 <textarea
                   ref={descRef}
-                  className="w-full rounded-lg bg-white/55 dark:bg-dark-surface/55 px-3 py-2 text-sm text-primary-800 dark:text-dark-text outline-none min-h-[60px] max-h-[180px] overflow-y-auto resize-none placeholder:text-primary-500 dark:placeholder:text-dark-muted leading-relaxed font-sans border border-dashed border-primary-300 dark:border-dark-border/95 focus:border-primary-500 dark:focus:border-dark-muted focus:bg-white dark:focus:bg-dark-surface"
+                  className="w-full rounded-lg bg-white/55 dark:bg-dark-surface/55 px-3 py-2 text-sm text-primary-800 dark:text-dark-text outline-none min-h-[60px] max-h-[180px] overflow-y-auto resize-none placeholder:text-primary-500 dark:placeholder:text-dark-muted leading-relaxed font-sans border border-primary-200 dark:border-dark-border/95 focus:border-primary-400 dark:focus:border-dark-muted focus:bg-white dark:focus:bg-dark-surface transition-colors"
                   value={descriptionDraft}
                   onChange={(e) => {
                     const nextDescription = e.target.value;
@@ -429,7 +429,7 @@ const StagingPanelComponent: React.FC<StagingPanelProps> = ({ task, onClose, onU
                      onChange={(e) => setNewSubtaskTitle(e.target.value)}
                      placeholder="Add subtask"
                      aria-label="Add subtask"
-                     className="w-full h-11 rounded-lg border border-dashed border-primary-300 dark:border-dark-border/95 bg-white/55 dark:bg-dark-surface/55 px-3 py-0 leading-[2.75rem] text-sm text-primary-900 dark:text-dark-text placeholder:text-primary-500 dark:placeholder:text-dark-muted outline-none focus:border-primary-500 dark:focus:border-dark-muted focus:bg-white dark:focus:bg-dark-surface"
+                     className="w-full h-11 rounded-lg border border-primary-200 dark:border-dark-border/95 bg-white/55 dark:bg-dark-surface/55 px-3 py-0 leading-[2.75rem] text-sm text-primary-900 dark:text-dark-text placeholder:text-primary-500 dark:placeholder:text-dark-muted outline-none focus:border-primary-400 dark:focus:border-dark-muted focus:bg-white dark:focus:bg-dark-surface transition-colors"
                    />
                  </form>
              </div>

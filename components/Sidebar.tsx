@@ -236,13 +236,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
     'relative z-30 flex flex-col',
     activeFilter === 'focus' ? 'bg-transparent' : 'bg-[var(--app-bg)]',
     isCollapsed ? 'w-[96px]' : 'w-[260px]',
-    'transition-[width] duration-300 ease-[cubic-bezier(0.2,0,0,1)]',
+    'transition-[width] duration-[var(--duration-slow)] ease-[cubic-bezier(0.2,0,0,1)]',
   );
 
   return (
       <aside className={sidebarClasses}>
         <div className="flex flex-col h-full w-full p-2.5 pt-2.5">
-          <div className="relative flex flex-col h-full overflow-hidden rounded-[calc(var(--app-radius)+4px)] border border-primary-200/60 dark:border-dark-border/70 bg-primary-100 dark:bg-dark-surface shadow-[0_4px_20px_rgba(20,20,19,0.12),0_1px_4px_rgba(20,20,19,0.06)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.4),0_1px_4px_rgba(0,0,0,0.2)]">
+          <div className="relative flex flex-col h-full overflow-hidden rounded-[var(--app-radius)] border border-primary-200/60 dark:border-dark-border/70 bg-primary-100 dark:bg-dark-surface shadow-[0_8px_30px_rgba(20,20,19,0.15),0_2px_8px_rgba(20,20,19,0.08)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4),0_2px_8px_rgba(0,0,0,0.2)]">
           {/* Header */}
           <div className={`h-[102px] relative flex items-center shrink-0 select-none w-full ${isDesktopMac ? 'pt-[54px]' : ''}`}>
 

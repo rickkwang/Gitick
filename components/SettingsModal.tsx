@@ -122,8 +122,10 @@ const SettingsModalComponent: React.FC<SettingsModalProps> = ({
         // Compress image to avoid exceeding localStorage quota (typically 5-10MB)
         const compressed = await compressImage(result, 200, 200, 0.85);
         // Guard: compressed data-URL should be well under 200KB
+        // base64 string length overestimates byte size by ~33%, so multiply by 0.75 to get actual bytes
         const MAX_AVATAR_BYTES = 200 * 1024;
-        if (compressed.length > MAX_AVATAR_BYTES) {
+        const actualBytes = Math.ceil((compressed.length - compressed.indexOf(',') - 1) * 0.75);
+        if (actualBytes > MAX_AVATAR_BYTES) {
           setAvatarError('Image is too large after compression. Please choose a smaller image.');
           if (avatarInputRef.current) avatarInputRef.current.value = '';
           return;
@@ -288,7 +290,7 @@ const SettingsModalComponent: React.FC<SettingsModalProps> = ({
                               Remove photo
                             </button>
                           )}
-                          {['bg-zinc-900', 'bg-neutral-700', 'bg-stone-600', 'bg-primary-700', 'bg-primary-600'].map(color => (
+                          {['bg-primary-900', 'bg-primary-800', 'bg-primary-700', 'bg-accent', 'bg-accent-coral'].map(color => (
                             <button 
                               key={color}
                               onClick={() => {
@@ -361,16 +363,26 @@ const SettingsModalComponent: React.FC<SettingsModalProps> = ({
                           <p className="text-xs text-primary-500 dark:text-dark-muted">Switch between light and dark themes</p>
                         </div>
                       </div>
-                      <button 
+                      <button
                         onClick={onToggleTheme}
-                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${isDarkMode ? 'bg-white' : 'bg-black'}`}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ${
+                          isDarkMode
+                            ? 'bg-[var(--accent)]'
+                            : 'bg-primary-900'
+                        }`}
                       >
-                        <span className={`inline-block h-4 w-4 transform rounded-full bg-gray-200 dark:bg-black transition-transform ${isDarkMode ? 'translate-x-6 bg-black' : 'translate-x-1 bg-white'}`} />
+                        <span
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-all duration-200 ${
+                            isDarkMode
+                              ? 'translate-x-5'
+                              : 'translate-x-1'
+                          }`}
+                        />
                       </button>
                     </div>
                  </div>
 
-                 <div className="rounded-xl border border-primary-200 dark:border-dark-border bg-primary-50 dark:bg-dark-surface p-7 space-y-5">
+                 <div className="rounded-xl border border-primary-200/80 dark:border-dark-border/80 bg-white dark:bg-dark-bg p-5 shadow-sm space-y-5">
                     <h4 className="text-sm font-medium text-primary-900 dark:text-dark-text border-b border-primary-200/80 dark:border-dark-border pb-3">Text Size (Desktop)</h4>
                     <div className="flex items-center justify-between p-5 bg-primary-100 dark:bg-dark-bg/70 rounded-xl border border-primary-200/80 dark:border-dark-border">
                       <div>

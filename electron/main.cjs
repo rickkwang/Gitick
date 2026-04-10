@@ -608,8 +608,9 @@ function createMainWindow() {
     minWidth: 980,
     minHeight: 680,
     title: isMac ? '' : 'Gitick',
-    backgroundColor: isMac ? '#00000000' : (nativeTheme.shouldUseDarkColors ? '#09090b' : '#ffffff'),
-    transparent: isMac,
+    show: false,
+    backgroundColor: isMac ? '#1f1a16' : (nativeTheme.shouldUseDarkColors ? '#09090b' : '#ffffff'),
+    transparent: false,
     autoHideMenuBar: true,
     titleBarStyle: isMac ? 'hiddenInset' : 'default',
     titleBarOverlay: false,
@@ -620,6 +621,10 @@ function createMainWindow() {
       nodeIntegration: false,
       sandbox: true,
     },
+  });
+
+  mainWindow.once('ready-to-show', () => {
+    mainWindow.show();
   });
 
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {

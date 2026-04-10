@@ -126,9 +126,9 @@ export const AppLayout: React.FC<AppLayoutProps> = (props) => {
       if (e.key === 'Escape') {
         if (isCommandPaletteOpen) {
           setIsCommandPaletteOpen(false);
-        } else if (props.showSettingsRef?.current) {
+        } else if (showSettings) {
           setShowSettings(false);
-        } else if (props.selectedTaskRef?.current) {
+        } else if (selectedTask) {
           setSelectedTask(null);
         }
         return;
@@ -141,7 +141,7 @@ export const AppLayout: React.FC<AppLayoutProps> = (props) => {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isCommandPaletteOpen, setIsCommandPaletteOpen, setShowSettings, setSelectedTask]);
+  }, [isCommandPaletteOpen, showSettings, selectedTask, setIsCommandPaletteOpen, setShowSettings, setSelectedTask]);
 
   useEffect(() => {
     const { minWidth, maxWidth } = getRightPanelBounds(window.innerWidth);
@@ -283,7 +283,7 @@ export const AppLayout: React.FC<AppLayoutProps> = (props) => {
               onPointerDown={handleRightPanelResizeStart}
               className="absolute -left-1 top-0 h-full w-2 cursor-col-resize z-20 group"
             >
-              <span className="absolute left-1/2 top-1/2 h-14 w-[2px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary-300/40 dark:bg-dark-muted/40 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <span className="absolute left-1/2 top-1/2 h-14 w-1 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary-300/50 dark:bg-dark-muted/50 opacity-0 group-hover:opacity-100 group-hover:bg-accent/60 transition-all duration-150" />
             </button>
           )}
           <div className="w-full h-full flex flex-col min-w-0">

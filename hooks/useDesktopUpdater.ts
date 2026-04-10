@@ -147,6 +147,7 @@ export const useDesktopUpdater = ({
     setDesktopUpdateStatus('Checking for updates...');
     try {
       const result = await window.gitickDesktop.updater.checkForUpdates();
+      if (!mountedRef.current) return;
       if (result.reason === 'in-progress') {
         setDesktopUpdateStatus('Update check already in progress...');
       } else if (!result.ok) {
@@ -156,6 +157,7 @@ export const useDesktopUpdater = ({
         finishDesktopUpdateFlow();
       }
     } catch (error) {
+      if (!mountedRef.current) return;
       console.warn('Manual update check failed:', error);
       setDesktopUpdateStatus('Unable to check updates right now.');
       showToast('Unable to check updates right now.');

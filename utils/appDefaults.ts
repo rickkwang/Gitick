@@ -4,7 +4,7 @@ export const DEFAULT_USER_PROFILE: UserProfile = {
   name: 'User',
   email: 'user@gitick.app',
   jobTitle: 'Productivity Master',
-  avatarColor: 'bg-zinc-900',
+  avatarColor: 'bg-primary-900',
   avatarImage: '',
 };
 
